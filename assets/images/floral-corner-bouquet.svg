@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" aria-hidden="true">
+  <defs>
+    <radialGradient id="roseCore" cx="35%" cy="32%" r="68%">
+      <stop offset="0%" stop-color="#fff5f8"/>
+      <stop offset="45%" stop-color="#f0b4c8"/>
+      <stop offset="100%" stop-color="#c56b85"/>
+    </radialGradient>
+    <radialGradient id="roseSoft" cx="40%" cy="35%" r="62%">
+      <stop offset="0%" stop-color="#fce8ef"/>
+      <stop offset="100%" stop-color="#d8899f"/>
+    </radialGradient>
+    <radialGradient id="lavG" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ebe2f5"/>
+      <stop offset="100%" stop-color="#b8a4cc"/>
+    </radialGradient>
+    <filter id="softBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#softBlur)" opacity="0.95">
+    <!-- Lá xanh / eucalyptus -->
+    <path fill="#a8c5a0" d="M18 248 Q45 210 72 195 Q98 178 118 168 L125 178 Q98 192 70 212 Q42 232 24 255 Z" opacity="0.9"/>
+    <path fill="#7da68e" d="M8 210 Q35 185 58 172 Q82 158 102 152 L108 162 Q85 172 62 188 Q38 205 14 228 Z" opacity="0.85"/>
+    <path fill="#b8cfc0" d="M42 278 Q68 255 88 238 Q108 222 122 210 L128 220 Q110 236 88 254 Q65 272 48 288 Z"/>
+    <ellipse cx="135" cy="248" rx="16" ry="28" fill="#9cb89a" transform="rotate(-35 135 248)" opacity="0.88"/>
+    <ellipse cx="98" cy="268" rx="13" ry="24" fill="#b8cfc0" transform="rotate(25 98 268)"/>
+    <!-- Lavender -->
+    <g fill="url(#lavG)">
+      <ellipse cx="155" cy="118" rx="7" ry="11" transform="rotate(-15 155 118)"/>
+      <ellipse cx="168" cy="108" rx="6" ry="10" transform="rotate(8 168 108)"/>
+      <ellipse cx="178" cy="122" rx="6" ry="9" transform="rotate(-22 178 122)"/>
+      <ellipse cx="162" cy="132" rx="5" ry="8" transform="rotate(12 162 132)"/>
+    </g>
+    <path stroke="#9a88b8" stroke-width="1.2" fill="none" d="M158 135 Q165 175 172 210" opacity="0.7"/>
+    <!-- Hồng lớn -->
+    <circle cx="88" cy="88" r="28" fill="url(#roseCore)"/>
+    <circle cx="78" cy="82" r="14" fill="#fce4ec" opacity="0.85"/>
+    <circle cx="98" cy="78" r="12" fill="#f0b4c6"/>
+    <circle cx="92" cy="98" r="10" fill="#e8a0b4"/>
+    <circle cx="128" cy="72" r="24" fill="url(#roseSoft)"/>
+    <circle cx="118" cy="66" r="11" fill="#fff5f8"/>
+    <circle cx="138" cy="68" r="9" fill="#f3c4d4"/>
+    <circle cx="58" cy="118" r="20" fill="url(#roseSoft)"/>
+    <circle cx="52" cy="112" r="9" fill="#fce8ef"/>
+    <circle cx="68" cy="122" r="8" fill="#e8a0b4"/>
+    <!-- Nụ hồng -->
+    <circle cx="148" cy="108" r="11" fill="#f5d0dc"/>
+    <circle cx="142" cy="104" r="5" fill="#fff"/>
+    <circle cx="108" cy="138" r="9" fill="#ddd0eb"/>
+    <circle cx="72" cy="148" r="8" fill="#c4b4d8" opacity="0.9"/>
+    <!-- Hồng phụ -->
+    <circle cx="168" cy="148" r="16" fill="url(#roseSoft)"/>
+    <circle cx="162" cy="144" r="7" fill="#fce4ec"/>
+    <path fill="none" stroke="#6d9478" stroke-width="2" stroke-linecap="round" d="M95 115 Q88 160 82 200 M102 118 Q108 165 112 215" opacity="0.75"/>
+    <path fill="none" stroke="#7da68e" stroke-width="1.5" stroke-linecap="round" d="M130 95 Q142 130 150 175" opacity="0.65"/>
+  </g>
+</svg>

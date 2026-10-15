@@ -1,0 +1,18 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Cho phép khách gửi lời chúc và đọc lời chúc công khai
+    match /wishes/{wishId} {
+      allow read, create: if true;
+      allow update, delete: if false;
+    }
+    
+    // Cho phép khách gửi xác nhận tham dự (RSVP)
+    match /rsvps/{rsvpId} {
+      allow create: if true;
+      allow read: if true;
+      allow update, delete: if false;
+    }
+  }
+}

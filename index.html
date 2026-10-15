@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Thiệp Cưới - Đào Văn Hùng & Hoàng Thị Thu Trang</title>
+  <meta name="description" content="Trân trọng kính mời quý khách đến dự lễ cưới của Đào Văn Hùng và Hoàng Thị Thu Trang - 15/11/2026 & 21/11/2026">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="Thiệp Cưới - Đào Văn Hùng & Hoàng Thị Thu Trang">
+  <meta property="og:description" content="Trân trọng kính mời quý khách đến dự lễ thành hôn của Văn Hùng & Thu Trang">
+  <meta property="og:image" content="kimono_image/THA_3400.JPG">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20y=%220%22%20width=%22100%22%20height=%22100%22><text y=%22.9em%22 font-size=%2290%22>💍</text></svg>">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="assets/css/animations.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/envelope-intro.css">
+  <script>
+    /**
+     * Cách hiển thị màn mở phong thiệp:
+     * - every-load : mỗi lần load / F5 đều mở phong (trải nghiệm khách mời)
+     * - session    : trong cùng tab, mở phong 1 lần — reload vào thẳng thiệp (tiện khi sửa web)
+     * - once       : mỗi máy/trình duyệt chỉ mở phong 1 lần duy nhất
+     */
+    window.WEDDING_ENVELOPE_MODE = 'every-load';
+  </script>
+</head>
+<body>
+
+  <!-- Màn mở thiệp: 3 mảnh đỏ hồng trên nền trắng -->
+  <div id="envelope-intro" class="envelope-intro" aria-live="polite">
+    <div id="intro-hearts-layer" class="intro-hearts-layer" aria-hidden="true"></div>
+    <div class="envelope-scene">
+      <div id="envelope-wrap" class="invite-tri">
+        <div class="invite-tri__shadow" aria-hidden="true"></div>
+        <div class="invite-tri__stack">
+          <article class="invite-tri__card invite-tri__card--back">
+            <div class="invite-tri__face">
+              <span class="invite-tri__label">Tiệc Miền Nam</span>
+              <span class="invite-tri__date">21 · 11 · 2026</span>
+              <span class="invite-tri__note">Đồng Nai</span>
+            </div>
+          </article>
+          <article class="invite-tri__card invite-tri__card--mid">
+            <div class="invite-tri__face">
+              <span class="invite-tri__label">Save the Date</span>
+              <span class="invite-tri__date">15 · 11 · 2026</span>
+              <span class="invite-tri__note">Hải Dương · Hưng Yên</span>
+            </div>
+          </article>
+          <article class="invite-tri__card invite-tri__card--front">
+            <div class="invite-tri__face invite-tri__face--main">
+              <span class="invite-tri__eyebrow">Wedding Invitation</span>
+              <h2 class="invite-tri__couple">
+                <span class="invite-tri__name">Văn Hùng</span>
+                <span class="invite-tri__amp">&</span>
+                <span class="invite-tri__name">Thu Trang</span>
+              </h2>
+              <p class="invite-tri__sub">Trân trọng kính mời</p>
+            </div>
+          </article>
+        </div>
+      </div>
+      <p class="envelope-hint">Chạm để mở thiệp</p>
+    </div>
+    <div id="envelope-petal-layer" class="envelope-petal-layer" aria-hidden="true"></div>
+  </div>
+
+  <!-- Cánh hoa rơi nhẹ nhàng -->
+  <div id="sakura-container" class="sakura-container"></div>
+
+  <!-- Nút điều khiển âm nhạc nổi thanh lịch -->
+  <div id="audio-toggle-btn" class="audio-floating-btn" title="Phát / Dừng nhạc nền">
+    <div id="audio-disk" class="audio-disk-rotate">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- MAIN CANVAS CONTAINER (CHUẨN 440PX MOBILE CĂN GIỮA) -->
+  <main id="app-canvas">
+
+    <!-- Thanh chào cá nhân hóa cho từng khách mời -->
+    <div id="guest-banner" class="guest-banner-sticky" style="display: none;">
+      <span>Kính gửi:</span>
+      <span id="guest-name-display" class="guest-name-badge">Quý Khách</span>
+      <span>- Trân trọng kính mời bạn tới chung vui!</span>
+    </div>
+
+    <!-- TOP BAR (SAVE THE DATE) -->
+    <header class="canvas-top-bar">
+      <div class="save-the-date-tag">
+        SAVE THE DATE <span class="save-the-date-dot"></span> <span id="save-the-date-short">15.11.2026</span>
+      </div>
+      <div style="font-size: 0.75rem; letter-spacing: 1px; color: var(--gold-dark); text-transform: uppercase;">
+        WEDDING INVITATION
+      </div>
+    </header>
+
+    <!-- HERO SECTION (KHUNG VÒM CỔ ĐIỂN THEO PHONG CÁCH MẪU 21) -->
+    <section class="hero-canvas-section">
+      <div class="hero-arch-wrap">
+        <div class="hero-arch-container">
+          <img src="kimono_image/THA_3400.JPG" alt="Ảnh cưới Đào Văn Hùng & Hoàng Thị Thu Trang" class="hero-arch-img">
+          <div class="hero-arch-overlay">
+            <p id="hero-date-on-photo" class="hero-overlay-date">15 . 11 . 2026</p>
+            <p class="hero-overlay-message">Chúng ta đã cùng nhau đi qua nhiều thăng trầm để nhận ra rằng được ở bên nhau là điều quý giá nhất. Hôm nay, trước sự chứng kiến của mọi người, từ khoảnh khắc này chúng ta nhẹ nhàng gọi nhau bằng hai tiếng Vợ - Chồng</p>
+          </div>
+        </div>
+        <div class="hero-hearts-orbit" aria-hidden="true">
+          <div class="hero-hearts-orbit__compose">
+            <div class="hero-hearts-orbit__ring">
+              <span class="hero-hearts-orbit__slot" style="--i: 0"></span>
+              <span class="hero-hearts-orbit__slot" style="--i: 1"></span>
+              <span class="hero-hearts-orbit__slot" style="--i: 2"></span>
+              <span class="hero-hearts-orbit__slot" style="--i: 3"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-text-block">
+        <div class="hero-eyebrow">HAPPY WEDDING</div>
+        <h1 class="hero-couple-heading">Đào Văn Hùng &amp; Hoàng Thị Thu Trang</h1>
+        <div class="hero-signatures" aria-label="Chữ ký cô dâu và chú rể">
+          <div class="hero-signature-col">
+            <img src="chu_ki/Hung.png" alt="" class="hero-signature-img" width="120" height="48" loading="lazy">
+            <p class="hero-signature-name">Đào Văn Hùng</p>
+          </div>
+          <div class="hero-signature-col">
+            <img src="chu_ki/trang.png" alt="" class="hero-signature-img" width="120" height="48" loading="lazy">
+            <p class="hero-signature-name">Hoàng Thị Thu Trang</p>
+          </div>
+        </div>
+        <p class="hero-journey-tagline">
+          <span class="hero-journey-tagline__lead">Một hành trình mới của chúng ta bắt đầu từ</span><br>
+          hôm nay
+        </p>
+        <div id="hero-date-badge" class="hero-date-ribbon" aria-hidden="true">
+          15 . 11 . 2026
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION POLAROID CÔ DÂU & CHÚ RỂ (CHUẨN ĐÔI POLAROID MẪU 21) -->
+    <section class="couple-polaroid-section">
+      <div class="couple-polaroid-matrix">
+        <div class="polaroid-card-body polaroid-card-body--side polaroid-card-body--bride couple-polaroid-matrix__text couple-polaroid-matrix__text--bride">
+          <p class="polaroid-family-head">Nhà Gái</p>
+          <div class="polaroid-family-rule" aria-hidden="true"></div>
+          <div class="polaroid-family-lines">
+            <p><span class="polaroid-family-label">Ông</span> Hoàng Văn Vịnh</p>
+            <p><span class="polaroid-family-label">Bà</span> Nguyễn Thị Hiền</p>
+            <p class="polaroid-family-place">Tiền Hải — Thái Bình</p>
+          </div>
+          <img
+            src="assets/images/co_dau_sticker.png"
+            alt="Sticker cô dâu"
+            class="polaroid-role-sticker polaroid-role-sticker--bride"
+            width="88"
+            height="120"
+            loading="lazy"
+          >
+          <p class="polaroid-display-name">Hoàng Thị Thu Trang</p>
+        </div>
+        <div class="polaroid-photo-box couple-polaroid-matrix__photo couple-polaroid-matrix__photo--bride">
+          <img src="kimono_image/crop_image/trang.png" alt="Cô dâu Hoàng Thị Thu Trang">
+        </div>
+        <div class="polaroid-photo-box couple-polaroid-matrix__photo couple-polaroid-matrix__photo--groom">
+          <img src="kimono_image/crop_image/hung.png" alt="Chú rể Đào Văn Hùng">
+        </div>
+        <div class="polaroid-card-body polaroid-card-body--side polaroid-card-body--groom couple-polaroid-matrix__text couple-polaroid-matrix__text--groom">
+          <p class="polaroid-family-head">Nhà Trai</p>
+          <div class="polaroid-family-rule" aria-hidden="true"></div>
+          <div class="polaroid-family-lines">
+            <p><span class="polaroid-family-label">Ông</span> Đào Văn Mạnh</p>
+            <p><span class="polaroid-family-label">Bà</span> Vương Thị Huyền</p>
+            <p class="polaroid-family-place">Tân Hưng — Hải Dương</p>
+          </div>
+          <img
+            src="assets/images/chu_re_sticker.png"
+            alt="Sticker chú rể"
+            class="polaroid-role-sticker polaroid-role-sticker--groom"
+            width="88"
+            height="120"
+            loading="lazy"
+          >
+          <p class="polaroid-display-name">Đào Văn Hùng</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION THIỆP MỜI (FORMAL INVITE) -->
+    <section class="formal-invite-section">
+      <div class="formal-invite-inner">
+        <div class="formal-invite-rule" aria-hidden="true"></div>
+        <h2 class="formal-invite-script">Thiệp Mời</h2>
+        <p class="formal-invite-lead">
+          Tham dự lễ cưới <span class="formal-invite-couple">Văn Hùng &amp; Thu Trang</span>
+        </p>
+
+        <div class="invite-triptych" aria-hidden="false">
+          <figure class="invite-triptych__item">
+            <img src="kimono_image/THA_3862.JPG" alt="Ảnh cưới Văn Hùng và Thu Trang">
+          </figure>
+          <figure class="invite-triptych__item invite-triptych__item--center">
+            <img src="kimono_image/THA_3880.JPG" alt="Ảnh cưới Văn Hùng và Thu Trang">
+          </figure>
+          <figure class="invite-triptych__item">
+            <img src="kimono_image/THA_3942.JPG" alt="Ảnh cưới Văn Hùng và Thu Trang">
+          </figure>
+        </div>
+
+        <p class="formal-invite-honor">TRÂN TRỌNG KÍNH MỜI</p>
+        <p id="invite-guest-title" class="formal-invite-guest">QUÝ KHÁCH</p>
+        <p class="formal-invite-body">
+          Đến dự Bữa Tiệc thân mật cùng Gia Đình chúng Tôi vào lúc
+        </p>
+
+        <div class="formal-invite-datetime">
+          <div class="formal-invite-date-grid">
+            <p id="invite-side-time" class="invite-grid-side-time">10h30</p>
+            <div class="invite-grid-mid">
+              <p id="invite-weekday" class="invite-grid-weekday">Chủ Nhật</p>
+              <div class="invite-grid-center" aria-hidden="true">
+                <span class="invite-grid-vline"></span>
+                <span id="invite-day-num" class="invite-grid-day">15</span>
+                <span class="invite-grid-vline"></span>
+              </div>
+              <p id="invite-month-label" class="invite-grid-month">Tháng 11</p>
+            </div>
+            <p id="invite-year" class="invite-grid-year">Năm 2026</p>
+            <p id="invite-lunar-paren" class="invite-grid-lunar">(Tức ngày 07 tháng 10 năm Bính Ngọ)</p>
+          </div>
+
+          <div class="formal-invite-schedule">
+            <div class="formal-invite-schedule-pair">
+              <figure class="formal-invite-schedule-illus formal-invite-schedule-illus--gate">
+                <img
+                  src="assets/images/wedding-gate.png"
+                  alt=""
+                  width="96"
+                  height="118"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </figure>
+              <p class="formal-invite-schedule-text">
+                <span id="invite-schedule-welcome">10h30</span>
+                <span class="formal-invite-schedule-label">Đón khách</span>
+              </p>
+            </div>
+            <div class="formal-invite-schedule-pair">
+              <figure class="formal-invite-schedule-illus formal-invite-schedule-illus--plate">
+                <img
+                  src="assets/images/feast-plate.jpg"
+                  alt=""
+                  width="88"
+                  height="88"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </figure>
+              <p class="formal-invite-schedule-text">
+                <span id="invite-schedule-party">11h00</span>
+                <span class="formal-invite-schedule-label">Khai tiệc</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="formal-invite-venue">
+            <p class="formal-invite-venue-label">Địa chỉ dự tiệc</p>
+            <h3 id="invite-venue-title" class="formal-invite-venue-name">TƯ GIA NHÀ TRAI</h3>
+            <p id="invite-address" class="formal-invite-venue-address">
+              Đường Lương Như Học, Tân Hưng, Thành Phố Hải Dương
+            </p>
+            <a id="invite-map-link" class="formal-invite-directions" href="https://maps.google.com/?q=Đường+Lương+Như+Học,+Tân+Hưng,+Hải+Dương" target="_blank" rel="noopener noreferrer">Chỉ đường</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION LỊCH & ĐẾM NGƯỢC (ẢNH NỀN) -->
+    <section class="wedding-calendar-section" aria-labelledby="wedding-calendar-heading">
+      <div class="wedding-calendar-stage">
+        <img
+          class="wedding-calendar-bg"
+          src="kimono_image/THA_3880.JPG"
+          alt=""
+          width="440"
+          height="620"
+          loading="lazy"
+          decoding="async"
+        />
+        <div class="wedding-calendar-scrim" aria-hidden="true"></div>
+        <div class="wedding-calendar-content">
+          <h2 id="wedding-calendar-heading" class="wedding-calendar-title">Wedding</h2>
+          <p class="wedding-calendar-month" id="wedding-calendar-month-label">Tháng 11 · 2026</p>
+          <div
+            id="wedding-calendar-grid"
+            class="wedding-calendar-grid"
+            role="grid"
+            aria-label="Lịch tháng 11 năm 2026"
+          ></div>
+          <p class="wedding-calendar-soon">Chỉ còn....</p>
+          <div class="wedding-calendar-countdown countdown-digits-grid">
+            <div class="countdown-unit-box">
+              <div id="cd-days" class="countdown-number-val">00</div>
+              <span class="countdown-unit-label">ngày</span>
+            </div>
+            <div class="countdown-unit-box">
+              <div id="cd-hours" class="countdown-number-val">00</div>
+              <span class="countdown-unit-label">giờ</span>
+            </div>
+            <div class="countdown-unit-box">
+              <div id="cd-minutes" class="countdown-number-val">00</div>
+              <span class="countdown-unit-label">phút</span>
+            </div>
+            <div class="countdown-unit-box">
+              <div id="cd-seconds" class="countdown-number-val">00</div>
+              <span class="countdown-unit-label">giây</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LỜI MỜI & XÁC NHẬN THAM DỰ -->
+    <section id="rsvp-section" class="rsvp-invite-section">
+      <div class="rsvp-invite-intro">
+        <p>
+          Chúng mình rất mong sự hiện diện của bạn để cùng nhau chung vui, sẻ chia niềm hạnh phúc và lưu lại những khoảnh khắc đáng nhớ trong ngày cưới.
+        </p>
+        <p>
+          Đừng quên để lại xác nhận tham dự để chúng mình chuẩn bị chu đáo hơn!
+        </p>
+      </div>
+
+      <div class="rsvp-box-card rsvp-box-card--invite">
+        <h3 class="rsvp-form-heading">Xác nhận tham dự</h3>
+        <form id="rsvp-form" class="rsvp-form-compact">
+          <div class="form-group-item">
+            <label class="form-label-title" for="rsvp-name">Họ và tên</label>
+            <input
+              type="text"
+              id="rsvp-name"
+              class="form-input-control"
+              placeholder="Nhập tên của bạn"
+              required
+              autocomplete="name"
+            />
+          </div>
+
+          <div class="form-group-item">
+            <span class="form-label-title">Bạn sẽ tham dự chứ?</span>
+            <div class="rsvp-radios-pair rsvp-radios-pair--plain">
+              <label class="rsvp-radio-label">
+                <input type="radio" name="attendance" value="attending" checked />
+                <span>Chắc chắn rồi</span>
+              </label>
+              <label class="rsvp-radio-label">
+                <input type="radio" name="attendance" value="declined" />
+                <span>xin lỗi bạn, Mình bận k tham dự được</span>
+              </label>
+            </div>
+          </div>
+
+          <div id="rsvp-status-msg" class="rsvp-status-msg" hidden></div>
+
+          <button type="submit" class="rsvp-submit-btn">Gửi xác nhận</button>
+        </form>
+      </div>
+
+      <div class="gift-envelope-wrap">
+        <button
+          type="button"
+          class="gift-envelope-trigger"
+          id="gift-envelope-open"
+          aria-haspopup="dialog"
+          aria-controls="gift-dialog"
+          aria-label="Mở hộp quà mừng"
+          onclick="openGiftDialog()"
+        >
+          <span class="gift-envelope-icon" aria-hidden="true">
+            <img
+              src="assets/images/gift-box.png"
+              alt=""
+              width="120"
+              height="120"
+              loading="lazy"
+              decoding="async"
+            />
+          </span>
+          <span class="gift-envelope-label">gửi quà mừng</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- SECTION ALBUM ẢNH CƯỚI (GALLERY) -->
+    <section class="gallery-canvas-section" aria-labelledby="album-section-title">
+      <header class="album-section-head">
+        <h2 id="album-section-title" class="album-section-title">Album ảnh cưới</h2>
+        <hr class="album-section-rule" aria-hidden="true" />
+      </header>
+
+      <div class="gallery-editorial-grid">
+        <figure class="gallery-grid-item gallery-item gallery-grid-item--hero">
+          <img src="kimono_image/THA_3880.JPG" alt="Ảnh cưới Văn Hùng và Thu Trang" loading="lazy" />
+        </figure>
+        <figure class="gallery-grid-item gallery-item">
+          <img src="kimono_image/THA_3524.JPG" alt="Ảnh cưới Kimono" loading="lazy" />
+        </figure>
+        <figure class="gallery-grid-item gallery-item">
+          <img src="kimono_image/THA_3557.JPG" alt="Ảnh cưới Kimono" loading="lazy" />
+        </figure>
+        <figure class="gallery-grid-item gallery-item">
+          <img src="kimono_image/THA_3637.JPG" alt="Ảnh cưới Kimono" loading="lazy" />
+        </figure>
+        <figure class="gallery-grid-item gallery-item gallery-grid-item--duo">
+          <img src="kimono_image/THA_3681.JPG" alt="Ảnh cưới Kimono" loading="lazy" />
+        </figure>
+        <figure class="gallery-grid-item gallery-item gallery-grid-item--duo">
+          <img src="kimono_image/THA_3802.JPG" alt="Ảnh cưới Kimono" loading="lazy" />
+        </figure>
+        <figure class="gallery-grid-item gallery-item">
+          <img src="kimono_image/THA_3400.JPG" alt="Ảnh cưới Kimono" loading="lazy" />
+        </figure>
+        <figure class="gallery-grid-item gallery-item">
+          <img src="kimono_image/THA_3859.JPG" alt="Ảnh cưới Kimono" loading="lazy" />
+        </figure>
+        <figure class="gallery-grid-item gallery-item">
+          <img src="kimono_image/THA_3965.JPG" alt="Ảnh cưới Kimono" loading="lazy" />
+        </figure>
+        <figure class="gallery-grid-item gallery-item gallery-grid-item--duo">
+          <img src="kimono_image/THA_4057.JPG" alt="Ảnh cưới Kimono" loading="lazy" />
+        </figure>
+        <figure class="gallery-grid-item gallery-item gallery-grid-item--duo">
+          <img src="kimono_image/THA_3942.JPG" alt="Ảnh cưới Kimono" loading="lazy" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- FOOTER CANVAS -->
+    <footer class="canvas-footer-section">
+      <div class="footer-couple-title">VĂN HÙNG & THU TRANG</div>
+      <div class="footer-script-thankyou">Thank You!</div>
+      <p class="footer-closing-text">
+        Chân thành cảm ơn sự hiện diện và những lời chúc phúc tốt đẹp nhất của quý khách và người thân!
+      </p>
+    </footer>
+
+  </main>
+
+  <!-- DIALOG HỘP QUÀ (QR) -->
+  <div id="gift-dialog" class="gift-dialog-backdrop" hidden aria-hidden="true">
+    <div class="gift-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="gift-dialog-title">
+      <h2 id="gift-dialog-title" class="gift-dialog-title">Hộp Quà Yêu Thương</h2>
+      <p class="gift-dialog-lead">Quét QR code để gửi yêu thương trực tiếp tới:</p>
+
+      <div class="gift-dialog-duo">
+        <article class="gift-dialog-card">
+          <h3 class="gift-dialog-card-role">Chú rể</h3>
+          <div class="gift-dialog-qr">
+            <img
+              src="https://api.vietqr.io/image/970422-0388147366-compact2.jpg?accountName=DAO%20VAN%20HUNG&amount=0"
+              alt="Mã QR chuyển khoản chú rể Đào Văn Hùng"
+              loading="lazy"
+              width="140"
+              height="140"
+            />
+          </div>
+          <p class="gift-dialog-name">ĐÀO VĂN HÙNG</p>
+          <p class="gift-dialog-bank">MB Bank</p>
+          <p class="gift-dialog-account">0388147366</p>
+          <button
+            type="button"
+            class="gift-dialog-copy"
+            onclick="copyText('0388147366', this)"
+          >
+            Sao chép số TK
+          </button>
+        </article>
+
+        <article class="gift-dialog-card">
+          <h3 class="gift-dialog-card-role">Cô dâu</h3>
+          <div class="gift-dialog-qr">
+            <img
+              src="https://api.vietqr.io/image/970422-0988888888-compact2.jpg?accountName=HOANG%20THI%20THU%20TRANG&amount=0"
+              alt="Mã QR chuyển khoản cô dâu Hoàng Thị Thu Trang"
+              loading="lazy"
+              width="140"
+              height="140"
+            />
+          </div>
+          <p class="gift-dialog-name">HOÀNG THỊ THU TRANG</p>
+          <p class="gift-dialog-bank">MB Bank</p>
+          <p class="gift-dialog-account">0988888888</p>
+          <button
+            type="button"
+            class="gift-dialog-copy"
+            onclick="copyText('0988888888', this)"
+          >
+            Sao chép số TK
+          </button>
+        </article>
+      </div>
+
+      <button type="button" class="gift-dialog-close" id="gift-dialog-close">Đóng</button>
+    </div>
+  </div>
+
+  <!-- LIGHTBOX MODAL XEM ẢNH FULL SIZE -->
+  <div id="lightbox-modal" class="lightbox-backdrop">
+    <button id="lightbox-close" class="lightbox-close-btn" title="Đóng">&times;</button>
+    <img id="lightbox-img" src="" alt="Ảnh phóng to">
+  </div>
+
+  <!-- Script phụ trợ cho Tab Hộp Mừng Cưới & Copy STK -->
+  <script>
+    function copyText(text, btnEl) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btnEl.innerHTML;
+        btnEl.innerHTML = "Đã sao chép!";
+        setTimeout(() => {
+          btnEl.innerHTML = originalText;
+        }, 2000);
+      });
+    }
+
+    function openGiftDialog() {
+      var dialog = document.getElementById('gift-dialog');
+      var closeBtn = document.getElementById('gift-dialog-close');
+      if (!dialog) return;
+      dialog.hidden = false;
+      dialog.classList.add('is-open');
+      dialog.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      if (closeBtn) closeBtn.focus();
+    }
+
+    function closeGiftDialog() {
+      var dialog = document.getElementById('gift-dialog');
+      var openBtn = document.getElementById('gift-envelope-open');
+      if (!dialog) return;
+      dialog.hidden = true;
+      dialog.classList.remove('is-open');
+      dialog.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      if (openBtn) openBtn.focus();
+    }
+
+    function bindGiftDialogControls() {
+      var openBtn = document.getElementById('gift-envelope-open');
+      var dialog = document.getElementById('gift-dialog');
+      var closeBtn = document.getElementById('gift-dialog-close');
+      if (!openBtn || !dialog || !closeBtn) return;
+      if (openBtn.dataset.giftBound === '1') return;
+      openBtn.dataset.giftBound = '1';
+
+      openBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        openGiftDialog();
+      });
+      openBtn.addEventListener('touchend', function (e) {
+        e.preventDefault();
+        openGiftDialog();
+      });
+      closeBtn.addEventListener('click', closeGiftDialog);
+      dialog.addEventListener('click', function (e) {
+        if (e.target === dialog) closeGiftDialog();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !dialog.hidden) closeGiftDialog();
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bindGiftDialogControls);
+    } else {
+      bindGiftDialogControls();
+    }
+  </script>
+
+  <!-- Firebase SDKs Compat -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
+
+  <!-- Dự phòng nếu ES module không chạy (mở file HTML trực tiếp) -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      setTimeout(function () {
+        var intro = document.getElementById('envelope-intro');
+        if (!intro || intro.dataset.bound === '1') return;
+        var KEY = 'wedding_envelope_opened_v1';
+        var mode = window.WEDDING_ENVELOPE_MODE || 'every-load';
+        function shouldSkip() {
+          if (mode === 'every-load') return false;
+          try {
+            if (mode === 'session') return sessionStorage.getItem(KEY) === '1';
+            return localStorage.getItem(KEY) === '1';
+          } catch (e) { return false; }
+        }
+        function markDone() {
+          if (mode === 'every-load') return;
+          try {
+            if (mode === 'session') sessionStorage.setItem(KEY, '1');
+            else localStorage.setItem(KEY, '1');
+          } catch (e) {}
+        }
+        if (shouldSkip()) {
+          intro.remove();
+          document.body.classList.remove('intro-active');
+          document.body.classList.add('intro-complete');
+          setTimeout(function () {
+            window.dispatchEvent(new Event('wedding:intro-complete'));
+            if (window.startIdleAutoScroll) window.startIdleAutoScroll();
+          }, 600);
+          return;
+        }
+        document.documentElement.classList.add('intro-active');
+        document.body.classList.add('intro-active');
+        window.scrollTo(0, 0);
+        intro.dataset.bound = 'fallback';
+        var opened = false;
+        function openIntro() {
+          if (opened) return;
+          opened = true;
+          intro.classList.add('is-opening');
+          window.dispatchEvent(new Event('wedding:first-open'));
+          markDone();
+          setTimeout(function () {
+            intro.classList.add('is-revealing');
+            document.body.classList.add('intro-revealing');
+            window.dispatchEvent(new Event('wedding:intro-revealing'));
+          }, 850);
+          setTimeout(function () {
+            intro.classList.add('is-complete');
+            document.documentElement.classList.remove('intro-active');
+            document.body.classList.remove('intro-active', 'intro-revealing');
+            document.body.classList.add('intro-complete');
+            window.scrollTo(0, 0);
+            setTimeout(function () {
+              intro.remove();
+              window.dispatchEvent(new Event('wedding:intro-complete'));
+              if (window.startIdleAutoScroll) window.startIdleAutoScroll();
+            }, 700);
+          }, 2200);
+        }
+        intro.addEventListener('click', openIntro);
+        intro.addEventListener('touchend', function (e) { e.preventDefault(); openIntro(); }, { passive: false });
+      }, 200);
+    });
+  </script>
+  <!-- Mở phong thiệp (load riêng — không phụ thuộc app.js) -->
+  <script type="module" src="assets/js/envelope-intro.js"></script>
+  <!-- Main Application Script -->
+  <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>
