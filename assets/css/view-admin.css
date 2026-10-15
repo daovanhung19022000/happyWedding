@@ -1,0 +1,56 @@
+body.view-admin-page .album-upload-wrap {
+  max-width: 720px;
+}
+
+.view-admin-slots {
+  display: grid;
+  gap: 16px;
+  padding: 0 16px 24px;
+}
+
+.view-slot-card {
+  border: 1px solid rgba(154, 99, 79, 0.22);
+  border-radius: 12px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.view-slot-preview {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+  background: #f0e8e0;
+}
+
+.view-slot-title {
+  margin: 12px 0 4px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #942233;
+}
+
+.view-slot-meta {
+  margin: 0 0 12px;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: #6b625c;
+  word-break: break-all;
+}
+
+.view-slot-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.view-slot-reset {
+  margin-left: auto;
+}
+
+@media (min-width: 560px) {
+  .view-admin-slots {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

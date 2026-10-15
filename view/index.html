@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Quản lý ảnh thiệp cưới</title>
+  <link rel="stylesheet" href="../assets/css/album-upload.css">
+  <link rel="stylesheet" href="../assets/css/view-admin.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20y=%220%22%20width=%22100%22%20height=%22100%22><text y=%22.9em%22 font-size=%2290%22>💍</text></svg>">
+</head>
+<body class="album-upload-page view-admin-page">
+  <div class="album-upload-wrap">
+    <nav class="album-upload-nav" aria-label="Điều hướng">
+      <a href="../index.html">← Thiệp cưới</a>
+      <a href="../album/">Album</a>
+    </nav>
+
+    <h1 class="album-upload-title">Quản lý ảnh thiệp</h1>
+    <p class="album-upload-lead">
+      Thay ảnh trên thiệp chính (hero, polaroid, thiệp mời, lịch, album). Ảnh mới lưu trên Firebase;
+      khách xem thiệp sẽ thấy bản cập nhật. Dùng <strong>PIN</strong> giống trang upload album.
+    </p>
+
+    <form id="view-admin-pin-form" class="album-upload-form album-upload-form--pin">
+      <label class="album-upload-pin-label" for="view-admin-pin">Mã PIN</label>
+      <input
+        id="view-admin-pin"
+        class="album-upload-pin-input"
+        type="password"
+        inputmode="numeric"
+        autocomplete="off"
+        placeholder="Nhập PIN"
+        required
+      />
+      <div class="album-upload-actions">
+        <button type="submit" class="album-upload-btn album-upload-btn--primary">Mở khóa quản lý</button>
+      </div>
+    </form>
+
+    <div id="view-admin-panel" class="view-admin-panel" hidden>
+      <div id="view-admin-slots" class="view-admin-slots"></div>
+    </div>
+
+    <p id="view-admin-status" class="album-upload-status" hidden></p>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+  <script type="module" src="../assets/js/firebase-config.js"></script>
+  <script type="module" src="../assets/js/view-admin.js"></script>
+</body>
+</html>

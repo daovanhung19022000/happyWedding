@@ -16,7 +16,7 @@
         window.location.replace(target + (search ? '&' + search.slice(1) : ''));
         return;
       }
-      if (path.indexOf('/customer') !== -1 || path.indexOf('/album') !== -1) {
+      if (path.indexOf('/customer') !== -1 || path.indexOf('/album') !== -1 || path.indexOf('/view') !== -1) {
         window.location.replace(path.replace(/\/?$/, '') + '/index.html' + search);
         return;
       }

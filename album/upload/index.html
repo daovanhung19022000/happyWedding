@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Upload album ảnh cưới</title>
+  <link rel="stylesheet" href="../../assets/css/album-upload.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20y=%220%22%20width=%22100%22%20height=%22100%22><text y=%22.9em%22 font-size=%2290%22>💍</text></svg>">
+</head>
+<body class="album-upload-page">
+  <div class="album-upload-wrap">
+    <nav class="album-upload-nav" aria-label="Điều hướng">
+      <a href="../">← Album</a>
+      <a href="../../index.html">Thiệp cưới</a>
+    </nav>
+
+    <h1 class="album-upload-title">Thêm ảnh album</h1>
+    <p class="album-upload-lead">
+      Chọn ảnh JPG/PNG/WEBP (tối đa 10MB/ảnh). Ảnh lưu trên Firebase và hiển thị thêm trên trang
+      <a href="../">Album ảnh cưới</a>.
+    </p>
+
+    <form id="album-upload-pin-form" class="album-upload-form album-upload-form--pin">
+      <label class="album-upload-pin-label" for="album-upload-pin">Mã PIN</label>
+      <input
+        id="album-upload-pin"
+        class="album-upload-pin-input"
+        type="password"
+        inputmode="numeric"
+        autocomplete="off"
+        maxlength="12"
+        placeholder="Nhập PIN"
+        required
+      />
+      <div class="album-upload-actions">
+        <button type="submit" class="album-upload-btn album-upload-btn--primary">Mở khóa upload</button>
+      </div>
+    </form>
+
+    <div id="album-upload-panel" class="album-upload-panel" hidden>
+      <form id="album-upload-form" class="album-upload-form">
+        <p class="album-upload-drop-hint">Chọn nhiều ảnh cùng lúc được</p>
+        <input
+          id="album-upload-input"
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          multiple
+          hidden
+        />
+        <div class="album-upload-actions">
+          <button type="button" id="album-upload-pick" class="album-upload-btn">Chọn ảnh</button>
+          <button type="submit" id="album-upload-submit" class="album-upload-btn album-upload-btn--primary">
+            Upload lên album
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <p id="album-upload-status" class="album-upload-status" hidden></p>
+    <div id="album-upload-log" class="album-upload-log" aria-live="polite"></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+  <script type="module" src="../../assets/js/firebase-config.js"></script>
+  <script type="module" src="../../assets/js/album-upload.js"></script>
+</body>
+</html>

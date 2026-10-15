@@ -1,0 +1,20 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /album_uploads/{fileName} {
+      allow read: if true;
+      allow write: if request.resource != null
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    match /invite_images/{slotId}/{fileName} {
+      allow read: if true;
+      allow write: if request.resource != null
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+      allow delete: if true;
+    }
+  }
+}

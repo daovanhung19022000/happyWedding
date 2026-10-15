@@ -21,6 +21,9 @@ if (typeof firebase !== 'undefined' && isFirebaseConfigured()) {
       firebase.initializeApp(firebaseConfig);
     }
     window.firebaseDb = firebase.firestore();
+    if (typeof firebase.storage === 'function') {
+      window.firebaseStorage = firebase.storage();
+    }
     if (firebase.analytics) {
       window.firebaseAnalytics = firebase.analytics();
     }
