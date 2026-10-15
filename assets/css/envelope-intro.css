@@ -33,8 +33,7 @@ body.intro-active #app-canvas {
   transform: none;
 }
 
-body.intro-active #audio-toggle-btn,
-body.intro-active #sakura-container {
+body.intro-active #audio-toggle-btn {
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
@@ -51,9 +50,7 @@ body.intro-complete #app-canvas {
 }
 
 body.intro-revealing #audio-toggle-btn,
-body.intro-revealing #sakura-container,
-body.intro-complete #audio-toggle-btn,
-body.intro-complete #sakura-container {
+body.intro-complete #audio-toggle-btn {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
@@ -130,6 +127,7 @@ html:has(body.intro-active) {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+  display: none;
   transition: opacity 0.4s ease, visibility 0s linear 0.4s;
 }
 

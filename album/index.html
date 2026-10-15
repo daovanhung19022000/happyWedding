@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Album ảnh cưới — Văn Hùng &amp; Thu Trang</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/animations.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20y=%220%22%20width=%22100%22%20height=%22100%22><text y=%22.9em%22 font-size=%2290%22>💍</text></svg>">
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      background: var(--bg-page, #f5ebe3);
+    }
+    .album-page-wrap {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 440px;
+      min-height: 100vh;
+      background: var(--bg-canvas, #fff);
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+    }
+
+    .album-page-wrap > .gallery-canvas-section {
+      flex: 1 0 auto;
+    }
+    .album-page-back {
+      display: inline-block;
+      margin: 16px 16px 0;
+      font-size: 0.85rem;
+      color: #9a634f;
+      text-decoration: none;
+    }
+    .album-page-back:hover {
+      text-decoration: underline;
+    }
+    .album-mosaic {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 12px 10px 28px;
+    }
+    .album-mosaic-row {
+      display: flex;
+      gap: 5px;
+      width: 100%;
+    }
+    .album-mosaic-row figure {
+      margin: 0;
+      flex: 1 1 0;
+      min-width: 0;
+      overflow: hidden;
+      background: var(--bg-cream-soft);
+      cursor: pointer;
+      line-height: 0;
+    }
+    .album-mosaic-row--1 figure {
+      flex: 1 1 100%;
+    }
+    .album-mosaic-row img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .album-mosaic-row--1 img {
+      max-height: min(72vw, 320px);
+      min-height: 180px;
+    }
+    .album-mosaic-row--2 img {
+      aspect-ratio: 3 / 4;
+    }
+    .album-mosaic-row--3 img {
+      aspect-ratio: 2 / 3;
+    }
+    .album-mosaic-row figure:hover {
+      box-shadow: 0 6px 18px rgba(45, 38, 36, 0.12);
+      z-index: 1;
+      position: relative;
+    }
+
+    .album-mosaic figure.album-reveal {
+      opacity: 0;
+      transform: translate3d(0, 44px, 0) scale(0.9);
+      transition:
+        opacity 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.35s ease;
+      transition-delay: var(--reveal-delay, 0s);
+      will-change: opacity, transform;
+    }
+
+    .album-mosaic figure.album-reveal.is-visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .album-mosaic figure.album-reveal {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body class="intro-complete">
+  <div class="album-page-wrap">
+    <a class="album-page-back" href="../index.html">← Về thiệp cưới</a>
+    <section class="gallery-canvas-section">
+      <header class="album-section-head">
+        <h1 class="album-section-title">Album ảnh cưới</h1>
+        <hr class="album-section-rule" aria-hidden="true" />
+      </header>
+      <div class="album-mosaic" id="album-mosaic"></div>
+    </section>
+
+    <footer class="canvas-footer-section blossom-zone-section">
+      <div class="blossom-pulse-layer blossom-pulse-layer--section" data-blossom-zone="footer" aria-hidden="true"></div>
+      <div class="footer-couple-title">VĂN HÙNG &amp; THU TRANG</div>
+      <div class="footer-script-thankyou">Thank You!</div>
+      <p class="footer-closing-text">
+        Chân thành cảm ơn sự hiện diện và những lời chúc phúc tốt đẹp nhất của quý khách và người thân!
+      </p>
+    </footer>
+  </div>
+
+  <div id="lightbox-modal" class="lightbox-backdrop">
+    <button id="lightbox-close" class="lightbox-close-btn" title="Đóng" type="button">&times;</button>
+    <img id="lightbox-img" src="" alt="Ảnh phóng to" />
+  </div>
+
+  <script>
+    (function () {
+      var files = [
+        'THA_3400.JPG', 'THA_3524.JPG', 'THA_3557.JPG', 'THA_3566.JPG', 'THA_3637.JPG',
+        'THA_3681.JPG', 'THA_3696.JPG', 'THA_3802.JPG', 'THA_3859.JPG', 'THA_3862.JPG',
+        'THA_3880.JPG', 'THA_3942.JPG', 'THA_3965.JPG', 'THA_4057.JPG', 'THA_4082.JPG',
+        'THA_4123.JPG', 'THA_4188.JPG', 'THA_4343.JPG', 'THA_4382.JPG', 'THA_4408.JPG',
+      ];
+
+      function shuffle(list) {
+        var arr = list.slice();
+        for (var i = arr.length - 1; i > 0; i -= 1) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = arr[i];
+          arr[i] = arr[j];
+          arr[j] = t;
+        }
+        return arr;
+      }
+
+      function pickRowSize(remaining) {
+        var options = [1, 2, 3].filter(function (n) {
+          return n <= remaining;
+        });
+        if (!options.length) return 1;
+        var size = options[Math.floor(Math.random() * options.length)];
+        var left = remaining - size;
+        if (left === 1 && size < 3 && remaining > 1) {
+          size = Math.min(2, remaining - 1);
+        }
+        return size;
+      }
+
+      function buildRows(list) {
+        var rows = [];
+        var i = 0;
+        while (i < list.length) {
+          var remaining = list.length - i;
+          var count = pickRowSize(remaining);
+          rows.push(list.slice(i, i + count));
+          i += count;
+        }
+        return rows;
+      }
+
+      var mosaic = document.getElementById('album-mosaic');
+      var base = '../kimono_image/';
+      var ordered = shuffle(files);
+      var rows = buildRows(ordered);
+
+      rows.forEach(function (rowFiles) {
+        var row = document.createElement('div');
+        row.className = 'album-mosaic-row album-mosaic-row--' + rowFiles.length;
+        rowFiles.forEach(function (name, colIndex) {
+          var fig = document.createElement('figure');
+          fig.className = 'album-reveal';
+          fig.style.setProperty('--reveal-delay', colIndex * 0.09 + 's');
+          var img = document.createElement('img');
+          img.src = base + name;
+          img.alt = 'Ảnh cưới Văn Hùng và Thu Trang';
+          img.loading = 'lazy';
+          img.addEventListener(
+            'load',
+            function onImgLoad() {
+              img.removeEventListener('load', onImgLoad);
+              if (fig.classList.contains('album-reveal--ready')) return;
+              fig.classList.add('album-reveal--ready');
+              maybeReveal(fig);
+            },
+            { once: true },
+          );
+          fig.appendChild(img);
+          row.appendChild(fig);
+        });
+        mosaic.appendChild(row);
+      });
+
+      function maybeReveal(fig) {
+        if (!fig.classList.contains('album-reveal--ready')) return;
+        var rect = fig.getBoundingClientRect();
+        var vh = window.innerHeight || document.documentElement.clientHeight;
+        if (rect.bottom > 0 && rect.top < vh) {
+          fig.classList.add('is-visible');
+        }
+      }
+
+      function initAlbumReveal() {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          mosaic.querySelectorAll('.album-reveal').forEach(function (fig) {
+            fig.classList.add('is-visible');
+          });
+          return;
+        }
+
+        var observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              var fig = entry.target;
+              if (!entry.isIntersecting) return;
+              var img = fig.querySelector('img');
+              if (img && !img.complete) return;
+              fig.classList.add('is-visible');
+              observer.unobserve(fig);
+            });
+          },
+          { threshold: 0.12, rootMargin: '0px 0px 6% 0px' },
+        );
+
+        mosaic.querySelectorAll('.album-reveal').forEach(function (fig) {
+          var img = fig.querySelector('img');
+          if (img && img.complete) fig.classList.add('album-reveal--ready');
+          observer.observe(fig);
+        });
+      }
+
+      initAlbumReveal();
+
+      var modal = document.getElementById('lightbox-modal');
+      var lightboxImg = document.getElementById('lightbox-img');
+      var closeBtn = document.getElementById('lightbox-close');
+      mosaic.addEventListener('click', function (e) {
+        var img = e.target.closest('img');
+        if (!img) return;
+        lightboxImg.src = img.src;
+        modal.classList.add('active');
+      });
+      closeBtn.addEventListener('click', function () {
+        modal.classList.remove('active');
+      });
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.classList.remove('active');
+      });
+    })();
+  </script>
+  <script src="../assets/js/cherry-blossom-bg.js" defer></script>
+</body>
+</html>

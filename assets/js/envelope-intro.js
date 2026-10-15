@@ -1,4 +1,8 @@
+import { parseInviteFromLocation } from './invite-config.js';
+
 const INTRO_STORAGE_KEY = 'wedding_envelope_opened_v1';
+/** Sau khi mở thiệp xong, chờ bao lâu rồi mới tự cuộn (ms) */
+const IDLE_AUTO_SCROLL_DELAY_MS = 5000;
 
 const PETAL_COLORS = [
   '#f5d0dc', '#e8a0b4', '#d44a66', '#c13a56', '#a82f48',
@@ -172,15 +176,33 @@ function startIdleAutoScroll() {
   window.addEventListener('pointerdown', onUserIntent);
   window.addEventListener('keydown', onUserIntent);
 
-  setTimeout(begin, 800);
+  setTimeout(begin, IDLE_AUTO_SCROLL_DELAY_MS);
+}
+
+function unlockPageInteraction() {
+  document.documentElement.classList.remove('intro-active');
+  document.body.classList.remove('intro-active', 'intro-revealing');
+  document.body.classList.add('intro-complete');
+  const canvas = document.getElementById('app-canvas');
+  if (canvas) {
+    canvas.style.pointerEvents = '';
+    canvas.style.opacity = '';
+  }
+}
+
+function hasPersonalInviteLink() {
+  try {
+    return Boolean(parseInviteFromLocation(window.location).guestName);
+  } catch {
+    const params = new URLSearchParams(window.location.search);
+    return Boolean(params.get('to') || params.get('guest'));
+  }
 }
 
 function finishIntro(intro) {
   intro.classList.add('is-complete');
   lockIntroScroll();
-  document.documentElement.classList.remove('intro-active');
-  document.body.classList.remove('intro-active', 'intro-revealing');
-  document.body.classList.add('intro-complete');
+  unlockPageInteraction();
   markIntroDone();
   requestAnimationFrame(() => {
     lockIntroScroll();
@@ -205,16 +227,14 @@ function initEnvelopeIntro() {
   if (!intro || intro.dataset.bound === '1') return;
   intro.dataset.bound = '1';
 
-  if (shouldSkipIntro()) {
+  if (shouldSkipIntro() || hasPersonalInviteLink()) {
     intro.remove();
-    document.documentElement.classList.remove('intro-active');
-    document.body.classList.remove('intro-active');
-    document.body.classList.add('intro-complete');
+    unlockPageInteraction();
     lockIntroScroll();
     setTimeout(() => {
       window.dispatchEvent(new Event('wedding:intro-complete'));
       startIdleAutoScroll();
-    }, 600);
+    }, 100);
     return;
   }
 
@@ -272,8 +292,21 @@ function initEnvelopeIntro() {
   intro.style.cursor = 'pointer';
   intro.setAttribute('role', 'button');
   intro.setAttribute('aria-label', 'Chạm để mở thiệp cưới');
+
+  window.setTimeout(() => {
+    if (!intro.isConnected || opened) return;
+    openEnvelope();
+  }, 2500);
+
+  window.setTimeout(() => {
+    if (!intro.isConnected) return;
+    if (document.body.classList.contains('intro-active')) {
+      finishIntro(intro);
+    }
+  }, 8000);
 }
 
 window.startIdleAutoScroll = startIdleAutoScroll;
+window.weddingForceUnlockPage = unlockPageInteraction;
 
 document.addEventListener('DOMContentLoaded', initEnvelopeIntro);

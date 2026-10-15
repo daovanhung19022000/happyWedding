@@ -22,29 +22,6 @@ let isAudioPlaying = false;
 let audioElement = new Audio();
 let countdownInterval = null;
 
-// Khởi tạo Sakura Petals Effect
-function initSakuraPetals() {
-  const container = document.getElementById('sakura-container');
-  if (!container) return;
-
-  const petalCount = 20;
-  for (let i = 0; i < petalCount; i++) {
-    createPetal(container);
-  }
-}
-
-function createPetal(container) {
-  const petal = document.createElement('div');
-  petal.className = 'sakura-petal';
-  const size = Math.random() * 12 + 10;
-  petal.style.width = `${size}px`;
-  petal.style.height = `${size * 1.3}px`;
-  petal.style.left = `${Math.random() * 100}vw`;
-  petal.style.animationDuration = `${Math.random() * 6 + 5}s, ${Math.random() * 3 + 2}s`;
-  petal.style.animationDelay = `${Math.random() * 5}s, ${Math.random() * 2}s`;
-  container.appendChild(petal);
-}
-
 // Khởi tạo Audio Player (Phát ngẫu nhiên / lần lượt)
 function initAudioPlayer() {
   const audioBtn = document.getElementById('audio-toggle-btn');
@@ -516,7 +493,6 @@ function initGiftDialog() {
 
 // Khởi chạy toàn bộ khi DOM load xong
 document.addEventListener('DOMContentLoaded', () => {
-  initSakuraPetals();
   initAudioPlayer();
   handleQueryParams();
   initLightbox();

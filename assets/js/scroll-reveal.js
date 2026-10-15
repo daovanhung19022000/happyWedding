@@ -25,7 +25,7 @@
 
   function shouldSkip(el) {
     if (!el || el.classList.contains('scroll-reveal')) return true;
-    if (el.closest('#envelope-intro, #gift-dialog, #guest-banner')) return true;
+    if (el.closest('#envelope-intro, #gift-dialog, #guest-banner, #blossom-pulse-layer')) return true;
     if (el.closest('.hero-hearts-orbit, .wedding-calendar-bg, .wedding-calendar-scrim')) return true;
     if (el.hidden || el.getAttribute('aria-hidden') === 'true') return true;
     if (el.matches('hr, .formal-invite-rule, .album-section-rule, .polaroid-family-rule')) return true;

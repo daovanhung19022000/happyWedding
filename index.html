@@ -82,9 +82,6 @@
     <div id="envelope-petal-layer" class="envelope-petal-layer" aria-hidden="true"></div>
   </div>
 
-  <!-- Cánh hoa rơi nhẹ nhàng -->
-  <div id="sakura-container" class="sakura-container"></div>
-
   <!-- Nút điều khiển âm nhạc nổi thanh lịch -->
   <div id="audio-toggle-btn" class="audio-floating-btn" title="Phát / Dừng nhạc nền">
     <div id="audio-disk" class="audio-disk-rotate">
@@ -96,7 +93,7 @@
 
   <!-- MAIN CANVAS CONTAINER (CHUẨN 440PX MOBILE CĂN GIỮA) -->
   <main id="app-canvas">
-
+    <div id="blossom-pulse-layer" class="blossom-pulse-layer" data-blossom-zone="global" aria-hidden="true"></div>
     <!-- Thanh chào cá nhân hóa cho từng khách mời -->
     <div id="guest-banner" class="guest-banner-sticky" style="display: none;">
       <span>Kính gửi:</span>
@@ -105,7 +102,13 @@
     </div>
 
     <!-- TOP BAR (SAVE THE DATE) -->
-    <header class="canvas-top-bar">
+    <header class="canvas-top-bar blossom-zone-section">
+      <div
+        class="blossom-pulse-layer blossom-pulse-layer--section blossom-pulse-layer--hearts"
+        data-blossom-zone="topbar"
+        data-blossom-kind="heart"
+        aria-hidden="true"
+      ></div>
       <div class="save-the-date-tag">
         SAVE THE DATE <span class="save-the-date-dot"></span> <span id="save-the-date-short">15.11.2026</span>
       </div>
@@ -115,7 +118,8 @@
     </header>
 
     <!-- HERO SECTION (KHUNG VÒM CỔ ĐIỂN THEO PHONG CÁCH MẪU 21) -->
-    <section class="hero-canvas-section">
+    <section class="hero-canvas-section blossom-zone-section">
+      <div class="blossom-pulse-layer blossom-pulse-layer--section" data-blossom-zone="hero" aria-hidden="true"></div>
       <div class="hero-arch-wrap">
         <div class="hero-arch-container">
           <img src="kimono_image/THA_3400.JPG" alt="Ảnh cưới Đào Văn Hùng & Hoàng Thị Thu Trang" class="hero-arch-img">
@@ -160,7 +164,8 @@
     </section>
 
     <!-- SECTION POLAROID CÔ DÂU & CHÚ RỂ (CHUẨN ĐÔI POLAROID MẪU 21) -->
-    <section class="couple-polaroid-section">
+    <section class="couple-polaroid-section blossom-zone-section">
+      <div class="blossom-pulse-layer blossom-pulse-layer--section" data-blossom-zone="polaroid" aria-hidden="true"></div>
       <div class="couple-polaroid-matrix">
         <div class="polaroid-card-body polaroid-card-body--side polaroid-card-body--bride couple-polaroid-matrix__text couple-polaroid-matrix__text--bride">
           <p class="polaroid-family-head">Nhà Gái</p>
@@ -208,7 +213,8 @@
     </section>
 
     <!-- SECTION THIỆP MỜI (FORMAL INVITE) -->
-    <section class="formal-invite-section">
+    <section class="formal-invite-section blossom-zone-section">
+      <div class="blossom-pulse-layer blossom-pulse-layer--section" data-blossom-zone="invite" aria-hidden="true"></div>
       <div class="formal-invite-inner">
         <div class="formal-invite-rule" aria-hidden="true"></div>
         <h2 class="formal-invite-script">Thiệp Mời</h2>
@@ -343,7 +349,8 @@
     </section>
 
     <!-- LỜI MỜI & XÁC NHẬN THAM DỰ -->
-    <section id="rsvp-section" class="rsvp-invite-section">
+    <section id="rsvp-section" class="rsvp-invite-section blossom-zone-section">
+      <div class="blossom-pulse-layer blossom-pulse-layer--section" data-blossom-zone="rsvp" aria-hidden="true"></div>
       <div class="rsvp-invite-intro">
         <p>
           Chúng mình rất mong sự hiện diện của bạn để cùng nhau chung vui, sẻ chia niềm hạnh phúc và lưu lại những khoảnh khắc đáng nhớ trong ngày cưới.
@@ -455,10 +462,14 @@
           <img src="kimono_image/THA_3942.JPG" alt="Ảnh cưới Kimono" loading="lazy" />
         </figure>
       </div>
+      <p class="album-more-link-wrap">
+        <a class="album-more-link" href="album/">Xem thêm ảnh cưới</a>
+      </p>
     </section>
 
     <!-- FOOTER CANVAS -->
-    <footer class="canvas-footer-section">
+    <footer class="canvas-footer-section blossom-zone-section">
+      <div class="blossom-pulse-layer blossom-pulse-layer--section" data-blossom-zone="footer" aria-hidden="true"></div>
       <div class="footer-couple-title">VĂN HÙNG & THU TRANG</div>
       <div class="footer-script-thankyou">Thank You!</div>
       <p class="footer-closing-text">
@@ -626,15 +637,29 @@
             else localStorage.setItem(KEY, '1');
           } catch (e) {}
         }
-        if (shouldSkip()) {
-          intro.remove();
-          document.body.classList.remove('intro-active');
+        function hasGuestInUrl() {
+          var params = new URLSearchParams(window.location.search);
+          if (params.get('to') || params.get('guest')) return true;
+          return /\/(0|1|9)\/[^/?#]+/.test(window.location.pathname);
+        }
+        function unlockPage() {
+          document.documentElement.classList.remove('intro-active');
+          document.body.classList.remove('intro-active', 'intro-revealing');
           document.body.classList.add('intro-complete');
+          var canvas = document.getElementById('app-canvas');
+          if (canvas) {
+            canvas.style.pointerEvents = '';
+            canvas.style.opacity = '';
+          }
+        }
+        if (shouldSkip() || hasGuestInUrl()) {
+          intro.remove();
+          unlockPage();
           setTimeout(function () {
             window.dispatchEvent(new Event('wedding:intro-complete'));
             if (window.WeddingScrollReveal) window.WeddingScrollReveal.boot();
             if (window.startIdleAutoScroll) window.startIdleAutoScroll();
-          }, 600);
+          }, 100);
           return;
         }
         document.documentElement.classList.add('intro-active');
@@ -655,9 +680,7 @@
           }, 850);
           setTimeout(function () {
             intro.classList.add('is-complete');
-            document.documentElement.classList.remove('intro-active');
-            document.body.classList.remove('intro-active', 'intro-revealing');
-            document.body.classList.add('intro-complete');
+            unlockPage();
             window.scrollTo(0, 0);
             setTimeout(function () {
               intro.remove();
@@ -669,11 +692,24 @@
         }
         intro.addEventListener('click', openIntro);
         intro.addEventListener('touchend', function (e) { e.preventDefault(); openIntro(); }, { passive: false });
+        setTimeout(function () {
+          if (intro.isConnected && !opened) openIntro();
+        }, 2500);
+        setTimeout(function () {
+          if (!intro.isConnected) return;
+          if (document.body.classList.contains('intro-active')) {
+            intro.remove();
+            unlockPage();
+            window.dispatchEvent(new Event('wedding:intro-complete'));
+            if (window.WeddingScrollReveal) window.WeddingScrollReveal.boot();
+          }
+        }, 8000);
       }, 200);
     });
   </script>
   <!-- Scroll reveal (script thường — luôn chạy) -->
   <script src="assets/js/scroll-reveal.js" defer></script>
+  <script src="assets/js/cherry-blossom-bg.js" defer></script>
   <!-- Mở phong thiệp (load riêng — không phụ thuộc app.js) -->
   <script type="module" src="assets/js/envelope-intro.js"></script>
   <!-- Main Application Script -->

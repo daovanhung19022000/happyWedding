@@ -1,43 +1,118 @@
 /* Animation effects cho thiệp cưới */
 
-/* Cánh hoa anh đào rơi (Sakura Petals) */
-.sakura-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+/* Hoa anh đào hồng — phóng / thu (nền thiệp, không chặn click) */
+.blossom-pulse-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   pointer-events: none;
-  z-index: 99;
   overflow: hidden;
 }
 
-.sakura-petal {
-  position: absolute;
-  background: radial-gradient(circle, #fce8ef 15%, #e8a0b4 55%, #c4b4d8 100%);
-  border-radius: 15px 1px 15px 1px;
-  opacity: 0.75;
-  box-shadow: 0 0 4px rgba(255, 182, 193, 0.4);
-  animation-name: fall, sway;
-  animation-iteration-count: infinite;
-  animation-timing-function: linear, ease-in-out;
+.blossom-pulse-layer--section {
+  border-radius: inherit;
 }
 
-@keyframes fall {
+.blossom-pulse-layer--hearts {
+  /* Trái tim tràn nhẹ xuống dưới Save the Date */
+  bottom: -18px;
+}
+
+.blossom-pulse-item--heart {
+  animation: blossomHeartPulse var(--dur, 3s) ease-in-out var(--delay, 0s) infinite;
+  filter: drop-shadow(0 2px 6px rgba(230, 100, 140, 0.28));
+}
+
+.blossom-pulse-item--heart svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+@keyframes blossomHeartPulse {
   0% {
-    top: -5%;
+    opacity: 0;
+    transform: scale(0.25);
   }
-  100% {
-    top: 105%;
-  }
-}
-
-@keyframes sway {
-  0%, 100% {
-    transform: translateX(0) rotate(0deg);
+  20% {
+    opacity: 0.85;
   }
   50% {
-    transform: translateX(45px) rotate(180deg);
+    opacity: 1;
+    transform: scale(var(--max-scale, 1.12));
+  }
+  80% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+}
+
+.blossom-zone-section {
+  position: relative;
+  isolation: isolate;
+}
+
+.blossom-zone-section > :not(.blossom-pulse-layer) {
+  position: relative;
+  z-index: 1;
+}
+
+.blossom-pulse-layer,
+.blossom-pulse-layer * {
+  pointer-events: none;
+}
+
+.blossom-pulse-item {
+  position: absolute;
+  opacity: 0;
+  transform: scale(0.22);
+  will-change: transform, opacity;
+  filter: drop-shadow(0 2px 8px rgba(232, 120, 150, 0.22));
+  animation: blossomPulse var(--dur, 3s) ease-in-out var(--delay, 0s) infinite;
+}
+
+.blossom-pulse-item svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+@keyframes blossomPulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.22);
+  }
+  18% {
+    opacity: 0.82;
+  }
+  50% {
+    opacity: 1;
+    transform: scale(var(--max-scale, 1.08));
+  }
+  82% {
+    opacity: 0.62;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+}
+
+.blossom-pulse-layer--static {
+  opacity: 0.35;
+  background: radial-gradient(circle at 20% 30%, rgba(255, 182, 193, 0.12), transparent 55%),
+    radial-gradient(circle at 80% 70%, rgba(255, 158, 187, 0.1), transparent 50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blossom-pulse-item,
+  .blossom-pulse-item--heart {
+    animation: none;
+    opacity: 0.35;
+    transform: scale(0.85);
   }
 }
 
@@ -171,12 +246,12 @@ body.intro-complete .canvas-top-bar {
 
 #app-canvas .scroll-reveal {
   opacity: 0;
-  pointer-events: none;
+  /* Không chặn click — tránh “không bấm được gì” khi chưa kịp reveal */
+  pointer-events: auto;
   will-change: opacity, transform;
 }
 
 #app-canvas .scroll-reveal.is-visible {
-  pointer-events: auto;
   opacity: 1;
   animation-duration: 0.85s;
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
@@ -193,6 +268,7 @@ body.intro-complete .canvas-top-bar {
   animation-name: weddingRevealZoom;
 }
 
+/* Triptych thiệp mời: giữ lệch tấm giữa, không reset transform che layout */
 /* Album — transition mượt, một lần (không keyframe restart / không ẩn lại) */
 #app-canvas .gallery-canvas-section .scroll-reveal {
   opacity: 0;
@@ -208,7 +284,6 @@ body.intro-complete .canvas-top-bar {
 #app-canvas .gallery-canvas-section .scroll-reveal.is-visible {
   opacity: 1;
   transform: none;
-  pointer-events: auto;
 }
 
 #app-canvas .scroll-reveal--merge-left.is-visible {
