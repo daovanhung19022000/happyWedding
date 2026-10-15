@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Thiệp cưới</title>
+  <script>
+    (function () {
+      var path = window.location.pathname;
+      var search = window.location.search || '';
+      var match = path.match(/^(.*)\/(0|1|9)\/([^/?#]+)\/?$/);
+      if (match) {
+        var base = match[1] || '';
+        var mode = match[2];
+        var guest = decodeURIComponent(match[3].replace(/\+/g, ' '));
+        var target = base + '/index.html?mode=' + encodeURIComponent(mode) + '&to=' + encodeURIComponent(guest);
+        window.location.replace(target + (search ? '&' + search.slice(1) : ''));
+        return;
+      }
+      if (path.indexOf('/customer') !== -1) {
+        window.location.replace(path.replace(/\/?$/, '') + '/index.html' + search);
+        return;
+      }
+      var fallback = path.replace(/\/[^/]*$/, '') || '';
+      if (!/\/index\.html$/i.test(path)) {
+        window.location.replace(fallback + '/index.html' + search);
+      }
+    })();
+  </script>
+</head>
+<body></body>
+</html>

@@ -1,68 +1,22 @@
 import { playlist } from './music-list.js';
 import { firebaseConfig, isFirebaseConfigured } from './firebase-config.js';
+import {
+  eventModes,
+  resolveEventMode,
+  parseInviteFromLocation,
+  buildGuestKey,
+  modeKeyToCode,
+} from './invite-config.js';
 
-// Mode 1 = Miền Bắc (15/11), Mode 2 = Miền Nam (21/11). URL: ?mode=1 hoặc ?mode=2
-export const eventModes = {
-  bac: {
-    title: "LỄ THÀNH HÔN (MIỀN BẮC)",
-    badge: "Tiệc Mừng Miền Bắc",
-    host: "Gia đình hai bên",
-    dateText: "Chủ Nhật, ngày 15 tháng 11 năm 2026",
-    lunarDate: "Tức ngày 07 tháng 10 năm Bính Ngọ",
-    targetDate: "2026-11-15T10:30:00",
-    welcomeTime: "10:30",
-    partyTime: "11:00",
-    venue: "Tư gia Nhà Trai",
-    address: "Đường Lương Như Học, Tân Hưng, Thành Phố Hải Dương",
-    mapLink: "https://maps.google.com/?q=Đường+Lương+Như+Học,+Tân+Hưng,+Hải+Dương",
-    specialDateDay: 15,
-    heroDateDisplay: "15 . 11 . 2026",
-    saveTheDateShort: "15.11.2026",
-    inviteWeekday: "Chủ Nhật",
-    inviteDay: "15",
-    inviteMonthLabel: "Tháng 11",
-    inviteYear: "2026",
-    inviteVenueTitle: "TƯ GIA NHÀ TRAI"
-  },
-  nam: {
-    title: "TIỆC BÁO HỶ (MIỀN NAM)",
-    badge: "Tiệc Mừng Miền Nam",
-    host: "Gia Đình & Bạn Bè Miền Nam",
-    dateText: "Thứ Bảy, ngày 21 tháng 11 năm 2026",
-    lunarDate: "Tức ngày 13 tháng 10 năm Bính Ngọ",
-    targetDate: "2026-11-21T15:00:00",
-    welcomeTime: "15:00",
-    partyTime: "17:00",
-    venue: "Tư gia Nhà Gái",
-    address: "Vĩnh Thạch, Biên Hoà, Tỉnh Đồng Nai",
-    mapLink: "https://maps.google.com/?q=Vĩnh+Thạch,+Biên+Hoà,+Đồng+Nai",
-    specialDateDay: 21,
-    heroDateDisplay: "21 . 11 . 2026",
-    saveTheDateShort: "21.11.2026",
-    inviteWeekday: "Thứ Bảy",
-    inviteDay: "21",
-    inviteMonthLabel: "Tháng 11",
-    inviteYear: "2026",
-    inviteVenueTitle: "TƯ GIA NHÀ GÁI"
-  }
-};
+export { eventModes, resolveEventMode };
 
 function formatInviteHour(timeStr) {
   if (!timeStr) return "";
   return String(timeStr).replace(":", "h");
 }
 
-/** Chuẩn hóa ?mode= từ URL (1/2, bac/nam, trai/gai cũ → bac) */
-export function resolveEventMode(modeParam) {
-  if (!modeParam) return "bac";
-  const key = String(modeParam).trim().toLowerCase();
-  if (key === "1" || key === "bac" || key === "trai" || key === "gai") return "bac";
-  if (key === "2" || key === "nam") return "nam";
-  return eventModes[key] ? key : "bac";
-}
-
 // Khởi tạo trạng thái
-let currentMode = "bac";
+let currentMode = "trai";
 let currentTrackIndex = 0;
 let isAudioPlaying = false;
 let audioElement = new Audio();
@@ -140,11 +94,10 @@ function initAudioPlayer() {
 // Xử lý Query Parameters (Cá nhân hóa khách mời & Chế độ)
 function handleQueryParams() {
   const urlParams = new URLSearchParams(window.location.search);
-  const guestName = urlParams.get('to') || urlParams.get('guest');
-  const role = urlParams.get('role');
-  const modeParam = urlParams.get('mode');
-
-  currentMode = resolveEventMode(modeParam);
+  const parsed = parseInviteFromLocation(window.location);
+  const guestName = parsed.guestName;
+  const role = parsed.role || urlParams.get('role');
+  currentMode = parsed.mode;
 
   // Cập nhật thanh chào khách mời
   const guestBanner = document.getElementById('guest-banner');
@@ -339,13 +292,23 @@ function initRSVPForm() {
       return;
     }
 
+    const parsedInvite = parseInviteFromLocation(window.location);
+    const modeCode = modeKeyToCode(currentMode);
+    const guestKey = parsedInvite.guestName
+      ? buildGuestKey(modeCode, parsedInvite.guestName, parsedInvite.role || '')
+      : null;
+
     const rsvpData = {
       name,
       attendance,
       guests,
       note,
       mode: currentMode,
-      timestamp: new Date().toISOString()
+      modeCode,
+      guestNameRaw: parsedInvite.guestName,
+      inviteRole: parsedInvite.role || '',
+      guestKey,
+      timestamp: new Date().toISOString(),
     };
 
     try {

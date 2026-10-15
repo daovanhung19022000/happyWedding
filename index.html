@@ -27,6 +27,19 @@
      */
     window.WEDDING_ENVELOPE_MODE = 'every-load';
   </script>
+  <script>
+    (function () {
+      var path = window.location.pathname;
+      var m = path.match(/\/(0|1|9)\/([^/?#]+)\/?$/);
+      if (!m || /index\.html$/i.test(path)) return;
+      var i = path.indexOf('/' + m[1] + '/');
+      var base = i >= 0 ? path.slice(0, i) : '';
+      var guest = decodeURIComponent(m[2].replace(/\+/g, ' '));
+      var q = '?mode=' + encodeURIComponent(m[1]) + '&to=' + encodeURIComponent(guest);
+      if (window.location.search) q += '&' + window.location.search.slice(1);
+      window.location.replace(base + '/index.html' + q + window.location.hash);
+    })();
+  </script>
 </head>
 <body>
 
