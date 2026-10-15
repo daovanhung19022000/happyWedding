@@ -56,32 +56,74 @@ function initAudioPlayer() {
     }
   });
 
+  let audioUnlocked = false;
+
+  const markPlaying = () => {
+    isAudioPlaying = true;
+    audioDisk.classList.add('spinning');
+  };
+
+  const startPlayback = async (unmute = false) => {
+    if (unmute) {
+      audioElement.muted = false;
+      audioUnlocked = true;
+    }
+    try {
+      await audioElement.play();
+      markPlaying();
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const unlockAudioWithSound = () => {
+    if (audioUnlocked && isAudioPlaying && !audioElement.muted) return;
+    audioUnlocked = true;
+    audioElement.muted = false;
+    if (audioElement.paused) {
+      startPlayback(true);
+    } else {
+      markPlaying();
+    }
+  };
+
+  const bootstrapMutedAutoplay = async () => {
+    audioElement.muted = true;
+    const ok = await startPlayback(false);
+    if (ok) {
+      audioElement.muted = false;
+      audioUnlocked = true;
+    }
+  };
+
   const togglePlay = () => {
     if (isAudioPlaying) {
       audioElement.pause();
       isAudioPlaying = false;
       audioDisk.classList.remove('spinning');
     } else {
-      audioElement.play().then(() => {
-        isAudioPlaying = true;
-        audioDisk.classList.add('spinning');
-      }).catch(err => console.log('Chờ người dùng tương tác để phát nhạc:', err));
+      unlockAudioWithSound();
     }
   };
 
-  audioBtn.addEventListener('click', togglePlay);
+  audioBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    togglePlay();
+  });
 
-  const tryAutoPlay = () => {
-    if (!isAudioPlaying) togglePlay();
-  };
+  bootstrapMutedAutoplay();
 
-  window.addEventListener('wedding:first-open', tryAutoPlay, { once: true });
+  window.addEventListener('wedding:first-open', unlockAudioWithSound);
+  window.addEventListener('wedding:intro-complete', unlockAudioWithSound, { once: true });
 
-  const firstInteract = () => {
-    tryAutoPlay();
-    document.removeEventListener('click', firstInteract);
-  };
-  document.addEventListener('click', firstInteract);
+  const onFirstGesture = () => unlockAudioWithSound();
+  ['pointerdown', 'touchstart', 'click', 'keydown'].forEach((evt) => {
+    window.addEventListener(evt, onFirstGesture, { once: true, passive: true });
+  });
+
+  window.setTimeout(() => unlockAudioWithSound(), 400);
+  window.setTimeout(() => unlockAudioWithSound(), 2600);
 }
 
 // Xử lý Query Parameters (Cá nhân hóa khách mời & Chế độ)
