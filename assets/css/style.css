@@ -873,12 +873,12 @@ img.polaroid-role-sticker--groom {
   font-style: italic;
   color: var(--invite-ink);
   line-height: 1.55;
-  margin: 0 auto 18px;
+  margin: 0 auto 6px;
   max-width: 340px;
 }
 
 .formal-invite-datetime {
-  padding: 10px 0 6px;
+  padding: 0 0 6px;
   width: 100%;
 }
 
@@ -892,7 +892,7 @@ img.polaroid-role-sticker--groom {
   width: 100%;
   max-width: 100%;
   margin: 0 auto 28px;
-  padding: 12px 4px 16px;
+  padding: 4px 4px 16px;
   box-sizing: border-box;
   font-family: var(--font-serif);
   overflow: visible;
@@ -1649,6 +1649,8 @@ img.polaroid-role-sticker--groom {
   line-height: 0;
   align-self: start;
   transition: box-shadow 0.4s ease;
+  contain: layout style;
+  min-height: 72px;
 }
 
 .gallery-grid-item:hover {
@@ -1678,7 +1680,10 @@ img.polaroid-role-sticker--groom {
   vertical-align: top;
   transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.4s ease;
   transform: scale(1);
-  will-change: transform;
+}
+
+.gallery-grid-item.scroll-reveal:not(.is-visible) img {
+  transform: scale(1);
 }
 
 .gallery-grid-item:hover img,

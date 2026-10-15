@@ -97,60 +97,141 @@
   transform: translateY(0);
 }
 
-/* Scroll reveal — cuộn tới đâu, ảnh & chữ bay vào đó */
-#app-canvas .scroll-reveal:not(.is-visible) {
+/* Scroll reveal — cuộn tới đâu, ảnh & chữ bay vào (keyframes để lặp lại khi cuộn lên/xuống) */
+/* Top bar — hiện một lần khi mở thiệp, không gắn scroll-reveal (tránh giật) */
+@keyframes weddingTopBarIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+body.intro-complete .canvas-top-bar {
+  animation: weddingTopBarIn 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+}
+
+@keyframes weddingRevealText {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 40px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes weddingRevealZoom {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 36px, 0) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes weddingRevealGallery {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 52px, 0) scale(0.86);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes weddingRevealMergeLeft {
+  from {
+    opacity: 0;
+    transform: translate3d(-52px, 20px, 0) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes weddingRevealMergeRight {
+  from {
+    opacity: 0;
+    transform: translate3d(52px, 20px, 0) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+#app-canvas .scroll-reveal {
   opacity: 0;
   pointer-events: none;
+  will-change: opacity, transform;
 }
 
 #app-canvas .scroll-reveal.is-visible {
   pointer-events: auto;
+  opacity: 1;
+  animation-duration: 0.85s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: both;
+  animation-delay: var(--reveal-delay, 0s);
 }
 
-.scroll-reveal {
+#app-canvas .scroll-reveal--text.is-visible,
+#app-canvas .scroll-reveal--up.is-visible {
+  animation-name: weddingRevealText;
+}
+
+#app-canvas .scroll-reveal--zoom.is-visible {
+  animation-name: weddingRevealZoom;
+}
+
+/* Album — transition mượt, một lần (không keyframe restart / không ẩn lại) */
+#app-canvas .gallery-canvas-section .scroll-reveal {
+  opacity: 0;
+  transform: translate3d(0, 32px, 0) scale(0.97);
+  animation: none !important;
   transition:
-    opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 1.05s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 1.05s cubic-bezier(0.22, 1, 0.36, 1);
   transition-delay: var(--reveal-delay, 0s);
-  will-change: opacity, transform;
+  backface-visibility: hidden;
 }
 
-.scroll-reveal--text,
-.scroll-reveal--up {
-  transform: translate3d(0, 36px, 0);
-}
-
-.scroll-reveal--left {
-  transform: translate3d(-36px, 0, 0);
-}
-
-.scroll-reveal--right {
-  transform: translate3d(36px, 0, 0);
-}
-
-.scroll-reveal--zoom {
-  transform: translate3d(0, 32px, 0) scale(0.9);
-}
-
-/* Polaroid / cặp ảnh — bay từ hai bên ghép vào giữa */
-.scroll-reveal--merge-left {
-  transform: translate3d(-56px, 24px, 0) scale(0.9);
-}
-
-.scroll-reveal--merge-right {
-  transform: translate3d(56px, 24px, 0) scale(0.9);
-}
-
-.scroll-reveal.is-visible {
+#app-canvas .gallery-canvas-section .scroll-reveal.is-visible {
   opacity: 1;
   transform: none;
+  pointer-events: auto;
+}
+
+#app-canvas .scroll-reveal--merge-left.is-visible {
+  animation-name: weddingRevealMergeLeft;
+}
+
+#app-canvas .scroll-reveal--merge-right.is-visible {
+  animation-name: weddingRevealMergeRight;
+}
+
+#app-canvas .scroll-reveal--left.is-visible {
+  animation-name: weddingRevealMergeLeft;
+}
+
+#app-canvas .scroll-reveal--right.is-visible {
+  animation-name: weddingRevealMergeRight;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .scroll-reveal {
+  #app-canvas .scroll-reveal {
     opacity: 1;
-    transform: none;
-    transition: none;
+    pointer-events: auto;
+    animation: none;
   }
 }
 

@@ -619,6 +619,7 @@
           document.body.classList.add('intro-complete');
           setTimeout(function () {
             window.dispatchEvent(new Event('wedding:intro-complete'));
+            if (window.WeddingScrollReveal) window.WeddingScrollReveal.boot();
             if (window.startIdleAutoScroll) window.startIdleAutoScroll();
           }, 600);
           return;
@@ -648,6 +649,7 @@
             setTimeout(function () {
               intro.remove();
               window.dispatchEvent(new Event('wedding:intro-complete'));
+              if (window.WeddingScrollReveal) window.WeddingScrollReveal.boot();
               if (window.startIdleAutoScroll) window.startIdleAutoScroll();
             }, 700);
           }, 2200);
@@ -657,6 +659,8 @@
       }, 200);
     });
   </script>
+  <!-- Scroll reveal (script thường — luôn chạy) -->
+  <script src="assets/js/scroll-reveal.js" defer></script>
   <!-- Mở phong thiệp (load riêng — không phụ thuộc app.js) -->
   <script type="module" src="assets/js/envelope-intro.js"></script>
   <!-- Main Application Script -->
