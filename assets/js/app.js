@@ -29,16 +29,31 @@ function initAudioPlayer() {
   const audioDisk = document.getElementById('audio-disk');
   if (!audioBtn) return;
 
-  // Chọn ngẫu nhiên 1 bài hát lúc mở trang
-  currentTrackIndex = Math.floor(Math.random() * playlist.length);
-  audioElement.src = playlist[currentTrackIndex].url;
-  audioElement.preload = "auto";
+  const pickRandomTrackIndex = (except = -1) => {
+    if (!playlist.length) return 0;
+    if (playlist.length === 1) return 0;
+    let idx = except;
+    while (idx === except) {
+      idx = Math.floor(Math.random() * playlist.length);
+    }
+    return idx;
+  };
 
-  // Khi hết bài thì tự chuyển bài tiếp theo
+  const loadTrack = (index) => {
+    const track = playlist[index];
+    if (!track?.url) return;
+    currentTrackIndex = index;
+    audioElement.src = track.url;
+  };
+
+  loadTrack(pickRandomTrackIndex());
+  audioElement.preload = 'auto';
+
   audioElement.addEventListener('ended', () => {
-    currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
-    audioElement.src = playlist[currentTrackIndex].url;
-    audioElement.play();
+    loadTrack(pickRandomTrackIndex(currentTrackIndex));
+    if (isAudioPlaying) {
+      audioElement.play().catch(() => {});
+    }
   });
 
   const togglePlay = () => {

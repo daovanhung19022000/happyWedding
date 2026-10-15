@@ -232,6 +232,7 @@ function initEnvelopeIntro() {
     unlockPageInteraction();
     lockIntroScroll();
     setTimeout(() => {
+      window.dispatchEvent(new Event('wedding:first-open'));
       window.dispatchEvent(new Event('wedding:intro-complete'));
       startIdleAutoScroll();
     }, 100);
