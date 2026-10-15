@@ -1,5 +1,6 @@
 import { playlist } from './music-list.js';
 import { firebaseConfig, isFirebaseConfigured } from './firebase-config.js';
+import { initWishesLive, setWishGuestName } from './wishes-live.js';
 import {
   eventModes,
   resolveEventMode,
@@ -90,6 +91,7 @@ function handleQueryParams() {
     if (guestBanner) guestBanner.style.display = 'flex';
     if (rsvpNameInput) rsvpNameInput.value = fullGreeting;
     if (wishNameInput) wishNameInput.value = fullGreeting;
+    setWishGuestName(fullGreeting);
     if (inviteGuestTitle) inviteGuestTitle.textContent = fullGreeting.toUpperCase();
   } else {
     if (guestBanner) guestBanner.style.display = 'none';
@@ -316,105 +318,6 @@ function initRSVPForm() {
   });
 }
 
-// Lời chúc mừng (Guestbook)
-const defaultWishes = [
-  { name: "Hội Bạn Thân", text: "Chúc hai bạn trăm năm hạnh phúc, răng long đầu bạc, sớm sinh quý tử nhé!", time: "Hôm nay" },
-  { name: "Gia đình Bác Ba", text: "Chúc cháu Hùng và cháu Trang mãi mãi yêu thương, hòa thuận và viên mãn!", time: "Hôm qua" },
-  { name: "Đồng nghiệp", text: "Happy Wedding! Chúc cặp đôi đẹp nhất năm một hành trình hôn nhân ngập tràn nụ cười!", time: "2 ngày trước" }
-];
-
-function initWishesSection() {
-  const form = document.getElementById('wish-form');
-  const listContainer = document.getElementById('wishes-list');
-  if (!listContainer) return;
-
-  const renderWishes = (items) => {
-    listContainer.innerHTML = '';
-    items.forEach(w => {
-      const el = document.createElement('div');
-      el.className = 'wish-item';
-      el.innerHTML = `
-        <div class="wish-author">
-          <span>${w.name}</span>
-          <span class="wish-time">${w.time || 'Vừa xong'}</span>
-        </div>
-        <div class="wish-text">${w.text}</div>
-      `;
-      listContainer.appendChild(el);
-    });
-  };
-
-  // Tải dữ liệu dự phòng ban đầu
-  let localWishes = JSON.parse(localStorage.getItem('wedding_wishes') || '[]');
-  const allInitialWishes = [...localWishes, ...defaultWishes];
-  renderWishes(allInitialWishes);
-
-  // Lắng nghe realtime từ Firestore nếu Firebase đã sẵn sàng
-  if (isFirebaseConfigured() && window.firebaseDb) {
-    try {
-      window.firebaseDb.collection("wishes")
-        .orderBy("timestamp", "desc")
-        .limit(50)
-        .onSnapshot((snapshot) => {
-          const firestoreWishes = [];
-          snapshot.forEach(doc => {
-            firestoreWishes.push(doc.data());
-          });
-          if (firestoreWishes.length > 0) {
-            renderWishes(firestoreWishes);
-          }
-        }, (err) => {
-          console.warn("Chưa tạo index hoặc Firestore rules cần cập nhật:", err);
-        });
-    } catch (e) {
-      console.warn("Lỗi listener Firestore:", e);
-    }
-  }
-
-  if (form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('wish-name').value.trim();
-      const text = document.getElementById('wish-message').value.trim();
-
-      if (!name || !text) {
-        alert("Vui lòng nhập tên và lời chúc!");
-        return;
-      }
-
-      const now = new Date();
-      const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')} - ${now.getDate()}/${now.getMonth() + 1}`;
-
-      const newWish = {
-        name,
-        text,
-        time: timeStr,
-        timestamp: now.toISOString()
-      };
-
-      try {
-        if (isFirebaseConfigured() && window.firebaseDb) {
-          await window.firebaseDb.collection("wishes").add(newWish);
-        } else {
-          localWishes.unshift(newWish);
-          localStorage.setItem('wedding_wishes', JSON.stringify(localWishes));
-          renderWishes([newWish, ...allInitialWishes]);
-        }
-        form.reset();
-        alert("Cảm ơn lời chúc yêu thương của bạn!");
-      } catch (err) {
-        console.error("Lỗi gửi lời chúc:", err);
-        // Fallback lưu local nếu có lỗi mạng
-        localWishes.unshift(newWish);
-        localStorage.setItem('wedding_wishes', JSON.stringify(localWishes));
-        renderWishes([newWish, ...allInitialWishes]);
-        form.reset();
-        alert("Cảm ơn lời chúc yêu thương của bạn!");
-      }
-    });
-  }
-}
-
 // Công cụ tạo Link thiệp mời & Mã QR cá nhân hóa
 function initGeneratorTool() {
   const genBtn = document.getElementById('gen-link-btn');
@@ -501,6 +404,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initLightbox();
   initRSVPForm();
   initGiftDialog();
-  initWishesSection();
+  initWishesLive();
   initGeneratorTool();
 });

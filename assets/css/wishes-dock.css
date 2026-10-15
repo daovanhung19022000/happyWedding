@@ -1,0 +1,380 @@
+.rsvp-invite-section .gift-envelope-wrap {
+  display: none;
+}
+
+:root {
+  --wish-dock-h: 52px;
+  --wish-dock-safe: env(safe-area-inset-bottom, 0px);
+  --wish-ticker-h: 33vh;
+  --wish-glass: rgba(118, 112, 106, 0.52);
+  --wish-glass-border: rgba(255, 255, 255, 0.28);
+  --wish-glass-text: rgba(255, 255, 255, 0.96);
+  --wish-glass-muted: rgba(255, 255, 255, 0.78);
+}
+
+body.has-wish-dock {
+  padding-bottom: calc(var(--wish-dock-h) + var(--wish-dock-safe) + 8px);
+}
+
+/* Vùng lời chúc ~1/3 màn hình — cuộn mượt từ dưới lên, căn trái */
+.wish-ticker-layer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: var(--wish-ticker-h);
+  bottom: calc(var(--wish-dock-h) + var(--wish-dock-safe) + 6px);
+  z-index: 45;
+  pointer-events: none;
+  padding-left: 10px;
+  box-sizing: border-box;
+}
+
+.wish-ticker-viewport {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  mask-image: linear-gradient(
+    to top,
+    transparent 0%,
+    #000 12%,
+    #000 88%,
+    transparent 100%
+  );
+}
+
+.wish-ticker-track {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  width: min(92vw, 360px);
+  will-change: transform;
+  animation: wish-ticker-scroll-up var(--wish-scroll-duration, 48s) linear infinite;
+}
+
+.wish-ticker-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  width: 100%;
+}
+
+.wish-ticker-bubble {
+  max-width: 100%;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(230, 145, 158, 0.68);
+  border: 1px solid rgba(255, 220, 228, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #fff;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: clamp(0.68rem, 3vw, 0.78rem);
+  line-height: 1.35;
+  box-shadow: 0 2px 12px rgba(148, 34, 51, 0.12);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+.wish-ticker-bubble__name {
+  font-weight: 700;
+}
+
+@keyframes wish-ticker-scroll-up {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wish-ticker-track {
+    animation: none;
+  }
+}
+
+.wish-dock {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 60;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 6px calc(8px + var(--wish-dock-safe));
+  background: transparent;
+  box-sizing: border-box;
+}
+
+.wish-dock-compose {
+  flex: 1 1 auto;
+  width: calc(100% - 46px);
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px 0 14px;
+  border: 1px solid var(--wish-glass-border);
+  border-radius: 999px;
+  background: var(--wish-glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--wish-glass-text);
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.78rem;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 2px 14px rgba(20, 16, 14, 0.2);
+}
+
+.wish-dock-compose__hint {
+  flex: 1;
+  color: var(--wish-glass-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wish-dock-compose__icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+}
+
+.wish-dock-gift-wrap {
+  position: relative;
+  flex: 0 0 40px;
+  width: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.wish-ticker-toggle {
+  position: absolute;
+  bottom: calc(100% + 5px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  cursor: pointer;
+  margin: 0;
+}
+
+.wish-ticker-toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.wish-ticker-toggle__track {
+  position: relative;
+  width: 20px;
+  height: 38px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(8px);
+  transition: background 0.2s ease, border-color 0.2s ease;
+  box-shadow: 0 1px 6px rgba(20, 16, 14, 0.15);
+}
+
+.wish-ticker-toggle__heart {
+  position: absolute;
+  left: 50%;
+  top: calc(100% - 17px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.42);
+  transition: top 0.22s ease, color 0.22s ease, transform 0.22s ease;
+  line-height: 0;
+}
+
+.wish-ticker-toggle input:checked + .wish-ticker-toggle__track {
+  background: rgba(148, 34, 51, 0.78);
+  border-color: rgba(255, 220, 228, 0.45);
+}
+
+.wish-ticker-toggle input:checked + .wish-ticker-toggle__track .wish-ticker-toggle__heart {
+  top: 3px;
+  color: #fff;
+  transform: translateX(-50%) scale(1.05);
+}
+
+.wish-ticker-toggle input:not(:checked) + .wish-ticker-toggle__track .wish-ticker-toggle__heart {
+  opacity: 0.85;
+}
+
+.wish-ticker-layer--hidden {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.wish-ticker-layer--hidden .wish-ticker-track {
+  animation-play-state: paused;
+}
+
+.wish-dock-round {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--wish-glass-border);
+  border-radius: 50%;
+  background: var(--wish-glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  box-shadow: 0 2px 14px rgba(20, 16, 14, 0.2);
+}
+
+.wish-dock-round img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.wish-compose-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(20, 16, 14, 0.35);
+  backdrop-filter: blur(4px);
+}
+
+.wish-compose-backdrop[hidden],
+.wish-compose-sheet[hidden] {
+  display: none !important;
+}
+
+.wish-compose-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 71;
+  background: rgba(128, 122, 116, 0.82);
+  backdrop-filter: blur(16px);
+  color: #faf8f6;
+  border-radius: 16px 16px 0 0;
+  padding: 16px 16px calc(16px + var(--wish-dock-safe));
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.12);
+  box-sizing: border-box;
+}
+
+.wish-compose-title {
+  margin: 0 0 12px;
+  font-family: var(--font-display, 'Playfair Display', serif);
+  font-size: 1.05rem;
+  color: #f8e8ec;
+}
+
+.wish-compose-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.wish-compose-form label {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.wish-compose-form input,
+.wish-compose-form textarea {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.wish-compose-form input::placeholder,
+.wish-compose-form textarea::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.wish-compose-form textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.wish-compose-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.wish-compose-actions button {
+  flex: 1;
+  border: none;
+  border-radius: 999px;
+  padding: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.wish-compose-cancel {
+  background: rgba(255, 255, 255, 0.14);
+  color: #f0ebe6;
+}
+
+.wish-compose-submit {
+  background: #942233;
+  color: #fff;
+}
+
+.wish-compose-status {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #f5c6cf;
+  min-height: 1.1em;
+}
+
+.wish-compose-status.is-error {
+  color: #ffb4ab;
+}
+
+@media (min-width: 520px) {
+  .wish-ticker-layer {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: min(440px, 100%);
+  }
+
+  .wish-compose-sheet {
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 440px;
+  }
+}
