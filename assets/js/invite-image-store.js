@@ -1,7 +1,14 @@
 import { INVITE_IMAGE_SLOTS, slotById } from './invite-image-slots.js';
-import { sanitizeFileName } from './album-store.js';
 
 const COLLECTION = 'invite_images';
+
+function normalizeInviteUrl(url) {
+  try {
+    return new URL(String(url).trim(), window.location.href).href;
+  } catch {
+    return String(url || '').trim();
+  }
+}
 
 export async function fetchInviteImageOverrides() {
   if (!window.firebaseDb) return {};
@@ -43,23 +50,30 @@ export async function fetchInviteImageDoc(slotId) {
   return doc.exists ? { id: doc.id, ...doc.data() } : null;
 }
 
-export async function saveInviteImageSlot(slotId, file) {
-  if (!window.firebaseStorage || !window.firebaseDb) {
+/** Gán ảnh đã có trong album (static hoặc upload) — không upload file mới. */
+export async function assignInviteImageSlot(slotId, url) {
+  if (!window.firebaseDb) {
     throw new Error('Firebase chưa sẵn sàng');
   }
   const slot = slotById(slotId);
   if (!slot) throw new Error('Vị trí ảnh không hợp lệ');
+  const cleanUrl = normalizeInviteUrl(url);
+  if (!cleanUrl) throw new Error('Chưa chọn ảnh');
 
-  const safe = sanitizeFileName(file.name);
-  const path = `invite_images/${slotId}/${Date.now()}_${safe}`;
-  const ref = window.firebaseStorage.ref().child(path);
-  await ref.put(file, { contentType: file.type });
-  const url = await ref.getDownloadURL();
+  const existing = await fetchInviteImageDoc(slotId);
+  if (existing?.storagePath?.startsWith('invite_images/') && window.firebaseStorage) {
+    try {
+      await window.firebaseStorage.ref().child(existing.storagePath).delete();
+    } catch {
+      /* bỏ qua */
+    }
+  }
 
   await window.firebaseDb.collection(COLLECTION).doc(slotId).set(
     {
-      url,
-      storagePath: path,
+      url: cleanUrl,
+      storagePath: null,
+      source: 'album',
       defaultSrc: slot.defaultSrc,
       label: slot.label,
       updatedAt: new Date().toISOString(),
@@ -67,7 +81,7 @@ export async function saveInviteImageSlot(slotId, file) {
     { merge: true },
   );
 
-  return url;
+  return cleanUrl;
 }
 
 export async function resetInviteImageSlot(slotId) {

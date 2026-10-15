@@ -1,4 +1,4 @@
-import { isFirebaseConfigured } from './firebase-config.js';
+import { isFirebaseConfigured, initFirebaseClient } from './firebase-config.js';
 import { sanitizeFileName } from './album-store.js';
 import {
   isAlbumUploadUnlocked,
@@ -96,6 +96,9 @@ function initAlbumUploadPage() {
   if (!pinForm || !form || !input) return;
 
   const initUpload = () => {
+    if (!window.firebaseStorage) {
+      initFirebaseClient();
+    }
     if (!isFirebaseConfigured()) {
       setStatus(statusEl, 'Chưa cấu hình Firebase — không thể upload.', true);
       submitBtn?.setAttribute('disabled', 'true');

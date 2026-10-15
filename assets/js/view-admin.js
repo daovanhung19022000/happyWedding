@@ -1,8 +1,9 @@
-import { isFirebaseConfigured } from './firebase-config.js';
+import { initFirebaseClient, isFirebaseConfigured } from './firebase-config.js';
+import { loadAllAlbumImageUrls } from './album-store.js';
 import {
   INVITE_IMAGE_SLOTS,
+  assignInviteImageSlot,
   fetchInviteImageDoc,
-  saveInviteImageSlot,
   resetInviteImageSlot,
 } from './invite-image-store.js';
 import {
@@ -11,8 +12,7 @@ import {
   verifyViewAdminPin,
 } from './view-config.js';
 
-const MAX_BYTES = 10 * 1024 * 1024;
-const ACCEPT_TYPES = /^image\//;
+let albumPickerUrls = [];
 
 function setStatus(el, text, isError = false) {
   if (!el) return;
@@ -24,6 +24,75 @@ function setStatus(el, text, isError = false) {
 function resolvePreviewSrc(slot, doc) {
   if (doc?.url) return doc.url;
   return `../${slot.defaultSrc}`;
+}
+
+function ensureAlbumPickerModal() {
+  let modal = document.getElementById('view-album-picker');
+  if (modal) return modal;
+
+  modal = document.createElement('div');
+  modal.id = 'view-album-picker';
+  modal.className = 'view-album-picker';
+  modal.hidden = true;
+  modal.innerHTML = `
+    <div class="view-album-picker__backdrop" data-close="1"></div>
+    <div class="view-album-picker__panel" role="dialog" aria-modal="true" aria-labelledby="view-album-picker-title">
+      <header class="view-album-picker__head">
+        <h2 id="view-album-picker-title" class="view-album-picker__title">Chọn ảnh từ album</h2>
+        <button type="button" class="view-album-picker__close" aria-label="Đóng">&times;</button>
+      </header>
+      <p class="view-album-picker__hint">Ảnh trong thư mục kimono + ảnh đã upload lên album.</p>
+      <div class="view-album-picker__grid" id="view-album-picker-grid"></div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  modal.querySelector('[data-close]')?.addEventListener('click', () => {
+    modal.hidden = true;
+  });
+  modal.querySelector('.view-album-picker__close')?.addEventListener('click', () => {
+    modal.hidden = true;
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.hidden) modal.hidden = true;
+  });
+
+  return modal;
+}
+
+function openAlbumPicker(slot, onPick) {
+  const modal = ensureAlbumPickerModal();
+  const grid = modal.querySelector('#view-album-picker-grid');
+  const title = modal.querySelector('#view-album-picker-title');
+  if (!grid || !title) return;
+
+  title.textContent = `Chọn ảnh — ${slot.label}`;
+  grid.replaceChildren();
+
+  if (!albumPickerUrls.length) {
+    const empty = document.createElement('p');
+    empty.className = 'view-album-picker__empty';
+    empty.textContent = 'Chưa có ảnh album.';
+    grid.appendChild(empty);
+  } else {
+    albumPickerUrls.forEach((url) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'view-album-picker__thumb';
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = '';
+      img.loading = 'lazy';
+      btn.appendChild(img);
+      btn.addEventListener('click', () => {
+        modal.hidden = true;
+        onPick(url);
+      });
+      grid.appendChild(btn);
+    });
+  }
+
+  modal.hidden = false;
 }
 
 function buildSlotCard(slot, doc) {
@@ -43,27 +112,17 @@ function buildSlotCard(slot, doc) {
 
   const meta = document.createElement('p');
   meta.className = 'view-slot-meta';
-  meta.textContent = doc?.url ? 'Đang dùng ảnh tùy chỉnh (Firebase)' : `Mặc định: ${slot.defaultSrc}`;
-
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/jpeg,image/png,image/webp,image/gif';
-  input.hidden = true;
-  input.dataset.slotInput = slot.id;
+  meta.textContent = doc?.url
+    ? 'Đang dùng ảnh chọn từ album'
+    : `Mặc định: ${slot.defaultSrc}`;
 
   const actions = document.createElement('div');
   actions.className = 'view-slot-actions';
 
   const pickBtn = document.createElement('button');
   pickBtn.type = 'button';
-  pickBtn.className = 'album-upload-btn';
-  pickBtn.textContent = 'Chọn ảnh mới';
-
-  const uploadBtn = document.createElement('button');
-  uploadBtn.type = 'button';
-  uploadBtn.className = 'album-upload-btn album-upload-btn--primary';
-  uploadBtn.textContent = 'Thay ảnh';
-  uploadBtn.disabled = true;
+  pickBtn.className = 'album-upload-btn album-upload-btn--primary';
+  pickBtn.textContent = 'Chọn từ album';
 
   const resetBtn = document.createElement('button');
   resetBtn.type = 'button';
@@ -71,60 +130,39 @@ function buildSlotCard(slot, doc) {
   resetBtn.textContent = 'Về ảnh gốc';
   resetBtn.disabled = !doc?.url;
 
-  pickBtn.addEventListener('click', () => input.click());
-  input.addEventListener('change', () => {
-    uploadBtn.disabled = !input.files?.length;
-    if (input.files?.[0]) {
-      preview.src = URL.createObjectURL(input.files[0]);
-    }
-  });
-
-  uploadBtn.addEventListener('click', async () => {
-    const file = input.files?.[0];
-    if (!file) return;
-    if (!ACCEPT_TYPES.test(file.type)) {
-      setStatus(document.getElementById('view-admin-status'), 'Chỉ chấp nhận file ảnh.', true);
-      return;
-    }
-    if (file.size > MAX_BYTES) {
-      setStatus(document.getElementById('view-admin-status'), 'Ảnh tối đa 10MB.', true);
-      return;
-    }
-    uploadBtn.disabled = true;
-    pickBtn.disabled = true;
-    resetBtn.disabled = true;
-    setStatus(document.getElementById('view-admin-status'), `Đang tải: ${slot.label}…`);
-    try {
-      const url = await saveInviteImageSlot(slot.id, file);
-      preview.src = url;
-      meta.textContent = 'Đang dùng ảnh tùy chỉnh (Firebase)';
-      resetBtn.disabled = false;
-      input.value = '';
-      setStatus(document.getElementById('view-admin-status'), `Đã cập nhật ${slot.label}.`);
-    } catch (err) {
-      setStatus(
-        document.getElementById('view-admin-status'),
-        err.message || 'Upload thất bại.',
-        true,
-      );
-      preview.src = resolvePreviewSrc(slot, doc);
-    } finally {
-      uploadBtn.disabled = !input.files?.length;
-      pickBtn.disabled = false;
-    }
+  pickBtn.addEventListener('click', () => {
+    openAlbumPicker(slot, async (url) => {
+      pickBtn.disabled = true;
+      resetBtn.disabled = true;
+      setStatus(document.getElementById('view-admin-status'), `Đang lưu: ${slot.label}…`);
+      try {
+        const saved = await assignInviteImageSlot(slot.id, url);
+        preview.src = saved;
+        meta.textContent = 'Đang dùng ảnh chọn từ album';
+        resetBtn.disabled = false;
+        setStatus(document.getElementById('view-admin-status'), `Đã cập nhật ${slot.label}.`);
+      } catch (err) {
+        setStatus(
+          document.getElementById('view-admin-status'),
+          err.message || 'Lưu thất bại.',
+          true,
+        );
+        preview.src = resolvePreviewSrc(slot, doc);
+      } finally {
+        pickBtn.disabled = false;
+      }
+    });
   });
 
   resetBtn.addEventListener('click', async () => {
     if (!confirm(`Trả ${slot.label} về ảnh gốc trong repo?`)) return;
     resetBtn.disabled = true;
-    uploadBtn.disabled = true;
     pickBtn.disabled = true;
     setStatus(document.getElementById('view-admin-status'), `Đang khôi phục ${slot.label}…`);
     try {
       const defaultSrc = await resetInviteImageSlot(slot.id);
       preview.src = `../${defaultSrc}`;
       meta.textContent = `Mặc định: ${slot.defaultSrc}`;
-      input.value = '';
       resetBtn.disabled = true;
       setStatus(document.getElementById('view-admin-status'), `Đã về ảnh gốc: ${slot.label}.`);
     } catch (err) {
@@ -133,15 +171,14 @@ function buildSlotCard(slot, doc) {
         err.message || 'Khôi phục thất bại.',
         true,
       );
-      resetBtn.disabled = false;
+      resetBtn.disabled = !!doc?.url;
     } finally {
       pickBtn.disabled = false;
-      uploadBtn.disabled = !input.files?.length;
     }
   });
 
-  actions.append(pickBtn, uploadBtn, resetBtn);
-  card.append(preview, title, meta, input, actions);
+  actions.append(pickBtn, resetBtn);
+  card.append(preview, title, meta, actions);
   return card;
 }
 
@@ -201,13 +238,22 @@ function initViewAdminPage() {
       setStatus(statusEl, 'Chưa cấu hình Firebase — không thể quản lý ảnh.', true);
       return;
     }
-    if (!window.firebaseStorage) {
-      setStatus(statusEl, 'Thiếu Firebase Storage SDK.', true);
+    if (!window.firebaseDb) {
+      initFirebaseClient();
+    }
+    if (!window.firebaseDb) {
+      setStatus(statusEl, 'Chưa kết nối Firestore — tải lại trang.', true);
       return;
     }
-    setStatus(statusEl, 'Đang tải danh sách ảnh…');
+
+    setStatus(statusEl, 'Đang tải album…');
+    try {
+      albumPickerUrls = await loadAllAlbumImageUrls('../kimono_image/');
+    } catch {
+      albumPickerUrls = [];
+    }
     await renderSlots(gridEl);
-    setStatus(statusEl, '');
+    setStatus(statusEl, albumPickerUrls.length ? '' : 'Chưa có ảnh album để chọn.');
   };
 
   initPinGate(pinForm, panel, statusEl, onUnlocked);

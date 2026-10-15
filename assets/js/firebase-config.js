@@ -14,10 +14,16 @@ export const isFirebaseConfigured = () => {
   return firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY";
 };
 
-// Tự động khởi tạo Firebase App, Firestore & Analytics
-if (typeof firebase !== 'undefined' && isFirebaseConfigured()) {
+function getFirebaseCompat() {
+  return globalThis.firebase;
+}
+
+/** Gọi lại sau khi đã load script compat (app / firestore / storage). */
+export function initFirebaseClient() {
+  const firebase = getFirebaseCompat();
+  if (!firebase || !isFirebaseConfigured()) return false;
   try {
-    if (!firebase.apps || !firebase.apps.length) {
+    if (!firebase.apps?.length) {
       firebase.initializeApp(firebaseConfig);
     }
     window.firebaseDb = firebase.firestore();
@@ -27,8 +33,11 @@ if (typeof firebase !== 'undefined' && isFirebaseConfigured()) {
     if (firebase.analytics) {
       window.firebaseAnalytics = firebase.analytics();
     }
-    console.log("✅ Firebase Firestore & Analytics đã được kết nối thành công!");
+    return true;
   } catch (err) {
-    console.warn("Lỗi khởi tạo Firebase:", err);
+    console.warn('Lỗi khởi tạo Firebase:', err);
+    return false;
   }
 }
+
+initFirebaseClient();

@@ -232,12 +232,15 @@ function initLightbox() {
   const img = document.getElementById('lightbox-img');
   const closeBtn = document.getElementById('lightbox-close');
 
-  document.querySelectorAll('.gallery-item img').forEach(item => {
-    item.addEventListener('click', () => {
-      img.src = item.src;
+  const gallerySection = document.querySelector('.gallery-canvas-section');
+  if (gallerySection && modal && img) {
+    gallerySection.addEventListener('click', (e) => {
+      const target = e.target;
+      if (!(target instanceof HTMLImageElement) || !target.closest('.gallery-item')) return;
+      img.src = target.currentSrc || target.src;
       modal.classList.add('active');
     });
-  });
+  }
 
   if (closeBtn) {
     closeBtn.addEventListener('click', () => modal.classList.remove('active'));
