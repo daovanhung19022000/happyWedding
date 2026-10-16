@@ -185,6 +185,44 @@
   }
 }
 
+/* Hero SAVE THE DATE — bay vào từng khối sau khi mở phong (không animate cả panel) */
+@keyframes heroOpeningFlyIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 32px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+body.intro-revealing .hero-opening-save,
+body.intro-complete .hero-opening-save {
+  animation: heroOpeningFlyIn 0.82s cubic-bezier(0.22, 1, 0.36, 1) 0.16s backwards;
+}
+
+body.intro-revealing .hero-opening-photo,
+body.intro-complete .hero-opening-photo {
+  animation: heroOpeningFlyIn 0.92s cubic-bezier(0.22, 1, 0.36, 1) 0.26s backwards;
+}
+
+body.intro-revealing .hero-opening-details,
+body.intro-complete .hero-opening-details {
+  animation: heroOpeningFlyIn 0.88s cubic-bezier(0.22, 1, 0.36, 1) 0.36s backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.intro-revealing .hero-opening-save,
+  body.intro-complete .hero-opening-save,
+  body.intro-revealing .hero-opening-photo,
+  body.intro-complete .hero-opening-photo,
+  body.intro-revealing .hero-opening-details,
+  body.intro-complete .hero-opening-details {
+    animation: none;
+  }
+}
+
 @keyframes weddingRevealText {
   from {
     opacity: 0;
@@ -351,6 +389,14 @@ body.wedding-idle-scroll #app-canvas .scroll-reveal {
   animation: none !important;
   transition: none !important;
   will-change: auto;
+}
+
+body.wedding-idle-scroll .hero-opening-save,
+body.wedding-idle-scroll .hero-opening-photo,
+body.wedding-idle-scroll .hero-opening-details {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
 }
 
 body.wedding-idle-scroll .gallery-grid-item img {
