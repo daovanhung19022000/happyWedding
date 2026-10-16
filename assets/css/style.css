@@ -431,10 +431,11 @@ body {
   background: none;
 }
 
-.hero-canvas-section .hero-text-block--opening {
-  padding: clamp(56px, 14vw, 82px) 26px 0;
-  margin-top: clamp(12px, 3vw, 20px);
-  margin-bottom: -4px;
+.hero-text-block--after-lovestory {
+  text-align: center;
+  padding: clamp(22px, 5.5vw, 34px) 26px 6px;
+  margin-top: 0;
+  margin-bottom: -2px;
 }
 
 .couple-polaroid-section .hero-text-block--after-polaroid {
@@ -708,7 +709,8 @@ body {
 /* LOVE STORY — TIMELINE */
 .love-story-section {
   position: relative;
-  padding: 4px 14px 28px;
+  margin-top: 10px;
+  padding: 20px 8px 28px;
   background: linear-gradient(180deg, var(--bg-canvas) 0%, var(--bg-cream-soft) 42%, var(--bg-canvas) 100%);
   overflow: visible;
 }
@@ -718,18 +720,11 @@ body {
 }
 
 .love-story-head {
+  position: relative;
+  z-index: 3;
   text-align: center;
-  padding: 0 6px 22px;
-}
-
-.love-story-eyebrow {
-  font-family: var(--font-condensed);
-  font-size: 0.78rem;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: var(--gold-dark);
-  margin: 0 0 6px;
-  font-weight: 600;
+  padding: 0 6px 16px;
+  margin: 0;
 }
 
 .love-story-title {
@@ -738,8 +733,18 @@ body {
   font-weight: 400;
   color: #6e2233;
   line-height: 1.1;
-  margin: 0 0 12px;
+  margin: clamp(4px, 1.2vw, 8px) 0 8px;
   letter-spacing: 0.02em;
+}
+
+.love-story-eyebrow {
+  font-family: var(--font-condensed);
+  font-size: 0.78rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+  margin: 0 0 10px;
+  font-weight: 600;
 }
 
 .love-story-lead {
@@ -756,12 +761,14 @@ body {
 .love-story-timeline {
   list-style: none;
   margin: 0;
-  padding: 0 0 clamp(16px, 4vw, 28px);
+  padding: 0 0 20px;
   display: flex;
   flex-direction: column;
   gap: 0;
   position: relative;
-  --love-story-overlap: clamp(56px, 16vw, 96px);
+  z-index: 1;
+  /* Chồng vừa — mốc sau hiện khi mốc trước đi ~1/3 */
+  --love-story-overlap: clamp(88px, 30vw, 152px);
 }
 
 .love-story-timeline::before {
@@ -786,8 +793,8 @@ body {
 
 .love-story-milestone {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 22px minmax(0, 1fr);
-  column-gap: clamp(6px, 2vw, 12px);
+  grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr);
+  column-gap: 4px;
   align-items: start;
   position: relative;
   margin-bottom: 0;
@@ -797,20 +804,12 @@ body {
   margin-top: calc(-1 * var(--love-story-overlap));
 }
 
-.love-story-milestone:nth-child(1) {
-  z-index: 1;
-}
-
-.love-story-milestone:nth-child(2) {
+.love-story-milestone:nth-child(odd) {
   z-index: 2;
 }
 
-.love-story-milestone:nth-child(3) {
-  z-index: 3;
-}
-
-.love-story-milestone:nth-child(4) {
-  z-index: 4;
+.love-story-milestone:nth-child(even) {
+  z-index: 1;
 }
 
 .love-story-rail {
@@ -826,11 +825,15 @@ body {
 .love-story-milestone:nth-child(odd) .love-story-card {
   grid-column: 1;
   grid-row: 1;
+  position: relative;
+  z-index: 2;
 }
 
 .love-story-milestone:nth-child(even) .love-story-card {
   grid-column: 3;
   grid-row: 1;
+  position: relative;
+  z-index: 1;
 }
 
 .love-story-dot {
@@ -855,18 +858,11 @@ body {
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
-.love-story-card {
+.love-story-card,
+.love-story-card--finale {
   margin: 0;
   padding: 0;
-  background: none;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
   min-width: 0;
-}
-
-.love-story-card--finale {
-  box-shadow: none;
 }
 
 .love-story-meta {
@@ -913,7 +909,7 @@ body {
   margin: 0 0 10px;
   border-radius: 10px;
   overflow: hidden;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 3 / 4;
   background: var(--bg-cream-soft);
   box-shadow: 0 4px 14px rgba(110, 34, 51, 0.08);
 }
@@ -922,8 +918,12 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 22%;
+  object-position: center 38%;
   display: block;
+}
+
+.love-story-milestone:first-child .love-story-photo img {
+  object-position: center 42%;
 }
 
 .love-story-chapter {
