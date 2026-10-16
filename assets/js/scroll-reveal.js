@@ -12,10 +12,11 @@
   const REVEAL_MEDIA =
     '.hero-signature-col, .polaroid-photo-box, .polaroid-card-body, ' +
     '.invite-triptych__item, .gallery-grid-item, .formal-invite-schedule-illus, ' +
-    '.gift-envelope-wrap';
+    '.gift-envelope-wrap, .love-story-card, .love-story-photo';
 
   const REVEAL_TEXT =
     'h1, h2, h3, h4, h5, h6, p, li, .hero-eyebrow, .hero-journey-tagline, .hero-date-ribbon, ' +
+    '.love-story-title, .love-story-lead, ' +
     '.rsvp-form-heading, .form-group-item, .rsvp-submit-btn, a.formal-invite-directions, ' +
     '.formal-invite-schedule-text, .album-section-title, .footer-couple-title, ' +
     '.footer-script-thankyou, .footer-closing-text, .wedding-calendar-countdown, ' +
@@ -67,6 +68,14 @@
       el.classList.contains('couple-polaroid-matrix__photo--groom')
     ) {
       return 'merge-right';
+    }
+    if (el.classList.contains('love-story-card')) {
+      const milestone = el.closest('.love-story-milestone');
+      if (milestone && milestone.parentElement) {
+        const siblings = milestone.parentElement.querySelectorAll('.love-story-milestone');
+        const idx = Array.prototype.indexOf.call(siblings, milestone);
+        return idx % 2 === 0 ? 'merge-left' : 'merge-right';
+      }
     }
     return 'text';
   }

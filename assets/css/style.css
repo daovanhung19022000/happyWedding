@@ -705,6 +705,245 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
+/* LOVE STORY — TIMELINE */
+.love-story-section {
+  position: relative;
+  padding: 4px 14px 28px;
+  background: linear-gradient(180deg, var(--bg-canvas) 0%, var(--bg-cream-soft) 42%, var(--bg-canvas) 100%);
+  overflow: visible;
+}
+
+.love-story-inner {
+  max-width: 100%;
+}
+
+.love-story-head {
+  text-align: center;
+  padding: 0 6px 22px;
+}
+
+.love-story-eyebrow {
+  font-family: var(--font-condensed);
+  font-size: 0.78rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.love-story-title {
+  font-family: var(--font-couple);
+  font-size: clamp(2.15rem, 8.6vw, 2.75rem);
+  font-weight: 400;
+  color: #6e2233;
+  line-height: 1.1;
+  margin: 0 0 12px;
+  letter-spacing: 0.02em;
+}
+
+.love-story-lead {
+  font-family: var(--font-serif);
+  font-size: clamp(0.92rem, 3.6vw, 1.02rem);
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  margin: 0 auto;
+  max-width: 340px;
+  padding: 0 4px;
+}
+
+.love-story-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 clamp(16px, 4vw, 28px);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  --love-story-overlap: clamp(56px, 16vw, 96px);
+}
+
+.love-story-timeline::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  bottom: 12px;
+  width: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    180deg,
+    rgba(154, 99, 79, 0.12) 0%,
+    rgba(110, 34, 51, 0.5) 22%,
+    rgba(110, 34, 51, 0.45) 78%,
+    rgba(197, 107, 133, 0.35) 100%
+  );
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.love-story-milestone {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 22px minmax(0, 1fr);
+  column-gap: clamp(6px, 2vw, 12px);
+  align-items: start;
+  position: relative;
+  margin-bottom: 0;
+}
+
+.love-story-milestone + .love-story-milestone {
+  margin-top: calc(-1 * var(--love-story-overlap));
+}
+
+.love-story-milestone:nth-child(1) {
+  z-index: 1;
+}
+
+.love-story-milestone:nth-child(2) {
+  z-index: 2;
+}
+
+.love-story-milestone:nth-child(3) {
+  z-index: 3;
+}
+
+.love-story-milestone:nth-child(4) {
+  z-index: 4;
+}
+
+.love-story-rail {
+  position: relative;
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  justify-content: center;
+  padding-top: 0.35em;
+  z-index: 2;
+}
+
+.love-story-milestone:nth-child(odd) .love-story-card {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.love-story-milestone:nth-child(even) .love-story-card {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.love-story-dot {
+  position: relative;
+  z-index: 1;
+  width: 12px;
+  height: 12px;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #9a634f;
+  box-shadow: 0 0 0 3px rgba(154, 99, 79, 0.18);
+}
+
+.love-story-dot--heart {
+  width: 14px;
+  height: 14px;
+  border: none;
+  background: #c56b85;
+  box-shadow: 0 0 0 4px rgba(197, 107, 133, 0.22);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.love-story-card {
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  min-width: 0;
+}
+
+.love-story-card--finale {
+  box-shadow: none;
+}
+
+.love-story-meta {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+  min-width: 0;
+}
+
+.love-story-milestone:nth-child(even) .love-story-meta {
+  justify-content: flex-end;
+}
+
+.love-story-date {
+  font-family: var(--font-condensed);
+  font-size: clamp(0.68rem, 2.8vw, 0.78rem);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6e2233;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.love-story-moment {
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9a634f;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(154, 99, 79, 0.1);
+  border: 1px solid rgba(154, 99, 79, 0.2);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.love-story-photo {
+  margin: 0 0 10px;
+  border-radius: 10px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: var(--bg-cream-soft);
+  box-shadow: 0 4px 14px rgba(110, 34, 51, 0.08);
+}
+
+.love-story-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 22%;
+  display: block;
+}
+
+.love-story-chapter {
+  font-family: var(--font-title);
+  font-size: clamp(0.92rem, 3.6vw, 1.08rem);
+  font-weight: 600;
+  color: var(--primary);
+  letter-spacing: 0.04em;
+  margin: 0 0 6px;
+  line-height: 1.35;
+}
+
+.love-story-text {
+  font-family: var(--font-serif);
+  font-size: clamp(0.78rem, 3.1vw, 0.9rem);
+  line-height: 1.55;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
 /* SECTION POLAROID CHÚ RỂ & CÔ DÂU (CHUẨN FORM MẪU 21) */
 .couple-polaroid-section {
   padding: 6px 12px 24px;
