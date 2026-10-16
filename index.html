@@ -102,62 +102,56 @@
       <span>- Trân trọng kính mời bạn tới chung vui!</span>
     </div>
 
-    <!-- TOP BAR (SAVE THE DATE) -->
-    <header class="canvas-top-bar blossom-zone-section">
-      <div
-        class="blossom-pulse-layer blossom-pulse-layer--section blossom-pulse-layer--hearts"
-        data-blossom-zone="topbar"
-        data-blossom-kind="heart"
-        aria-hidden="true"
-      ></div>
-      <div class="save-the-date-tag">
-        SAVE THE DATE <span class="save-the-date-dot"></span> <span id="save-the-date-short">15.11.2026</span>
-      </div>
-      <div style="font-size: 0.75rem; letter-spacing: 1px; color: var(--gold-dark); text-transform: uppercase;">
-        WEDDING INVITATION
-      </div>
-    </header>
-
-    <!-- HERO SECTION (KHUNG VÒM CỔ ĐIỂN THEO PHONG CÁCH MẪU 21) -->
+    <!-- HERO MỞ ĐẦU — SAVE THE DATE + ẢNH VÒM + THƯ MỜI (THEO MẪU) -->
     <section class="hero-canvas-section blossom-zone-section">
       <div class="blossom-pulse-layer blossom-pulse-layer--section" data-blossom-zone="hero" aria-hidden="true"></div>
-      <div class="hero-arch-wrap">
-        <div class="hero-arch-container">
-          <img src="kimono_image/THA_3400.JPG" alt="Ảnh cưới Đào Văn Hùng & Hoàng Thị Thu Trang" class="hero-arch-img" data-invite-slot="hero-arch">
-          <div class="hero-arch-overlay">
-            <p id="hero-date-on-photo" class="hero-overlay-date">15 . 11 . 2026</p>
-            <p class="hero-overlay-message">Chúng ta đã cùng nhau đi qua nhiều thăng trầm để nhận ra rằng được ở bên nhau là điều quý giá nhất. Hôm nay, trước sự chứng kiến của mọi người, từ khoảnh khắc này chúng ta nhẹ nhàng gọi nhau bằng hai tiếng Vợ - Chồng</p>
-          </div>
-        </div>
-        <div class="hero-hearts-orbit" aria-hidden="true">
-          <div class="hero-hearts-orbit__compose">
-            <div class="hero-hearts-orbit__ring">
-              <span class="hero-hearts-orbit__slot" style="--i: 0"></span>
-              <span class="hero-hearts-orbit__slot" style="--i: 1"></span>
-              <span class="hero-hearts-orbit__slot" style="--i: 2"></span>
-              <span class="hero-hearts-orbit__slot" style="--i: 3"></span>
+      <div class="hero-opening-shell">
+        <div class="hero-opening-panel">
+          <p class="hero-opening-save">SAVE THE DATE</p>
+          <div class="hero-opening-layout">
+            <div class="hero-opening-photo">
+              <svg class="hero-opening-flower" viewBox="0 0 48 64" aria-hidden="true">
+                <path d="M24 8c-6 10-14 18-14 28 0 8 6 14 14 14s14-6 14-14c0-10-8-18-14-28z" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="1.2"/>
+                <path d="M24 50v12" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
+              </svg>
+              <span class="hero-opening-heart hero-opening-heart--a" aria-hidden="true"></span>
+              <span class="hero-opening-heart hero-opening-heart--b" aria-hidden="true"></span>
+              <div class="hero-arch-wrap">
+                <svg class="hero-arch-curve-label" viewBox="0 0 200 72" aria-hidden="true">
+                  <defs>
+                    <path id="hero-love-arc" d="M 4 58 Q 52 6 128 8 Q 176 12 196 52" fill="none" />
+                  </defs>
+                  <text fill="rgba(255,255,255,0.94)" font-family="Cormorant Garamond, serif" font-size="17" letter-spacing="0.24em">
+                    <textPath href="#hero-love-arc" xlink:href="#hero-love-arc" startOffset="2%">I LOVE YOU</textPath>
+                  </text>
+                </svg>
+                <div class="hero-arch-container">
+                  <img src="kimono_image/THA_3400.JPG" alt="Ảnh cưới Đào Văn Hùng & Hoàng Thị Thu Trang" class="hero-arch-img" data-invite-slot="hero-arch">
+                </div>
+              </div>
+            </div>
+            <div class="hero-opening-details">
+              <h2 class="hero-opening-details-title">THƯ MỜI TIỆC CƯỚI</h2>
+              <hr class="hero-opening-rule" />
+              <p class="hero-opening-weekday" id="hero-opening-weekday">Chủ nhật</p>
+              <p class="hero-opening-date-compact" id="hero-opening-date-short">15.11.2026</p>
+              <hr class="hero-opening-rule" />
+              <p class="hero-opening-ceremony">Lễ Thành Hôn</p>
+              <p class="hero-opening-couple">
+                Văn Hùng
+                <span class="hero-opening-couple-heart" aria-hidden="true">♥</span>
+                Thu Trang
+              </p>
+              <p class="visually-hidden" id="hero-date-on-photo">15 . 11 . 2026</p>
+              <p class="visually-hidden" id="save-the-date-short">15.11.2026</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="hero-text-block">
-        <div class="hero-eyebrow">HAPPY WEDDING</div>
+      <div class="hero-text-block hero-text-block--opening">
+        <div class="hero-eyebrow">Happy Wedding</div>
         <h1 class="hero-couple-heading">Đào Văn Hùng &amp; Hoàng Thị Thu Trang</h1>
-        <div class="hero-signatures" aria-label="Chữ ký cô dâu và chú rể">
-          <div class="hero-signature-col">
-            <img src="chu_ki/Hung.png" alt="" class="hero-signature-img" width="120" height="48" loading="lazy">
-            <p class="hero-signature-name">Đào Văn Hùng</p>
-          </div>
-          <div class="hero-signature-col">
-            <img src="chu_ki/trang.png" alt="" class="hero-signature-img" width="120" height="48" loading="lazy">
-            <p class="hero-signature-name">Hoàng Thị Thu Trang</p>
-          </div>
-        </div>
-        <p class="hero-journey-tagline">
-          <span class="hero-journey-tagline__lead">Một hành trình mới của chúng ta bắt đầu từ</span><br>
-          hôm nay
-        </p>
         <div id="hero-date-badge" class="hero-date-ribbon" aria-hidden="true">
           15 . 11 . 2026
         </div>
@@ -211,6 +205,23 @@
           <p class="polaroid-display-name">Đào Văn Hùng</p>
         </div>
       </div>
+
+      <div class="hero-text-block hero-text-block--after-polaroid">
+        <div class="hero-signatures" aria-label="Chữ ký cô dâu và chú rể">
+          <div class="hero-signature-col">
+            <img src="chu_ki/Hung.png" alt="" class="hero-signature-img" width="120" height="48" loading="lazy">
+            <p class="hero-signature-name">Đào Văn Hùng</p>
+          </div>
+          <div class="hero-signature-col">
+            <img src="chu_ki/trang.png" alt="" class="hero-signature-img" width="120" height="48" loading="lazy">
+            <p class="hero-signature-name">Hoàng Thị Thu Trang</p>
+          </div>
+        </div>
+        <p class="hero-journey-tagline">
+          <span class="hero-journey-tagline__lead">Một hành trình mới của chúng ta bắt đầu từ</span><br>
+          hôm nay
+        </p>
+      </div>
     </section>
 
     <!-- SECTION THIỆP MỜI (FORMAL INVITE) -->
@@ -257,39 +268,23 @@
             <p id="invite-lunar-paren" class="invite-grid-lunar">(Tức ngày 07 tháng 10 năm Bính Ngọ)</p>
           </div>
 
-          <div class="formal-invite-schedule">
-            <div class="formal-invite-schedule-pair">
-              <figure class="formal-invite-schedule-illus formal-invite-schedule-illus--gate">
-                <img
-                  src="assets/images/wedding-gate.png"
-                  alt=""
-                  width="96"
-                  height="118"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </figure>
-              <p class="formal-invite-schedule-text">
-                <span id="invite-schedule-welcome">10h30</span>
-                <span class="formal-invite-schedule-label">Đón khách</span>
-              </p>
+          <div class="formal-invite-schedule-wrap">
+            <hr class="formal-invite-schedule-rule" aria-hidden="true" />
+            <div class="formal-invite-schedule">
+              <div class="formal-invite-schedule-pair">
+                <p class="formal-invite-schedule-text">
+                  <span id="invite-schedule-welcome">10h30</span>
+                  <span class="formal-invite-schedule-label">Đón khách</span>
+                </p>
+              </div>
+              <div class="formal-invite-schedule-pair">
+                <p class="formal-invite-schedule-text">
+                  <span id="invite-schedule-party">11h00</span>
+                  <span class="formal-invite-schedule-label">Khai tiệc</span>
+                </p>
+              </div>
             </div>
-            <div class="formal-invite-schedule-pair">
-              <figure class="formal-invite-schedule-illus formal-invite-schedule-illus--plate">
-                <img
-                  src="assets/images/feast-plate.jpg"
-                  alt=""
-                  width="88"
-                  height="88"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </figure>
-              <p class="formal-invite-schedule-text">
-                <span id="invite-schedule-party">11h00</span>
-                <span class="formal-invite-schedule-label">Khai tiệc</span>
-              </p>
-            </div>
+            <hr class="formal-invite-schedule-rule" aria-hidden="true" />
           </div>
 
           <div class="formal-invite-venue">

@@ -71,6 +71,8 @@ export function updateModeUI(modeKey) {
   const heroDateBadge = document.getElementById('hero-date-badge');
   const heroDateOnPhoto = document.getElementById('hero-date-on-photo');
   const saveTheDateShort = document.getElementById('save-the-date-short');
+  const heroOpeningWeekday = document.getElementById('hero-opening-weekday');
+  const heroOpeningDateShort = document.getElementById('hero-opening-date-short');
   const inviteWeekday = document.getElementById('invite-weekday');
   const inviteSideTime = document.getElementById('invite-side-time');
   const inviteDayNum = document.getElementById('invite-day-num');
@@ -96,15 +98,8 @@ export function updateModeUI(modeKey) {
   if (heroDateBadge) heroDateBadge.textContent = dateOnHero;
   if (heroDateOnPhoto) heroDateOnPhoto.textContent = dateOnHero;
   if (saveTheDateShort) saveTheDateShort.textContent = modeData.saveTheDateShort;
-  if (inviteWeekday) inviteWeekday.textContent = modeData.inviteWeekday;
-  if (inviteSideTime) inviteSideTime.textContent = formatInviteHour(modeData.welcomeTime);
-  if (inviteDayNum) inviteDayNum.textContent = modeData.inviteDay;
-  if (inviteMonthLabel) inviteMonthLabel.textContent = modeData.inviteMonthLabel;
-  if (inviteYear) inviteYear.textContent = `Năm ${modeData.inviteYear}`;
-  if (inviteLunarParen) inviteLunarParen.textContent = `(${modeData.lunarDate})`;
-  if (inviteScheduleWelcome) inviteScheduleWelcome.textContent = formatInviteHour(modeData.welcomeTime);
-  if (inviteScheduleParty) inviteScheduleParty.textContent = formatInviteHour(modeData.partyTime);
-  if (inviteVenueTitle) inviteVenueTitle.textContent = modeData.inviteVenueTitle;
+  if (heroOpeningWeekday) heroOpeningWeekday.textContent = modeData.inviteWeekday || '';
+  if (heroOpeningDateShort) heroOpeningDateShort.textContent = modeData.saveTheDateShort || '';
   if (inviteAddress) inviteAddress.textContent = modeData.address;
   if (inviteMapLink) inviteMapLink.href = modeData.mapLink;
 

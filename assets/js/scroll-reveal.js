@@ -10,7 +10,7 @@
   let openingDone = false;
 
   const REVEAL_MEDIA =
-    '.hero-arch-wrap, .hero-signature-col, .polaroid-photo-box, .polaroid-card-body, ' +
+    '.hero-signature-col, .polaroid-photo-box, .polaroid-card-body, ' +
     '.invite-triptych__item, .gallery-grid-item, .formal-invite-schedule-illus, ' +
     '.gift-envelope-wrap';
 
@@ -87,9 +87,13 @@
       return list;
     }
 
-    section.querySelectorAll(REVEAL_MEDIA).forEach(push);
+    section.querySelectorAll(REVEAL_MEDIA).forEach((el) => {
+      if (el.closest('.hero-opening-panel')) return;
+      push(el);
+    });
     section.querySelectorAll(REVEAL_TEXT).forEach((el) => {
       if (shouldSkip(el)) return;
+      if (el.closest('.hero-opening-panel')) return;
       if (insideMedia(el)) return;
       if (el.closest('.invite-triptych__item, .gallery-grid-item, .formal-invite-schedule-illus')) return;
       if (el.closest('.polaroid-card-body') && !el.classList.contains('polaroid-card-body')) return;
@@ -98,6 +102,7 @@
     });
     section.querySelectorAll('img').forEach((img) => {
       if (shouldSkip(img)) return;
+      if (img.closest('.hero-opening-panel')) return;
       if (img.closest(REVEAL_MEDIA)) return;
       if (img.closest('.gift-envelope-icon')) return;
       push(img);
@@ -111,12 +116,19 @@
     el.style.setProperty('--reveal-delay', delay + 's');
   }
 
+  function isHeroOpeningBlock(el) {
+    return (
+      el.classList.contains('hero-opening-panel') ||
+      !!el.closest('.hero-opening-panel')
+    );
+  }
+
   function applyClasses(section) {
     collectSection(section).forEach((el, i) => {
       if (el.classList.contains('scroll-reveal')) return;
       const variant = el.classList.contains('album-section-head') ? 'text' : variantFor(el);
       el.classList.add('scroll-reveal', 'scroll-reveal--' + variant);
-      if (section.classList.contains('gallery-canvas-section')) {
+      if (section.classList.contains('gallery-canvas-section') || isHeroOpeningBlock(el)) {
         el.classList.add('scroll-reveal--persist');
       }
       const step = section.classList.contains('gallery-canvas-section') ? 0.1 : 0.06;
@@ -131,11 +143,28 @@
   }
 
   function stripTopBarReveal() {
-    const bar = document.querySelector('header.canvas-top-bar');
-    if (!bar) return;
-    bar.querySelectorAll('.scroll-reveal').forEach((el) => {
-      el.classList.remove('scroll-reveal', 'scroll-reveal--text', 'scroll-reveal--zoom', 'is-visible', 'is-animating');
+    const panel = document.querySelector('.hero-opening-panel');
+    if (!panel) return;
+    panel.querySelectorAll('.scroll-reveal').forEach((el) => {
+      el.classList.remove(
+        'scroll-reveal',
+        'scroll-reveal--text',
+        'scroll-reveal--zoom',
+        'scroll-reveal--gallery',
+        'is-visible',
+        'is-animating',
+      );
       el.style.removeProperty('--reveal-delay');
+    });
+  }
+
+  function lockHeroOpeningVisible() {
+    const panel = document.querySelector('.hero-opening-panel');
+    if (!panel) return;
+    panel.querySelectorAll('.hero-arch-wrap, .hero-arch-container, .hero-arch-img').forEach((el) => {
+      el.classList.remove('scroll-reveal', 'scroll-reveal--zoom', 'is-animating');
+      el.style.opacity = '';
+      el.style.visibility = '';
     });
   }
 
@@ -194,7 +223,9 @@
   }
 
   function hideEl(el) {
-    if (el.classList.contains('scroll-reveal--persist') || isGalleryReveal(el)) return;
+    if (el.classList.contains('scroll-reveal--persist') || isGalleryReveal(el) || isHeroOpeningBlock(el)) {
+      return;
+    }
     el.classList.remove('is-visible', 'is-animating');
   }
 
@@ -317,9 +348,11 @@
 
   function boot() {
     markAll();
+    lockHeroOpeningVisible();
     playOpening();
     observeAll();
     setupGalleryLazyReveal();
+    lockHeroOpeningVisible();
   }
 
   function wireEvents() {

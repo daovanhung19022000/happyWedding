@@ -185,7 +185,7 @@
   }
 }
 
-body.intro-complete .canvas-top-bar {
+body.intro-complete .hero-opening-panel {
   animation: weddingTopBarIn 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
 }
 
@@ -322,6 +322,21 @@ body.wedding-idle-scroll #app-canvas .scroll-reveal {
 body.wedding-idle-scroll .gallery-grid-item img {
   transform: none !important;
   transition: none !important;
+}
+
+/* Ảnh vòm mở đầu — luôn hiện, không gắn scroll-reveal (tránh mất sau khi animation xong) */
+.hero-opening-panel .hero-arch-wrap,
+.hero-opening-panel .hero-arch-container,
+.hero-opening-panel .hero-arch-img,
+.hero-opening-panel .hero-arch-curve-label {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.hero-opening-panel .hero-arch-wrap.scroll-reveal,
+.hero-opening-panel .hero-arch-wrap.scroll-reveal.is-visible {
+  animation: none !important;
+  transform: none !important;
 }
 
 /* Shimmer gold text */
