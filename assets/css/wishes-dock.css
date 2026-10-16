@@ -27,32 +27,37 @@ body.has-wish-dock {
   pointer-events: none;
   padding-left: 10px;
   box-sizing: border-box;
+  opacity: 1;
+  visibility: visible;
 }
 
 .wish-ticker-viewport {
+  position: relative;
   height: 100%;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: flex-start;
   mask-image: linear-gradient(
     to top,
     transparent 0%,
-    #000 12%,
-    #000 88%,
+    #000 10%,
+    #000 90%,
     transparent 100%
   );
 }
 
 .wish-ticker-track {
+  position: absolute;
+  left: 0;
+  bottom: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 7px;
+  gap: 0;
   width: min(92vw, 360px);
+  flex-shrink: 0;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   will-change: transform;
-  animation: wish-ticker-scroll-up var(--wish-scroll-duration, 48s) linear infinite;
 }
 
 .wish-ticker-group {
@@ -61,16 +66,16 @@ body.has-wish-dock {
   align-items: flex-start;
   gap: 7px;
   width: 100%;
+  flex-shrink: 0;
+  padding-bottom: 0;
 }
 
 .wish-ticker-bubble {
   max-width: 100%;
   padding: 8px 14px;
   border-radius: 10px;
-  background: rgba(230, 145, 158, 0.68);
+  background: rgba(230, 145, 158, 0.88);
   border: 1px solid rgba(255, 220, 228, 0.45);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   color: #fff;
   font-family: var(--font-body, 'Montserrat', sans-serif);
   font-size: clamp(0.68rem, 3vw, 0.78rem);
@@ -86,18 +91,9 @@ body.has-wish-dock {
   font-weight: 700;
 }
 
-@keyframes wish-ticker-scroll-up {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(-50%);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .wish-ticker-track {
-    animation: none;
+    transform: none !important;
   }
 }
 
@@ -230,9 +226,6 @@ body.has-wish-dock {
   transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
-.wish-ticker-layer--hidden .wish-ticker-track {
-  animation-play-state: paused;
-}
 
 .wish-dock-round {
   flex: 0 0 40px;
