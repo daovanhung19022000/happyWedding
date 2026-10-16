@@ -1075,13 +1075,14 @@ img.polaroid-role-sticker--groom {
 }
 
 .formal-invite-guest {
-  font-family: var(--font-serif);
-  font-size: clamp(1.12rem, 4.4vw, 1.32rem);
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #7a6560;
+  font-family: var(--font-couple);
+  font-size: clamp(2rem, 8vw, 2.45rem);
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--invite-ink);
+  line-height: 1.1;
   margin: 0 0 12px;
   -webkit-font-smoothing: antialiased;
 }

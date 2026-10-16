@@ -43,10 +43,10 @@ function handleQueryParams() {
     if (rsvpNameInput) rsvpNameInput.value = fullGreeting;
     if (wishNameInput) wishNameInput.value = fullGreeting;
     setWishGuestName(fullGreeting);
-    if (inviteGuestTitle) inviteGuestTitle.textContent = fullGreeting.toUpperCase();
+    if (inviteGuestTitle) inviteGuestTitle.textContent = fullGreeting;
   } else {
     if (guestBanner) guestBanner.style.display = 'none';
-    if (inviteGuestTitle) inviteGuestTitle.textContent = 'QUÝ KHÁCH';
+    if (inviteGuestTitle) inviteGuestTitle.textContent = 'Quý khách';
   }
 
   updateModeUI(currentMode);
