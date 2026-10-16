@@ -310,6 +310,20 @@ body.intro-complete .canvas-top-bar {
   }
 }
 
+/* Cuộn tự động — tắt reveal/transition để không giật khung hình */
+body.wedding-idle-scroll #app-canvas .scroll-reveal {
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
+  transition: none !important;
+  will-change: auto;
+}
+
+body.wedding-idle-scroll .gallery-grid-item img {
+  transform: none !important;
+  transition: none !important;
+}
+
 /* Shimmer gold text */
 @keyframes goldShimmer {
   0% {

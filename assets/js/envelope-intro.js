@@ -130,7 +130,10 @@ function startIdleAutoScroll() {
 
   let stopped = false;
   let rafId = null;
-  const speed = 1.45;
+  let lastFrameTs = 0;
+  let scrollPos = 0;
+  /** px/giây — cuộn tự động khi khách không tương tác */
+  const PX_PER_SEC = 168;
 
   const removeListeners = () => {
     window.removeEventListener('wheel', onUserIntent);
@@ -144,6 +147,9 @@ function startIdleAutoScroll() {
     if (stopped) return;
     stopped = true;
     if (rafId) cancelAnimationFrame(rafId);
+    window.__weddingIdleScrollActive = false;
+    document.documentElement.classList.remove('wedding-auto-scroll');
+    document.body.classList.remove('wedding-idle-scroll');
     removeListeners();
   };
 
@@ -151,22 +157,36 @@ function startIdleAutoScroll() {
     stop();
   }
 
-  const tick = () => {
+  const tick = (ts) => {
     if (stopped) return;
+    if (!lastFrameTs) lastFrameTs = ts;
+    const deltaMs = Math.min(48, Math.max(8, ts - lastFrameTs));
+    lastFrameTs = ts;
+
     const maxScroll = Math.max(
       0,
       document.documentElement.scrollHeight - window.innerHeight
     );
-    if (window.scrollY >= maxScroll - 1) {
+    if (scrollPos >= maxScroll - 0.5) {
+      window.scrollTo(0, maxScroll);
       stop();
       return;
     }
-    window.scrollBy(0, speed);
+
+    const step = (PX_PER_SEC * deltaMs) / 1000;
+    scrollPos = Math.min(maxScroll, scrollPos + step);
+    window.scrollTo(0, scrollPos);
     rafId = requestAnimationFrame(tick);
   };
 
   const begin = () => {
     if (stopped) return;
+    window.__weddingIdleScrollActive = true;
+    document.documentElement.classList.add('wedding-auto-scroll');
+    document.body.classList.add('wedding-idle-scroll');
+    window.WeddingScrollReveal?.freezeForAutoScroll?.();
+    scrollPos = window.scrollY;
+    lastFrameTs = 0;
     rafId = requestAnimationFrame(tick);
   };
 

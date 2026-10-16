@@ -204,6 +204,7 @@
     observer = new IntersectionObserver(
       (entries) => {
         if (reducedMotion()) return;
+        if (window.__weddingIdleScrollActive) return;
         entries.forEach((entry) => {
           const el = entry.target;
           if (entry.isIntersecting) {
@@ -212,7 +213,11 @@
             } else if (!el.classList.contains('is-visible')) {
               revealEl(el);
             }
-          } else if (!el.classList.contains('scroll-reveal--persist') && isFullyOutOfView(entry.boundingClientRect)) {
+          } else if (
+            !window.__weddingIdleScrollActive &&
+            !el.classList.contains('scroll-reveal--persist') &&
+            isFullyOutOfView(entry.boundingClientRect)
+          ) {
             hideEl(el);
           }
         });
@@ -299,6 +304,17 @@
     });
   }
 
+  function freezeForAutoScroll() {
+    const canvas = document.getElementById('app-canvas');
+    if (!canvas) return;
+    canvas.querySelectorAll('.scroll-reveal').forEach((el) => {
+      el.classList.add('is-visible', 'scroll-reveal--persist');
+      el.classList.remove('is-animating');
+      el.style.removeProperty('--reveal-delay');
+      if (isGalleryReveal(el)) el.dataset.revealDone = '1';
+    });
+  }
+
   function boot() {
     markAll();
     playOpening();
@@ -329,7 +345,7 @@
 
   }
 
-  window.WeddingScrollReveal = { boot, markAll, refresh: observeAll };
+  window.WeddingScrollReveal = { boot, markAll, refresh: observeAll, freezeForAutoScroll };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', wireEvents);

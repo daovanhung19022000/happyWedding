@@ -43,8 +43,12 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   background-color: var(--bg-page);
+}
+
+html.wedding-auto-scroll {
+  scroll-behavior: auto;
 }
 
 body {
