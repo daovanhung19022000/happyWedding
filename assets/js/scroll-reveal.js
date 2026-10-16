@@ -23,6 +23,23 @@
     '.wedding-calendar-grid';
 
   const OPENING_ROOTS = '.hero-canvas-section';
+  const EDGE_SECTION_CLASS = 'scroll-reveal-edge-zone';
+
+  function isEdgeRevealSection(section) {
+    if (!section) return false;
+    return (
+      section.classList.contains('love-story-section') ||
+      section.classList.contains('couple-polaroid-section') ||
+      section.classList.contains('formal-invite-section') ||
+      section.classList.contains('wedding-calendar-section') ||
+      section.classList.contains('rsvp-invite-section') ||
+      section.classList.contains('gallery-canvas-section')
+    );
+  }
+
+  function edgeSideByIndex(index) {
+    return index % 2 === 0 ? 'edge-left' : 'edge-right';
+  }
 
   function shouldSkip(el) {
     if (!el || el.classList.contains('scroll-reveal')) return true;
@@ -41,21 +58,13 @@
     return true;
   }
 
-  function variantFor(el) {
+  function variantFor(el, index, section) {
+    const edge = isEdgeRevealSection(section);
+
     if (el.classList.contains('gallery-grid-item')) {
-      return 'gallery';
+      return edge ? edgeSideByIndex(index) : 'gallery';
     }
-    if (
-      el.classList.contains('hero-arch-wrap') ||
-      el.classList.contains('wedding-calendar-grid') ||
-      el.classList.contains('polaroid-photo-box') ||
-      el.classList.contains('formal-invite-schedule-illus') ||
-      el.classList.contains('hero-signature-col') ||
-      el.classList.contains('gift-envelope-wrap') ||
-      el.matches('img')
-    ) {
-      return 'zoom';
-    }
+
     if (
       el.classList.contains('polaroid-card-body--bride') ||
       el.classList.contains('couple-polaroid-matrix__photo--bride')
@@ -76,6 +85,21 @@
         return idx % 2 === 0 ? 'merge-left' : 'merge-right';
       }
     }
+
+    const zoomLike =
+      el.classList.contains('hero-arch-wrap') ||
+      el.classList.contains('wedding-calendar-grid') ||
+      el.classList.contains('polaroid-photo-box') ||
+      el.classList.contains('formal-invite-schedule-illus') ||
+      el.classList.contains('hero-signature-col') ||
+      el.classList.contains('gift-envelope-wrap') ||
+      el.classList.contains('love-story-photo') ||
+      el.matches('img');
+
+    if (edge) {
+      return edgeSideByIndex(index);
+    }
+    if (zoomLike) return 'zoom';
     return 'text';
   }
 
@@ -132,9 +156,16 @@
   }
 
   function applyClasses(section) {
+    if (isEdgeRevealSection(section)) {
+      section.classList.add(EDGE_SECTION_CLASS);
+    }
     collectSection(section).forEach((el, i) => {
       if (el.classList.contains('scroll-reveal')) return;
-      const variant = el.classList.contains('album-section-head') ? 'text' : variantFor(el);
+      const variant = el.classList.contains('album-section-head')
+        ? isEdgeRevealSection(section)
+          ? edgeSideByIndex(i)
+          : 'text'
+        : variantFor(el, i, section);
       el.classList.add('scroll-reveal', 'scroll-reveal--' + variant);
       if (section.classList.contains('gallery-canvas-section') || isHeroOpeningBlock(el)) {
         el.classList.add('scroll-reveal--persist');
@@ -145,9 +176,7 @@
   }
 
   function markOpening() {
-    const canvas = document.getElementById('app-canvas');
-    if (!canvas) return;
-    canvas.querySelectorAll(OPENING_ROOTS).forEach(applyClasses);
+    /* Hero mở đầu cố định — không gắn scroll-reveal (tránh giật SAVE THE DATE / ảnh vòm) */
   }
 
   function stripTopBarReveal() {
@@ -180,7 +209,10 @@
     const canvas = document.getElementById('app-canvas');
     if (!canvas) return;
     stripTopBarReveal();
-    canvas.querySelectorAll('section, footer.canvas-footer-section').forEach(applyClasses);
+    canvas.querySelectorAll('section, footer.canvas-footer-section').forEach((section) => {
+      if (section.classList.contains('hero-canvas-section')) return;
+      applyClasses(section);
+    });
   }
 
   function reducedMotion() {
@@ -193,6 +225,9 @@
   }
 
   function isGalleryReveal(el) {
+    if (el.classList.contains('scroll-reveal--edge-left') || el.classList.contains('scroll-reveal--edge-right')) {
+      return false;
+    }
     return (
       el.classList.contains('gallery-grid-item') ||
       el.classList.contains('scroll-reveal--gallery') ||
@@ -289,33 +324,7 @@
   }
 
   function playOpening() {
-    if (openingDone) return;
-    const canvas = document.getElementById('app-canvas');
-    if (!canvas) return;
-
-    const targets = [];
-    const seen = new Set();
-    canvas.querySelectorAll(OPENING_ROOTS).forEach((root) => {
-      collectSection(root).forEach((el) => {
-        if (seen.has(el)) return;
-        seen.add(el);
-        targets.push(el);
-      });
-    });
-    if (!targets.length) return;
-
     openingDone = true;
-    if (reducedMotion()) {
-      targets.forEach((el) => el.classList.add('is-visible'));
-      return;
-    }
-
-    requestAnimationFrame(() => {
-      targets.forEach((el, i) => {
-        const d = 0.15 + Math.min(i * 0.08, 0.6);
-        revealEl(el, d + 's');
-      });
-    });
   }
 
   function isInViewport(el) {

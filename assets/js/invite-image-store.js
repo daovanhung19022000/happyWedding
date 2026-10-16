@@ -26,7 +26,26 @@ export function applyInviteImageOverrides(overrides) {
   Object.entries(overrides).forEach(([slotId, url]) => {
     if (!url) return;
     document.querySelectorAll(`[data-invite-slot="${slotId}"]`).forEach((el) => {
-      if (el.tagName === 'IMG') el.src = url;
+      if (el.tagName !== 'IMG') return;
+      const slot = slotById(slotId);
+      if (!el.dataset.defaultSrc) {
+        el.dataset.defaultSrc = el.getAttribute('src') || slot?.defaultSrc || '';
+      }
+      el.onerror = function onInviteSlotImgError() {
+        const fallback = this.dataset.defaultSrc;
+        if (!fallback) return;
+        try {
+          const resolved = new URL(fallback, window.location.href).href;
+          if (this.src !== resolved) {
+            this.onerror = null;
+            this.src = fallback;
+          }
+        } catch {
+          this.onerror = null;
+          this.src = fallback;
+        }
+      };
+      el.src = url;
     });
   });
   if (overrides['hero-arch']) {

@@ -230,6 +230,8 @@ body {
 }
 
 .hero-opening-panel {
+  opacity: 1;
+  transform: none;
   position: relative;
   background: linear-gradient(
     180deg,

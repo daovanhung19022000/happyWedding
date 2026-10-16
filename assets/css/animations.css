@@ -185,10 +185,6 @@
   }
 }
 
-body.intro-complete .hero-opening-panel {
-  animation: weddingTopBarIn 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
-}
-
 @keyframes weddingRevealText {
   from {
     opacity: 0;
@@ -244,6 +240,29 @@ body.intro-complete .hero-opening-panel {
   }
 }
 
+/* Love Story trở xuống — bay từ hai mép khung (canvas ~440px) */
+@keyframes weddingRevealEdgeLeft {
+  from {
+    opacity: 0;
+    transform: translate3d(calc(-1 * min(120px, 38vw)), 0, 0) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes weddingRevealEdgeRight {
+  from {
+    opacity: 0;
+    transform: translate3d(min(120px, 38vw), 0, 0) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 #app-canvas .scroll-reveal {
   opacity: 0;
   /* Không chặn click — tránh “không bấm được gì” khi chưa kịp reveal */
@@ -268,9 +287,8 @@ body.intro-complete .hero-opening-panel {
   animation-name: weddingRevealZoom;
 }
 
-/* Triptych thiệp mời: giữ lệch tấm giữa, không reset transform che layout */
-/* Album — transition mượt, một lần (không keyframe restart / không ẩn lại) */
-#app-canvas .gallery-canvas-section .scroll-reveal {
+/* Album — chỉ dùng bay từ dưới khi không thuộc vùng mép màn hình */
+#app-canvas .gallery-canvas-section:not(.scroll-reveal-edge-zone) .scroll-reveal {
   opacity: 0;
   transform: translate3d(0, 32px, 0) scale(0.97);
   animation: none !important;
@@ -281,9 +299,25 @@ body.intro-complete .hero-opening-panel {
   backface-visibility: hidden;
 }
 
-#app-canvas .gallery-canvas-section .scroll-reveal.is-visible {
+#app-canvas .gallery-canvas-section:not(.scroll-reveal-edge-zone) .scroll-reveal.is-visible {
   opacity: 1;
   transform: none;
+}
+
+#app-canvas .scroll-reveal-edge-zone .scroll-reveal--edge-left.is-visible {
+  animation-name: weddingRevealEdgeLeft;
+}
+
+#app-canvas .scroll-reveal-edge-zone .scroll-reveal--edge-right.is-visible {
+  animation-name: weddingRevealEdgeRight;
+}
+
+#app-canvas .scroll-reveal-edge-zone .scroll-reveal--merge-left.is-visible {
+  animation-name: weddingRevealEdgeLeft;
+}
+
+#app-canvas .scroll-reveal-edge-zone .scroll-reveal--merge-right.is-visible {
+  animation-name: weddingRevealEdgeRight;
 }
 
 #app-canvas .scroll-reveal--merge-left.is-visible {
