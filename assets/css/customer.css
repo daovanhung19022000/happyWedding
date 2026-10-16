@@ -218,6 +218,10 @@ body.customer-page::before {
   flex: 1.4 1 140px;
 }
 
+.customer-field--nick {
+  flex: 0.85 1 96px;
+}
+
 .customer-field--role {
   flex: 0 1 118px;
 }
@@ -352,6 +356,19 @@ body.customer-page::before {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+}
+
+.customer-list-sync {
+  font-size: 0.68rem;
+  color: var(--c-muted);
+  flex: 1 1 100%;
+  line-height: 1.35;
+}
+
+@media (min-width: 640px) {
+  .customer-list-sync {
+    flex: 1 1 auto;
+  }
 }
 
 .customer-list-count {

@@ -7,6 +7,9 @@ import {
   parseInviteFromLocation,
   buildGuestKey,
   modeKeyToCode,
+  formatInviteGuestTitle,
+  formatRsvpGuestName,
+  formatWishGuestName,
 } from './invite-config.js';
 
 export { eventModes, resolveEventMode };
@@ -26,27 +29,24 @@ function handleQueryParams() {
   const parsed = parseInviteFromLocation(window.location);
   const guestName = parsed.guestName;
   const role = parsed.role || urlParams.get('role');
+  const nickname = parsed.nickname || urlParams.get('nick') || urlParams.get('nickname');
   currentMode = parsed.mode;
 
-  // Cập nhật thanh chào khách mời
-  const guestBanner = document.getElementById('guest-banner');
-  const guestDisplay = document.getElementById('guest-name-display');
   const rsvpNameInput = document.getElementById('rsvp-name');
   const wishNameInput = document.getElementById('wish-name');
 
-  const fullGreeting = guestName ? (role ? `${role} ${guestName}` : guestName) : null;
   const inviteGuestTitle = document.getElementById('invite-guest-title');
 
-  if (fullGreeting) {
-    if (guestDisplay) guestDisplay.textContent = fullGreeting;
-    if (guestBanner) guestBanner.style.display = 'flex';
-    if (rsvpNameInput) rsvpNameInput.value = fullGreeting;
-    if (wishNameInput) wishNameInput.value = fullGreeting;
-    setWishGuestName(fullGreeting);
-    if (inviteGuestTitle) inviteGuestTitle.textContent = fullGreeting;
-  } else {
-    if (guestBanner) guestBanner.style.display = 'none';
-    if (inviteGuestTitle) inviteGuestTitle.textContent = 'Quý khách';
+  if (guestName) {
+    const inviteLine = formatInviteGuestTitle(role, guestName, nickname);
+    const rsvpLine = formatRsvpGuestName(role, guestName);
+    const wishLine = formatWishGuestName(role, guestName, nickname);
+    if (rsvpNameInput) rsvpNameInput.value = rsvpLine;
+    if (wishNameInput) wishNameInput.value = wishLine;
+    setWishGuestName(wishLine);
+    if (inviteGuestTitle) inviteGuestTitle.textContent = inviteLine;
+  } else if (inviteGuestTitle) {
+    inviteGuestTitle.textContent = 'Quý khách';
   }
 
   updateModeUI(currentMode);

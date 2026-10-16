@@ -171,7 +171,7 @@ export function buildInvitePath(modeCode, guestRaw) {
  * python -m http.server, Live Server (không cần rewrite /0/tên).
  * Đường dẫn /0/tên vẫn đọc được qua 404.html + redirect trong index.html.
  */
-export function buildInviteUrl(modeCode, guestRaw, roleRaw) {
+export function buildInviteUrl(modeCode, guestRaw, roleRaw, nicknameRaw) {
   const origin = window.location.origin;
   const base = getSiteBasePath();
   const params = new URLSearchParams();
@@ -179,8 +179,48 @@ export function buildInviteUrl(modeCode, guestRaw, roleRaw) {
   params.set('to', String(guestRaw).trim());
   const role = roleRaw != null ? String(roleRaw).trim() : '';
   if (role) params.set('role', role);
+  const nick = nicknameRaw != null ? String(nicknameRaw).trim() : '';
+  if (nick) params.set('nick', nick);
   const prefix = base ? `${base}/` : '/';
   return `${origin}${prefix}index.html?${params.toString()}`;
+}
+
+/** Tên hiển thị trên thiệp — ưu tiên biệt danh, không thì lấy tên riêng (từ cuối). */
+export function guestDisplayName(fullName, nickname) {
+  const nick = String(nickname || '').trim();
+  if (nick) return nick;
+  const trimmed = String(fullName || '').trim();
+  if (!trimmed) return '';
+  const parts = trimmed.split(/\s+/);
+  return parts[parts.length - 1];
+}
+
+/** Dòng “TRÂN TRỌNG KÍNH MỜI” — Bạn → Bạn & người thương; còn lại: Xưng hô + biệt danh/tên riêng. */
+export function formatInviteGuestTitle(role, fullName, nickname) {
+  const r = String(role || '').trim();
+  if (/^bạn$/i.test(r)) return 'Bạn & người thương';
+  const who = guestDisplayName(fullName, nickname);
+  if (!who && !r) return 'Quý khách';
+  if (!r) return who;
+  return `${r} ${who}`.trim();
+}
+
+/** Xác nhận tham dự — xưng hô + họ và tên đầy đủ. */
+export function formatRsvpGuestName(role, fullName) {
+  const r = String(role || '').trim();
+  const name = String(fullName || '').trim();
+  if (!name) return '';
+  if (!r) return name;
+  return `${r} ${name}`.trim();
+}
+
+/** Lời chúc — xưng hô + tên (biệt danh hoặc tên riêng), kể cả Bạn + tên. */
+export function formatWishGuestName(role, fullName, nickname) {
+  const r = String(role || '').trim();
+  const who = guestDisplayName(fullName, nickname);
+  if (!who && !r) return '';
+  if (!r) return who;
+  return `${r} ${who}`.trim();
 }
 
 /** Đọc mode + tên khách từ pathname /0/id hoặc query ?mode=&to= */
@@ -190,6 +230,7 @@ export function parseInviteFromLocation(loc = window.location) {
   const qGuest = params.get('to') || params.get('guest');
 
   const qRole = params.get('role');
+  const qNick = params.get('nick') || params.get('nickname');
 
   const pathMatch = loc.pathname.match(/\/(0|1|9)\/([^/?#]+)\/?$/);
   if (pathMatch) {
@@ -197,16 +238,18 @@ export function parseInviteFromLocation(loc = window.location) {
       mode: resolveEventMode(pathMatch[1]),
       guestName: decodeGuestId(pathMatch[2]),
       role: qRole ? qRole.trim() : null,
+      nickname: qNick ? qNick.trim() : null,
     };
   }
 
-  if (qMode || qGuest || qRole) {
+  if (qMode || qGuest || qRole || qNick) {
     return {
       mode: resolveEventMode(qMode || '0'),
       guestName: qGuest ? decodeGuestId(qGuest) : null,
       role: qRole ? qRole.trim() : null,
+      nickname: qNick ? qNick.trim() : null,
     };
   }
 
-  return { mode: 'trai', guestName: null, role: null };
+  return { mode: 'trai', guestName: null, role: null, nickname: null };
 }

@@ -29,6 +29,18 @@
             />
           </div>
 
+          <div class="customer-field customer-field--nick">
+            <label class="customer-label" for="customer-nickname">Biệt danh</label>
+            <input
+              id="customer-nickname"
+              class="customer-input"
+              type="text"
+              name="nickname"
+              placeholder="Hương, Long…"
+              autocomplete="off"
+            />
+          </div>
+
           <div class="customer-field customer-field--role">
             <label class="customer-label" for="customer-role">Xưng hô</label>
             <select id="customer-role" class="customer-select" name="role" required>
@@ -74,6 +86,7 @@
               <button type="button" class="customer-filter-btn" data-mode-filter="9">Miền Nam</button>
             </div>
             <div class="customer-list-actions">
+              <span id="customer-list-sync-status" class="customer-list-sync"></span>
               <span id="customer-list-count" class="customer-list-count"></span>
               <a class="customer-tool-btn customer-tool-btn--ghost" href="wedding_template.xlsx" download>Tải mẫu Excel</a>
               <button type="button" id="customer-excel-upload" class="customer-tool-btn">Upload Excel</button>
@@ -86,6 +99,7 @@
               <thead>
                 <tr>
                   <th>Họ và tên</th>
+                  <th>Biệt danh</th>
                   <th>Mode</th>
                   <th>Xưng hô</th>
                   <th>Link</th>

@@ -1,11 +1,18 @@
-import { parseInviteModeCode, MODE_SHORT_LABELS } from './invite-config.js';
-import { buildInviteUrl } from './invite-config.js';
+import {
+  parseInviteModeCode,
+  MODE_SHORT_LABELS,
+  buildInviteUrl,
+  formatInviteGuestTitle,
+} from './invite-config.js';
+import { initFirebaseClient, isFirebaseConfigured } from './firebase-config.js';
 import {
   loadGuestInvites,
   createGuestInvite,
   upsertGuestInvites,
   replaceGuestInvites,
   syncGuestInvitesToFirestore,
+  fetchGuestInvitesFromFirestore,
+  subscribeGuestInvites,
   subscribeRsvpUpdates,
   mapLatestRsvpByGuestKey,
   formatRsvpConfirm,
@@ -20,11 +27,14 @@ let rsvpByKey = new Map();
 function refreshStoredInviteUrls() {
   let changed = false;
   guestList = guestList.map((guest) => {
-    const url = buildInviteUrl(guest.mode, guest.name, guest.role);
+    const url = buildInviteUrl(guest.mode, guest.name, guest.role, guest.nickname);
     if (guest.url !== url) changed = true;
     return { ...guest, url };
   });
-  if (changed) replaceGuestInvites(guestList);
+  if (changed) {
+    replaceGuestInvites(guestList);
+    syncGuestInvitesToFirestore(guestList).catch(() => {});
+  }
 }
 
 function loadSheetJs() {
@@ -81,9 +91,12 @@ function rowFromExcel(rawRow) {
   const role = String(
     row.honorifics || row['xưng hô'] || row['xung ho'] || row.role || '',
   ).trim();
+  const nickname = String(
+    row.nickname || row['biệt danh'] || row['biet danh'] || row.nick || '',
+  ).trim();
   const modeCode = parseInviteModeCode(row.mode ?? row['buổi tiệc']);
   if (!name || !role || !modeCode) return null;
-  return createGuestInvite(name, role, modeCode);
+  return createGuestInvite(name, role, modeCode, nickname);
 }
 
 function parseExcelRows(rows) {
@@ -148,6 +161,7 @@ function renderGuestTable() {
 
     tr.innerHTML = `
       <td class="customer-td-name">${escapeHtml(guest.name)}</td>
+      <td>${escapeHtml(guest.nickname || '—')}</td>
       <td>${escapeHtml(MODE_SHORT_LABELS[guest.mode] || guest.mode)}</td>
       <td>${escapeHtml(guest.role)}</td>
       <td class="customer-td-actions"></td>
@@ -156,8 +170,8 @@ function renderGuestTable() {
       <td><span class="customer-confirm-badge${rsvp ? ' is-filled' : ''}">${escapeHtml(confirmStatus)}</span></td>
     `;
 
-    const linkCell = tr.children[3];
-    const qrCell = tr.children[4];
+    const linkCell = tr.children[4];
+    const qrCell = tr.children[5];
 
     const linkBtn = document.createElement('button');
     linkBtn.type = 'button';
@@ -210,18 +224,55 @@ function showUploadStatus(message) {
   el.hidden = !message;
 }
 
+async function bootstrapGuestList() {
+  if (isFirebaseConfigured()) initFirebaseClient();
+
+  if (window.firebaseDb) {
+    try {
+      const remote = await fetchGuestInvitesFromFirestore();
+      if (remote?.length) {
+        guestList = remote;
+        replaceGuestInvites(guestList);
+      } else {
+        guestList = loadGuestInvites();
+        if (guestList.length) await syncGuestInvitesToFirestore(guestList);
+      }
+    } catch {
+      guestList = loadGuestInvites();
+    }
+  } else {
+    guestList = loadGuestInvites();
+  }
+
+  refreshStoredInviteUrls();
+}
+
 function initCustomerPage() {
   const form = document.getElementById('customer-form');
   const nameInput = document.getElementById('customer-guest-name');
+  const nickInput = document.getElementById('customer-nickname');
   const roleSelect = document.getElementById('customer-role');
   const modeSelect = document.getElementById('customer-mode');
   const greetingPreview = document.getElementById('customer-greeting-preview');
   const excelInput = document.getElementById('customer-excel-input');
   const excelBtn = document.getElementById('customer-excel-upload');
+  const listStatusEl = document.getElementById('customer-list-sync-status');
 
   if (!form || !nameInput || !roleSelect || !modeSelect) return;
 
-  refreshStoredInviteUrls();
+  bootstrapGuestList().then(() => {
+    renderGuestTable();
+    if (listStatusEl) {
+      listStatusEl.textContent = window.firebaseDb
+        ? 'Danh sách đồng bộ từ Firestore.'
+        : 'Đang dùng bộ nhớ trình duyệt (chưa kết nối Firestore).';
+    }
+    subscribeGuestInvites((list) => {
+      guestList = list;
+      refreshStoredInviteUrls();
+      renderGuestTable();
+    });
+  });
 
   document.querySelectorAll('[data-mode-filter]').forEach((btn) => {
     btn.addEventListener('click', () => setModeFilter(btn.dataset.modeFilter));
@@ -231,10 +282,11 @@ function initCustomerPage() {
   const updatePreview = () => {
     const name = nameInput.value.trim();
     const role = roleSelect.value;
+    const nickname = nickInput?.value.trim() || '';
     if (greetingPreview) {
       if (name && role) {
         greetingPreview.hidden = false;
-        greetingPreview.textContent = `Trên thiệp: ${role} ${name}`;
+        greetingPreview.textContent = `Trên thiệp: ${formatInviteGuestTitle(role, name, nickname)}`;
       } else {
         greetingPreview.hidden = true;
       }
@@ -242,6 +294,7 @@ function initCustomerPage() {
   };
 
   nameInput.addEventListener('input', updatePreview);
+  nickInput?.addEventListener('input', updatePreview);
   roleSelect.addEventListener('change', updatePreview);
   modeSelect.addEventListener('change', updatePreview);
   updatePreview();
@@ -249,6 +302,7 @@ function initCustomerPage() {
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const guest = nameInput.value.trim();
+    const nickname = nickInput?.value.trim() || '';
     const role = roleSelect.value.trim();
     const modeCode = modeSelect.value;
 
@@ -261,12 +315,15 @@ function initCustomerPage() {
       return;
     }
 
-    const entry = createGuestInvite(guest, role, modeCode);
+    const entry = createGuestInvite(guest, role, modeCode, nickname);
     const { added, skipped } = addGuests([entry]);
 
     if (added) {
-      showUploadStatus(`Đã thêm ${role} ${guest} vào danh sách.`);
+      showUploadStatus(
+        `Đã thêm: ${formatInviteGuestTitle(role, guest, nickname)} (đã lưu Firestore).`,
+      );
       nameInput.value = '';
+      if (nickInput) nickInput.value = '';
       nameInput.focus();
       updatePreview();
     } else if (skipped) {
@@ -318,7 +375,6 @@ function initCustomerPage() {
     }
   }, 4000);
 
-  renderGuestTable();
 }
 
 document.addEventListener('DOMContentLoaded', initCustomerPage);
