@@ -14,6 +14,39 @@ import {
 
 let albumPickerUrls = [];
 
+/** Thứ tự khớp luồng trang chủ index.html */
+const VIEW_SLOT_GROUPS = [
+  {
+    title: 'SAVE THE DATE',
+    lead: 'Ảnh khung vòm — mở đầu sau khi mở phong thiệp.',
+    slotIds: ['hero-arch'],
+  },
+  {
+    title: 'Nhà gái & nhà trai',
+    lead: 'Hai ảnh polaroid cạnh thông tin gia đình.',
+    slotIds: ['polaroid-bride', 'polaroid-groom'],
+  },
+  {
+    title: 'Lịch cưới & đếm ngược',
+    slotIds: ['calendar-bg'],
+  },
+  {
+    title: 'Always You',
+    lead: 'Ba ảnh ngay sau lịch: 1 lớn bên trái, 2 xếp dọc bên phải (ảnh 1–3).',
+    slotIds: ['always-you-main', 'always-you-top', 'always-you-bottom'],
+  },
+  {
+    title: 'Banner hôn nhân — lưới 3 ảnh',
+    lead: 'Hai ảnh dọc trên, một ảnh ngang full phía dưới (ảnh 4–6).',
+    slotIds: ['marriage-trio-left', 'marriage-trio-right', 'marriage-trio-wide'],
+  },
+  {
+    title: 'Album trên thiệp',
+    lead: 'Lưới editorial cuối trang — thứ tự ô khớp album trên thiệp.',
+    slotPrefix: 'gallery-',
+  },
+];
+
 function setStatus(el, text, isError = false) {
   if (!el) return;
   el.hidden = !text;
@@ -21,9 +54,67 @@ function setStatus(el, text, isError = false) {
   el.classList.toggle('album-upload-status--error', isError);
 }
 
+function resolveDefaultPreviewSrc(defaultSrc) {
+  const src = String(defaultSrc || '').trim();
+  if (!src) return '';
+  if (/^https?:\/\//i.test(src)) return src;
+  const path = src.replace(/^\/+/, '');
+  return `../${path}`;
+}
+
 function resolvePreviewSrc(slot, doc) {
   if (doc?.url) return doc.url;
-  return `../${slot.defaultSrc}`;
+  return resolveDefaultPreviewSrc(slot.defaultSrc);
+}
+
+function slotsForGroup(group, slotByIdMap) {
+  if (group.slotIds?.length) {
+    return group.slotIds.map((id) => slotByIdMap[id]).filter(Boolean);
+  }
+  if (group.slotPrefix) {
+    return INVITE_IMAGE_SLOTS.filter((s) => s.id.startsWith(group.slotPrefix));
+  }
+  return [];
+}
+
+function buildGroupSection(group, slotByIdMap, docs) {
+  const slots = slotsForGroup(group, slotByIdMap);
+  if (!slots.length) return null;
+
+  const section = document.createElement('section');
+  section.className = 'view-admin-group';
+
+  const heading = document.createElement('h2');
+  heading.className = 'view-admin-group__title';
+  heading.textContent = group.title;
+  section.appendChild(heading);
+
+  if (group.lead) {
+    const lead = document.createElement('p');
+    lead.className = 'view-admin-group__lead';
+    lead.textContent = group.lead;
+    section.appendChild(lead);
+  }
+
+  const grid = document.createElement('div');
+  grid.className = 'view-admin-group__slots';
+  slots.forEach((slot) => {
+    grid.appendChild(buildSlotCard(slot, docs[slot.id] || null));
+  });
+  section.appendChild(grid);
+  return section;
+}
+
+function buildMarqueeNoteSection() {
+  const section = document.createElement('section');
+  section.className = 'view-admin-group view-admin-group--note';
+  section.innerHTML =
+    '<h2 class="view-admin-group__title">Thiệp mời — dải ảnh cuộn</h2>' +
+    '<p class="view-admin-group__lead">' +
+    'Section <strong>Thiệp Mời</strong> hiển thị toàn bộ album (kimono + upload) cuộn ngang. ' +
+    'Không có slot riêng; cập nhật ảnh qua trang Album hoặc upload mới.' +
+    '</p>';
+  return section;
 }
 
 function ensureAlbumPickerModal() {
@@ -161,7 +252,7 @@ function buildSlotCard(slot, doc) {
     setStatus(document.getElementById('view-admin-status'), `Đang khôi phục ${slot.label}…`);
     try {
       const defaultSrc = await resetInviteImageSlot(slot.id);
-      preview.src = `../${defaultSrc}`;
+      preview.src = resolveDefaultPreviewSrc(defaultSrc);
       meta.textContent = `Mặc định: ${slot.defaultSrc}`;
       resetBtn.disabled = true;
       setStatus(document.getElementById('view-admin-status'), `Đã về ảnh gốc: ${slot.label}.`);
@@ -185,15 +276,24 @@ function buildSlotCard(slot, doc) {
 async function renderSlots(gridEl) {
   if (!gridEl) return;
   gridEl.replaceChildren();
+
+  const slotByIdMap = Object.fromEntries(INVITE_IMAGE_SLOTS.map((s) => [s.id, s]));
+  const docs = {};
   for (const slot of INVITE_IMAGE_SLOTS) {
-    let doc = null;
     try {
-      doc = await fetchInviteImageDoc(slot.id);
+      docs[slot.id] = await fetchInviteImageDoc(slot.id);
     } catch {
-      /* ignore */
+      docs[slot.id] = null;
     }
-    gridEl.appendChild(buildSlotCard(slot, doc));
   }
+
+  VIEW_SLOT_GROUPS.forEach((group, index) => {
+    if (index === 2) {
+      gridEl.appendChild(buildMarqueeNoteSection());
+    }
+    const section = buildGroupSection(group, slotByIdMap, docs);
+    if (section) gridEl.appendChild(section);
+  });
 }
 
 function showPanel(pinForm, panel) {

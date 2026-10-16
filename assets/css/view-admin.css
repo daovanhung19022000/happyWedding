@@ -3,9 +3,67 @@ body.view-admin-page .album-upload-wrap {
 }
 
 .view-admin-slots {
-  display: grid;
-  gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   padding: 0 16px 24px;
+}
+
+.view-admin-group {
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(154, 99, 79, 0.16);
+}
+
+.view-admin-group:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.view-admin-group--note {
+  background: rgba(245, 235, 227, 0.55);
+  border: 1px dashed rgba(154, 99, 79, 0.28);
+  border-radius: 12px;
+  padding: 14px 14px 16px;
+  margin-bottom: 20px;
+}
+
+.view-admin-group--note .view-admin-group__title {
+  font-size: 0.88rem;
+}
+
+.view-admin-group__title {
+  margin: 0 0 6px;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #942233;
+}
+
+.view-admin-group__lead {
+  margin: 0 0 12px;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: #6b625c;
+}
+
+.view-admin-group__slots {
+  display: grid;
+  gap: 14px;
+}
+
+@media (min-width: 560px) {
+  .view-admin-group__slots {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .view-admin-group__slots .view-slot-card:only-child {
+    grid-column: 1 / -1;
+    max-width: 360px;
+  }
 }
 
 .view-slot-card {
@@ -47,12 +105,6 @@ body.view-admin-page .album-upload-wrap {
 
 .view-slot-reset {
   margin-left: auto;
-}
-
-@media (min-width: 560px) {
-  .view-admin-slots {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 .view-album-picker {
