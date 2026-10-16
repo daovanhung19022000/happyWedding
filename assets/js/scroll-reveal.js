@@ -12,7 +12,7 @@
   const REVEAL_MEDIA =
     '.hero-signature-col, .polaroid-photo-box, .polaroid-card-body, ' +
     '.gallery-grid-item, .formal-invite-schedule-illus, ' +
-    '.gift-envelope-wrap, .love-story-card, .love-story-photo';
+    '.gift-envelope-wrap, .love-story-card, .love-story-photo, .always-you-photo, .marriage-trio-cell';
 
   const REVEAL_TEXT =
     'h1, h2, h3, h4, h5, h6, p, li, .hero-eyebrow, .hero-journey-tagline, .hero-date-ribbon, ' +
@@ -32,6 +32,8 @@
       section.classList.contains('couple-polaroid-section') ||
       section.classList.contains('formal-invite-section') ||
       section.classList.contains('wedding-calendar-section') ||
+      section.classList.contains('always-you-section') ||
+      section.classList.contains('marriage-trio-section') ||
       section.classList.contains('rsvp-invite-section') ||
       section.classList.contains('gallery-canvas-section')
     );
@@ -41,12 +43,105 @@
     return index % 2 === 0 ? 'edge-left' : 'edge-right';
   }
 
+  /** Timeline: mốc lẻ (cột 1) trái, mốc chẵn (cột 3) phải */
+  function loveStorySide(milestone) {
+    if (!milestone || !milestone.parentElement) return null;
+    const siblings = milestone.parentElement.querySelectorAll('.love-story-milestone');
+    const idx = Array.prototype.indexOf.call(siblings, milestone);
+    if (idx < 0) return null;
+    return idx % 2 === 0 ? 'merge-left' : 'merge-right';
+  }
+
+  function loveStorySideFor(el) {
+    const milestone = el.closest('.love-story-milestone');
+    return milestone ? loveStorySide(milestone) : null;
+  }
+
+  /** Khớp invite-gallery-grid.js — lưới 6 cột editorial */
+  function galleryItemSpan(index, total) {
+    if (index === 0 || index === total - 1) return 6;
+    const pos = (index - 1) % 5;
+    return pos >= 3 ? 3 : 2;
+  }
+
+  function galleryColumnStart(index, total) {
+    if (index === 0 || index === total - 1) return 1;
+    let col = 1;
+    for (let i = 1; i < index; i++) {
+      if (i === total - 1) continue;
+      const span = galleryItemSpan(i, total);
+      if (col + span - 1 > 6) col = 1;
+      col += span;
+      if (col > 6) col = 1;
+    }
+    const span = galleryItemSpan(index, total);
+    if (col + span - 1 > 6) col = 1;
+    return col;
+  }
+
+  function gallerySideFromLayout(index, total) {
+    if (index === 0) return 'merge-left';
+    if (index === total - 1) return 'merge-right';
+    const start = galleryColumnStart(index, total);
+    const span = galleryItemSpan(index, total);
+    if (start >= 4) return 'merge-right';
+    if (start + span - 1 <= 3) return 'merge-left';
+    return start >= 4 ? 'merge-right' : 'merge-left';
+  }
+
+  function galleryRevealSide(el) {
+    if (el.classList.contains('album-section-title')) return 'merge-left';
+    if (el.classList.contains('album-more-link')) return 'merge-right';
+    const grid = el.closest('.gallery-editorial-grid');
+    if (!grid) return 'merge-left';
+    const items = grid.querySelectorAll('.gallery-grid-item');
+    const index = Array.prototype.indexOf.call(items, el);
+    if (index < 0) return 'merge-left';
+    return gallerySideFromLayout(index, items.length);
+  }
+
+  function alwaysYouSideFor(el) {
+    if (el.closest('.always-you-col--light')) return 'merge-left';
+    if (el.closest('.always-you-col--wine')) return 'merge-right';
+    return null;
+  }
+
+  function marriageTrioSideFor(el) {
+    if (el.classList.contains('marriage-trio-quote')) return 'edge-left';
+    if (el.closest('.marriage-trio-cell--left')) return 'merge-left';
+    if (el.closest('.marriage-trio-cell--right')) return 'merge-right';
+    if (el.closest('.marriage-trio-cell--wide')) return 'merge-left';
+    return null;
+  }
+
+  /** Lưới polaroid: cột 1 = trái, cột 2 = phải (ảnh chú rể trái, ảnh cô dâu phải) */
+  function polaroidSideFor(el) {
+    if (el.closest('.couple-polaroid-matrix__text--bride, .couple-polaroid-matrix__photo--groom')) {
+      return 'merge-left';
+    }
+    if (el.closest('.couple-polaroid-matrix__photo--bride, .couple-polaroid-matrix__text--groom')) {
+      return 'merge-right';
+    }
+    const sigCol = el.closest('.hero-signature-col');
+    if (sigCol && el.closest('.couple-polaroid-section .hero-signatures')) {
+      const row = sigCol.parentElement;
+      const cols = row ? row.querySelectorAll('.hero-signature-col') : [];
+      const idx = Array.prototype.indexOf.call(cols, sigCol);
+      return idx <= 0 ? 'merge-left' : 'merge-right';
+    }
+    return null;
+  }
+
   function shouldSkip(el) {
     if (!el || el.classList.contains('scroll-reveal')) return true;
     if (el.closest('#envelope-intro, #gift-dialog, #guest-banner, #blossom-pulse-layer')) return true;
     if (el.closest('.hero-hearts-orbit, .wedding-calendar-bg, .wedding-calendar-scrim')) return true;
     if (el.hidden || el.getAttribute('aria-hidden') === 'true') return true;
     if (el.matches('hr, .formal-invite-rule, .album-section-rule, .polaroid-family-rule')) return true;
+    if (el.classList.contains('love-story-photo') && el.closest('.love-story-card')) return true;
+    if (el.matches('img') && el.closest('.love-story-card')) return true;
+    if (el.matches('img') && el.closest('.always-you-photo')) return true;
+    if (el.matches('img') && el.closest('.marriage-trio-cell')) return true;
     const text = (el.textContent || '').trim();
     if (el.matches('p, span, li') && !text) return true;
     return false;
@@ -61,29 +156,35 @@
   function variantFor(el, index, section) {
     const edge = isEdgeRevealSection(section);
 
-    if (el.classList.contains('gallery-grid-item')) {
-      return edge ? edgeSideByIndex(index) : 'gallery';
+    if (
+      el.classList.contains('gallery-grid-item') ||
+      el.classList.contains('album-section-title') ||
+      el.classList.contains('album-more-link')
+    ) {
+      if (edge && section.classList.contains('gallery-canvas-section')) {
+        return galleryRevealSide(el);
+      }
+      return el.classList.contains('gallery-grid-item') ? 'gallery' : 'text';
     }
 
-    if (
-      el.classList.contains('polaroid-card-body--bride') ||
-      el.classList.contains('couple-polaroid-matrix__photo--bride')
-    ) {
-      return 'merge-left';
+    if (section.classList.contains('love-story-section')) {
+      const side = loveStorySideFor(el);
+      if (side) return side;
     }
-    if (
-      el.classList.contains('polaroid-card-body--groom') ||
-      el.classList.contains('couple-polaroid-matrix__photo--groom')
-    ) {
-      return 'merge-right';
+
+    if (section.classList.contains('couple-polaroid-section')) {
+      const side = polaroidSideFor(el);
+      if (side) return side;
     }
-    if (el.classList.contains('love-story-card')) {
-      const milestone = el.closest('.love-story-milestone');
-      if (milestone && milestone.parentElement) {
-        const siblings = milestone.parentElement.querySelectorAll('.love-story-milestone');
-        const idx = Array.prototype.indexOf.call(siblings, milestone);
-        return idx % 2 === 0 ? 'merge-left' : 'merge-right';
-      }
+
+    if (section.classList.contains('always-you-section')) {
+      const side = alwaysYouSideFor(el);
+      if (side) return side;
+    }
+
+    if (section.classList.contains('marriage-trio-section')) {
+      const side = marriageTrioSideFor(el);
+      if (side) return side;
     }
 
     const zoomLike =
@@ -113,8 +214,10 @@
     };
 
     if (section.classList.contains('gallery-canvas-section')) {
-      const head = section.querySelector('.album-section-head');
-      if (head) push(head);
+      const title = section.querySelector('.album-section-title');
+      const moreLink = section.querySelector('.album-more-link');
+      if (title) push(title);
+      if (moreLink) push(moreLink);
       section.querySelectorAll('.gallery-grid-item').forEach(push);
       return list;
     }
@@ -161,11 +264,7 @@
     }
     collectSection(section).forEach((el, i) => {
       if (el.classList.contains('scroll-reveal')) return;
-      const variant = el.classList.contains('album-section-head')
-        ? isEdgeRevealSection(section)
-          ? edgeSideByIndex(i)
-          : 'text'
-        : variantFor(el, i, section);
+      const variant = variantFor(el, i, section);
       el.classList.add('scroll-reveal', 'scroll-reveal--' + variant);
       if (section.classList.contains('gallery-canvas-section') || isHeroOpeningBlock(el)) {
         el.classList.add('scroll-reveal--persist');
@@ -231,7 +330,7 @@
     return (
       el.classList.contains('gallery-grid-item') ||
       el.classList.contains('scroll-reveal--gallery') ||
-      (el.classList.contains('album-section-head') && el.closest('.gallery-canvas-section'))
+      (el.classList.contains('album-section-title') && el.closest('.gallery-canvas-section'))
     );
   }
 

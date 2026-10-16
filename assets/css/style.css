@@ -1976,6 +1976,226 @@ img.polaroid-role-sticker--groom {
   background: var(--primary-light);
 }
 
+/* SECTION EDITORIAL — IT WAS ALWAYS YOU */
+.always-you-section {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+}
+
+.always-you-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 46fr) minmax(0, 54fr);
+  align-items: stretch;
+  min-height: clamp(420px, 112vw, 540px);
+}
+
+.always-you-col--light {
+  background: #ffffff;
+  padding: 16px 8px 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.always-you-col--wine {
+  background: #631618;
+  padding: 12px 10px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 8px;
+  min-width: 0;
+  color: rgba(255, 255, 255, 0.96);
+}
+
+.always-you-headline {
+  font-family: var(--font-title);
+  font-size: clamp(1.28rem, 5.8vw, 1.58rem);
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #1c1816;
+  margin: 0;
+}
+
+.always-you-headline span {
+  display: block;
+}
+
+.always-you-photo {
+  margin: 0;
+  overflow: hidden;
+  line-height: 0;
+  flex-shrink: 0;
+}
+
+.always-you-photo--hero {
+  flex: 1 1 auto;
+  min-height: clamp(260px, 68vw, 340px);
+}
+
+.always-you-photo--stack {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  max-height: clamp(128px, 34vw, 168px);
+}
+
+.always-you-photo img {
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
+}
+
+.always-you-quote-en {
+  font-family: var(--font-body);
+  font-size: clamp(0.58rem, 2.35vw, 0.68rem);
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  text-align: center;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.always-you-script {
+  font-family: var(--font-couple);
+  font-size: clamp(1.45rem, 6.8vw, 1.75rem);
+  font-weight: 400;
+  line-height: 1;
+  margin: 2px 0 0;
+  text-align: center;
+  color: #fff;
+}
+
+.always-you-quote-vi {
+  font-family: var(--font-body);
+  font-size: clamp(0.54rem, 2.2vw, 0.64rem);
+  font-weight: 300;
+  line-height: 1.5;
+  text-align: center;
+  margin: 0;
+  padding: 0 2px 2px;
+  opacity: 0.94;
+}
+
+/* BANNER + LƯỚI 3 ẢNH (2 DỌC — 1 NGANG) */
+.marriage-trio-section {
+  position: relative;
+  padding: 0 0 20px;
+  overflow: hidden;
+}
+
+.marriage-trio-banner {
+  position: relative;
+  background: #631618;
+  padding: 22px 16px 28px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.marriage-trio-banner-sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 12% 28%, rgba(255, 255, 255, 0.55) 0 2px, transparent 3px),
+    radial-gradient(circle at 78% 18%, rgba(255, 255, 255, 0.45) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 34% 72%, rgba(255, 255, 255, 0.4) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 88% 62%, rgba(255, 255, 255, 0.5) 0 2px, transparent 3px),
+    radial-gradient(circle at 52% 42%, rgba(255, 255, 255, 0.35) 0 1px, transparent 2px),
+    radial-gradient(circle at 22% 58%, rgba(255, 255, 255, 0.38) 0 1.5px, transparent 2.5px);
+  opacity: 0.85;
+}
+
+.marriage-trio-quote {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-family: var(--font-couple);
+  font-size: clamp(1.05rem, 4.8vw, 1.28rem);
+  font-weight: 400;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.98);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.25);
+}
+
+.marriage-trio-stage {
+  position: relative;
+  margin-top: -18px;
+  padding: 0 10px;
+  background: linear-gradient(
+    180deg,
+    #631618 0,
+    #631618 72px,
+    #ffffff 72px,
+    #ffffff 100%
+  );
+}
+
+.marriage-trio-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.marriage-trio-cell {
+  margin: 0;
+  overflow: hidden;
+  line-height: 0;
+  background: var(--bg-cream-soft);
+}
+
+.marriage-trio-cell--portrait {
+  aspect-ratio: 3 / 4;
+}
+
+.marriage-trio-cell--wide {
+  grid-column: 1 / -1;
+  aspect-ratio: 16 / 10;
+  margin-top: 5px;
+}
+
+.marriage-trio-cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
+}
+
+.marriage-trio-heart {
+  position: absolute;
+  z-index: 2;
+  font-size: clamp(1.1rem, 4.5vw, 1.35rem);
+  line-height: 1;
+  color: rgba(154, 60, 72, 0.42);
+  pointer-events: none;
+  text-shadow: 0 1px 6px rgba(255, 255, 255, 0.35);
+}
+
+.marriage-trio-heart--a {
+  left: 14%;
+  top: calc(72px + 38%);
+}
+
+.marriage-trio-heart--b {
+  right: 12%;
+  top: calc(72px + 12%);
+}
+
+.marriage-trio-heart--c {
+  left: 46%;
+  top: calc(72px + 52%);
+}
+
 /* SECTION LỊCH & ĐẾM NGƯỢC (ẢNH NỀN) */
 .wedding-calendar-section {
   padding: 0 0 20px;
