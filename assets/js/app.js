@@ -1,5 +1,5 @@
-import { playlist } from './music-list.js';
 import { firebaseConfig, isFirebaseConfigured } from './firebase-config.js';
+import { initWeddingAudio } from './wedding-audio.js';
 import { initWishesLive, setWishGuestName } from './wishes-live.js';
 import {
   eventModes,
@@ -18,113 +18,7 @@ function formatInviteHour(timeStr) {
 
 // Khởi tạo trạng thái
 let currentMode = "trai";
-let currentTrackIndex = 0;
-let isAudioPlaying = false;
-let audioElement = new Audio();
 let countdownInterval = null;
-
-// Khởi tạo Audio Player (Phát ngẫu nhiên / lần lượt)
-function initAudioPlayer() {
-  const audioBtn = document.getElementById('audio-toggle-btn');
-  const audioDisk = document.getElementById('audio-disk');
-  if (!audioBtn) return;
-
-  const pickRandomTrackIndex = (except = -1) => {
-    if (!playlist.length) return 0;
-    if (playlist.length === 1) return 0;
-    let idx = except;
-    while (idx === except) {
-      idx = Math.floor(Math.random() * playlist.length);
-    }
-    return idx;
-  };
-
-  const loadTrack = (index) => {
-    const track = playlist[index];
-    if (!track?.url) return;
-    currentTrackIndex = index;
-    audioElement.src = track.url;
-  };
-
-  loadTrack(pickRandomTrackIndex());
-  audioElement.preload = 'auto';
-
-  audioElement.addEventListener('ended', () => {
-    loadTrack(pickRandomTrackIndex(currentTrackIndex));
-    if (isAudioPlaying) {
-      audioElement.play().catch(() => {});
-    }
-  });
-
-  let audioUnlocked = false;
-
-  const markPlaying = () => {
-    isAudioPlaying = true;
-    audioDisk.classList.add('spinning');
-  };
-
-  const startPlayback = async (unmute = false) => {
-    if (unmute) {
-      audioElement.muted = false;
-      audioUnlocked = true;
-    }
-    try {
-      await audioElement.play();
-      markPlaying();
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  const unlockAudioWithSound = () => {
-    if (audioUnlocked && isAudioPlaying && !audioElement.muted) return;
-    audioUnlocked = true;
-    audioElement.muted = false;
-    if (audioElement.paused) {
-      startPlayback(true);
-    } else {
-      markPlaying();
-    }
-  };
-
-  const bootstrapMutedAutoplay = async () => {
-    audioElement.muted = true;
-    const ok = await startPlayback(false);
-    if (ok) {
-      audioElement.muted = false;
-      audioUnlocked = true;
-    }
-  };
-
-  const togglePlay = () => {
-    if (isAudioPlaying) {
-      audioElement.pause();
-      isAudioPlaying = false;
-      audioDisk.classList.remove('spinning');
-    } else {
-      unlockAudioWithSound();
-    }
-  };
-
-  audioBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    togglePlay();
-  });
-
-  bootstrapMutedAutoplay();
-
-  window.addEventListener('wedding:first-open', unlockAudioWithSound);
-  window.addEventListener('wedding:intro-complete', unlockAudioWithSound, { once: true });
-
-  const onFirstGesture = () => unlockAudioWithSound();
-  ['pointerdown', 'touchstart', 'click', 'keydown'].forEach((evt) => {
-    window.addEventListener(evt, onFirstGesture, { once: true, passive: true });
-  });
-
-  window.setTimeout(() => unlockAudioWithSound(), 400);
-  window.setTimeout(() => unlockAudioWithSound(), 2600);
-}
 
 // Xử lý Query Parameters (Cá nhân hóa khách mời & Chế độ)
 function handleQueryParams() {
@@ -456,7 +350,7 @@ function initGiftDialog() {
 
 // Khởi chạy toàn bộ khi DOM load xong
 document.addEventListener('DOMContentLoaded', () => {
-  initAudioPlayer();
+  initWeddingAudio({ enableIntroAutoplay: true });
   handleQueryParams();
   initLightbox();
   initRSVPForm();

@@ -10,6 +10,14 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20y=%220%22%20width=%22100%22%20height=%22100%22><text y=%22.9em%22 font-size=%2290%22>💍</text></svg>">
 </head>
 <body class="intro-complete album-view-page">
+  <div id="audio-toggle-btn" class="audio-floating-btn is-paused" title="Phát / Dừng nhạc nền">
+    <div id="audio-disk" class="audio-disk-rotate">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+      </svg>
+    </div>
+  </div>
+
   <div class="album-page-wrap">
     <nav class="album-page-nav" aria-label="Điều hướng album">
       <a href="../index.html">← Về thiệp cưới</a>
@@ -40,6 +48,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script type="module" src="../assets/js/firebase-config.js"></script>
+  <script type="module">
+    import { initWeddingAudio } from '../assets/js/wedding-audio.js';
+    initWeddingAudio({ enableIntroAutoplay: false });
+  </script>
   <script type="module" src="../assets/js/album-view.js"></script>
   <script src="../assets/js/cherry-blossom-bg.js" defer></script>
 </body>
