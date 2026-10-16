@@ -11,7 +11,7 @@
 
   const REVEAL_MEDIA =
     '.hero-signature-col, .polaroid-photo-box, .polaroid-card-body, ' +
-    '.invite-triptych__item, .gallery-grid-item, .formal-invite-schedule-illus, ' +
+    '.gallery-grid-item, .formal-invite-schedule-illus, ' +
     '.gift-envelope-wrap, .love-story-card, .love-story-photo';
 
   const REVEAL_TEXT =
@@ -46,7 +46,6 @@
       return 'gallery';
     }
     if (
-      el.classList.contains('invite-triptych__item') ||
       el.classList.contains('hero-arch-wrap') ||
       el.classList.contains('wedding-calendar-grid') ||
       el.classList.contains('polaroid-photo-box') ||
@@ -104,7 +103,7 @@
       if (shouldSkip(el)) return;
       if (el.closest('.hero-opening-panel')) return;
       if (insideMedia(el)) return;
-      if (el.closest('.invite-triptych__item, .gallery-grid-item, .formal-invite-schedule-illus')) return;
+      if (el.closest('.invite-photo-marquee, .gallery-grid-item, .formal-invite-schedule-illus')) return;
       if (el.closest('.polaroid-card-body') && !el.classList.contains('polaroid-card-body')) return;
       if (el.closest('.hero-arch-wrap') && !el.closest('.hero-arch-overlay, .hero-text-block')) return;
       push(el);

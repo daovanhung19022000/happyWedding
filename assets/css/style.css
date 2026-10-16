@@ -1267,40 +1267,115 @@ img.polaroid-role-sticker--groom {
   font-style: italic;
 }
 
-.invite-triptych {
+/* Thiệp mời — album cuộn ngang (marquee) */
+.invite-photo-marquee {
+  position: relative;
+  margin: 0 auto 22px;
+  max-width: 100%;
+  padding: 0 2px;
+}
+
+.invite-photo-marquee__viewport {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+  cursor: grab;
+  scrollbar-width: none;
+  padding: 4px 0 2px;
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 10%,
+    #000 90%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 10%,
+    #000 90%,
+    transparent 100%
+  );
+}
+
+.invite-photo-marquee__viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.invite-photo-marquee.is-dragging .invite-photo-marquee__viewport {
+  cursor: grabbing;
+}
+
+.invite-photo-marquee__track {
   display: flex;
   align-items: flex-end;
-  justify-content: center;
-  gap: 5px;
-  margin: 0 auto 22px;
-  max-width: 92%;
+  gap: clamp(6px, 2vw, 10px);
+  width: max-content;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-.invite-triptych__item {
-  flex: 1 1 0;
-  min-width: 0;
+.invite-photo-marquee:not(.is-ready) .invite-photo-marquee__track {
+  opacity: 0;
+}
+
+.invite-photo-marquee.is-ready .invite-photo-marquee__track {
+  opacity: 1;
+  transition: opacity 0.35s ease;
+}
+
+.invite-photo-marquee__item {
+  flex: 0 0 auto;
+  width: clamp(102px, 28vw, 132px);
   margin: 0;
-  overflow: hidden;
+}
+
+.invite-photo-marquee__frame {
   aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 2px;
   background: var(--bg-cream-soft);
+  box-shadow: 0 6px 18px rgba(110, 34, 51, 0.1);
+  animation: invite-photo-marquee-float 5.5s ease-in-out infinite;
 }
 
-.invite-triptych__item--center {
-  flex: 1.08 1 0;
-  /* Cùng chiều cao khung; chỉ nhích vị trí tấm giữa lên (không đổi transform — tránh scroll-reveal) */
-  margin-bottom: clamp(10px, 2.8vw, 16px);
+.invite-photo-marquee__item:nth-child(3n + 2) .invite-photo-marquee__frame {
+  margin-bottom: clamp(8px, 2.5vw, 14px);
+  animation-duration: 4.8s;
+  animation-delay: -1.2s;
 }
 
-.invite-triptych__item img {
+.invite-photo-marquee__item:nth-child(3n) .invite-photo-marquee__frame {
+  animation-delay: -2.4s;
+}
+
+@keyframes invite-photo-marquee-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.invite-photo-marquee__frame img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center 22%;
   display: block;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-drag: none;
 }
 
-.invite-triptych__item--center img {
-  object-position: center 12%;
+@media (prefers-reduced-motion: reduce) {
+  .invite-photo-marquee__frame {
+    animation: none !important;
+  }
 }
 
 .formal-invite-honor {
