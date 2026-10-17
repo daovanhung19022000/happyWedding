@@ -19,7 +19,8 @@
     '.love-story-title, .love-story-lead, ' +
     '.rsvp-form-heading, .form-group-item, .rsvp-submit-btn, a.formal-invite-directions, ' +
     '.formal-invite-schedule-text, .album-section-title, .footer-couple-title, ' +
-    '.footer-script-thankyou, .footer-closing-text, .wedding-calendar-countdown, ' +
+    '.footer-script-thankyou, .footer-closing-text, .chuc-phuc-footer__title, .chuc-phuc-footer__lead, ' +
+    '.chuc-phuc-footer__role, .chuc-phuc-footer__name, .wedding-calendar-countdown, ' +
     '.wedding-calendar-grid';
 
   const OPENING_ROOTS = '.hero-canvas-section';
