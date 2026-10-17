@@ -30,16 +30,6 @@ export function buildInviteGalleryGrid(container) {
     img.setAttribute('data-invite-slot', slotId);
 
     fig.appendChild(img);
-
-    if (index === total - 1) {
-      const caption = document.createElement('figcaption');
-      caption.className = 'gallery-finale-caption';
-      caption.innerHTML =
-        '<div class="footer-script-thankyou">Thank You!</div>' +
-        '<p class="footer-closing-text">Chân thành cảm ơn sự hiện diện và những lời chúc phúc tốt đẹp nhất của quý khách và người thân!</p>';
-      fig.appendChild(caption);
-    }
-
     container.appendChild(fig);
   });
 
