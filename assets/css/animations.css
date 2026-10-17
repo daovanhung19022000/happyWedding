@@ -382,27 +382,7 @@ body.intro-complete .hero-opening-details {
   }
 }
 
-/* Cuộn tự động — tắt reveal/transition để không giật khung hình */
-body.wedding-idle-scroll #app-canvas .scroll-reveal {
-  opacity: 1 !important;
-  transform: none !important;
-  animation: none !important;
-  transition: none !important;
-  will-change: auto;
-}
-
-body.wedding-idle-scroll .hero-opening-save,
-body.wedding-idle-scroll .hero-opening-photo,
-body.wedding-idle-scroll .hero-opening-details {
-  animation: none !important;
-  opacity: 1 !important;
-  transform: none !important;
-}
-
-body.wedding-idle-scroll .gallery-grid-item img {
-  transform: none !important;
-  transition: none !important;
-}
+/* Cuộn tự động — vẫn cho scroll-reveal chạy khi block vào khung hình */
 
 /* Ảnh vòm mở đầu — luôn hiện, không gắn scroll-reveal (tránh mất sau khi animation xong) */
 .hero-opening-panel .hero-arch-wrap,

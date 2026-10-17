@@ -377,7 +377,6 @@
     observer = new IntersectionObserver(
       (entries) => {
         if (reducedMotion()) return;
-        if (window.__weddingIdleScrollActive) return;
         entries.forEach((entry) => {
           const el = entry.target;
           if (entry.isIntersecting) {

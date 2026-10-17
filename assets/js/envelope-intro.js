@@ -133,7 +133,7 @@ function startIdleAutoScroll() {
   let lastFrameTs = 0;
   let scrollPos = 0;
   /** px/giây — cuộn tự động khi khách không tương tác */
-  const PX_PER_SEC = 168;
+  const PX_PER_SEC = 72;
 
   const removeListeners = () => {
     window.removeEventListener('wheel', onUserIntent);
@@ -184,7 +184,6 @@ function startIdleAutoScroll() {
     window.__weddingIdleScrollActive = true;
     document.documentElement.classList.add('wedding-auto-scroll');
     document.body.classList.add('wedding-idle-scroll');
-    window.WeddingScrollReveal?.freezeForAutoScroll?.();
     scrollPos = window.scrollY;
     lastFrameTs = 0;
     rafId = requestAnimationFrame(tick);
