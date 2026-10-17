@@ -2461,8 +2461,31 @@ img.polaroid-role-sticker--groom {
   grid-column: span 3;
 }
 
-.gallery-grid-item:not(.gallery-grid-item--hero):not(.gallery-grid-item--duo):not(.gallery-grid-item--finale) {
+.gallery-grid-item--third {
   grid-column: span 2;
+}
+
+.gallery-grid-item--half {
+  grid-column: span 3;
+}
+
+.gallery-grid-item:not(.gallery-grid-item--hero):not(.gallery-grid-item--duo):not(.gallery-grid-item--finale):not(.gallery-grid-item--fit-feet):not(.gallery-grid-item--third):not(.gallery-grid-item--half) {
+  grid-column: span 2;
+}
+
+/* Album — ảnh ngang (slot 8): full khung, ưu tiên không mất chân */
+.gallery-grid-item--fit-feet {
+  grid-column: 1 / -1;
+  align-self: start;
+  overflow: hidden;
+}
+
+.gallery-grid-item--fit-feet img {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center bottom;
 }
 
 .album-more-link {
@@ -2518,6 +2541,12 @@ img.polaroid-role-sticker--groom {
 .gallery-grid-item--finale:hover img,
 .gallery-grid-item--finale:focus-within img {
   transform: scale(1.03);
+}
+
+.gallery-grid-item--fit-feet:hover img,
+.gallery-grid-item--fit-feet:focus-within img {
+  transform: none;
+  filter: none;
 }
 
 @media (hover: none) {
