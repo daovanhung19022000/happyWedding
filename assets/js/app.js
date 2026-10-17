@@ -11,6 +11,7 @@ import {
   formatRsvpGuestName,
   formatWishGuestName,
 } from './invite-config.js';
+import { recordGuestInviteVisit } from './guest-invite-store.js';
 
 export { eventModes, resolveEventMode };
 
@@ -45,6 +46,11 @@ function handleQueryParams() {
     if (wishNameInput) wishNameInput.value = wishLine;
     setWishGuestName(wishLine);
     if (inviteGuestTitle) inviteGuestTitle.textContent = inviteLine;
+    recordGuestInviteVisit({
+      ...parsed,
+      role: role || parsed.role,
+      nickname: nickname || parsed.nickname,
+    });
   } else if (inviteGuestTitle) {
     inviteGuestTitle.textContent = 'Quý khách';
   }

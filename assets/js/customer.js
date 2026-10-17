@@ -166,6 +166,7 @@ function renderGuestTable() {
       <td>${escapeHtml(guest.role)}</td>
       <td class="customer-td-actions"></td>
       <td class="customer-td-actions"></td>
+      <td class="customer-td-visits">${formatVisitCount(guest.visitCount)}</td>
       <td>${escapeHtml(confirmName)}</td>
       <td><span class="customer-confirm-badge${rsvp ? ' is-filled' : ''}">${escapeHtml(confirmStatus)}</span></td>
     `;
@@ -199,6 +200,12 @@ function renderGuestTable() {
     qrCell.appendChild(qrBtn);
     tbody.appendChild(tr);
   }
+}
+
+function formatVisitCount(n) {
+  const v = Number(n);
+  if (!Number.isFinite(v) || v <= 0) return '0';
+  return String(Math.trunc(v));
 }
 
 function escapeHtml(str) {

@@ -1,4 +1,4 @@
-import { buildGuestKey, buildInviteUrl } from './invite-config.js';
+import { buildGuestKey, buildInviteUrl, modeKeyToCode } from './invite-config.js';
 
 const STORAGE_KEY = 'wedding_guest_invites';
 const COLLECTION = 'guest_invites';
@@ -37,6 +37,8 @@ function normalizeGuestRecord(raw, docId) {
     url: raw.url || buildInviteUrl(mode, name, role, nickname),
     guestKey,
     createdAt: raw.createdAt || new Date().toISOString(),
+    visitCount: Number(raw.visitCount) || 0,
+    lastVisitAt: raw.lastVisitAt || null,
   };
 }
 
@@ -214,4 +216,30 @@ export function formatRsvpConfirm(attendance) {
   if (attendance === 'attending') return 'Tham dự';
   if (attendance === 'declined') return 'Không tham dự';
   return attendance ? String(attendance) : '—';
+}
+
+/** Mỗi lần mở link mời cá nhân — cộng visitCount trên Firestore. */
+export function recordGuestInviteVisit(parsed) {
+  if (!parsed?.guestName || !window.firebaseDb) return;
+  const role = String(parsed.role || '').trim();
+  const modeCode = modeKeyToCode(parsed.mode);
+  const guestKey = buildGuestKey(modeCode, parsed.guestName, role);
+  const ref = window.firebaseDb.collection(COLLECTION).doc(guestKeyToDocId(guestKey));
+  const FieldValue = window.firebase?.firestore?.FieldValue;
+  if (!FieldValue) return;
+
+  ref
+    .set(
+      {
+        visitCount: FieldValue.increment(1),
+        lastVisitAt: new Date().toISOString(),
+        guestKey,
+        name: String(parsed.guestName).trim(),
+        role,
+        nickname: String(parsed.nickname || '').trim(),
+        mode: modeCode,
+      },
+      { merge: true },
+    )
+    .catch((err) => console.warn('Không ghi lượt truy cập link:', err));
 }
