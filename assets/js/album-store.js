@@ -23,11 +23,24 @@ export async function fetchUploadedAlbumUrls() {
   return rows.map((r) => r.url).filter(Boolean);
 }
 
+const UPLOAD_FETCH_TIMEOUT_MS = 2500;
+
 export async function loadAllAlbumImageUrls(basePath = '../kimono_image/') {
   const urls = staticAlbumUrls(basePath);
   try {
-    const uploaded = await fetchUploadedAlbumUrls();
-    return urls.concat(uploaded);
+    const uploaded = await Promise.race([
+      fetchUploadedAlbumUrls(),
+      new Promise((resolve) => setTimeout(() => resolve([]), UPLOAD_FETCH_TIMEOUT_MS)),
+    ]);
+    if (!uploaded.length) return urls;
+    const seen = new Set(urls);
+    uploaded.forEach((url) => {
+      if (url && !seen.has(url)) {
+        seen.add(url);
+        urls.push(url);
+      }
+    });
+    return urls;
   } catch (err) {
     console.warn('Không tải được ảnh upload:', err);
     return urls;

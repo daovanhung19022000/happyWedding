@@ -1278,9 +1278,8 @@ img.polaroid-role-sticker--groom {
 }
 
 .invite-photo-marquee__viewport {
-  overflow-x: auto;
+  overflow-x: hidden;
   overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
   touch-action: pan-x;
   cursor: grab;
@@ -1317,6 +1316,9 @@ img.polaroid-role-sticker--groom {
   width: max-content;
   user-select: none;
   -webkit-user-select: none;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
 
 .invite-photo-marquee:not(.is-ready) .invite-photo-marquee__track {

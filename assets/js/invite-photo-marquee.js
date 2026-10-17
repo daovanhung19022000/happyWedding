@@ -1,4 +1,7 @@
-import { loadAllAlbumImageUrls } from './album-store.js';
+import { staticAlbumUrls, fetchUploadedAlbumUrls } from './album-store.js';
+
+const MARQUEE_BASE = 'kimono_image/';
+const UPLOAD_WAIT_MS = 2500;
 
 function createMarqueeItem(src, index) {
   const fig = document.createElement('figure');
@@ -16,14 +19,48 @@ function createMarqueeItem(src, index) {
   return fig;
 }
 
-function loopScroll(viewport, track) {
-  const half = track.scrollWidth / 2;
-  if (half <= 0) return;
-  if (viewport.scrollLeft >= half) {
-    viewport.scrollLeft -= half;
-  } else if (viewport.scrollLeft < 0) {
-    viewport.scrollLeft += half;
+function waitForMarqueeImages(track) {
+  return new Promise((resolve) => {
+    const imgs = [...track.querySelectorAll('img')];
+    let pending = imgs.filter((img) => !img.complete).length;
+    if (!pending) {
+      resolve();
+      return;
+    }
+    const done = () => {
+      pending -= 1;
+      if (pending <= 0) resolve();
+    };
+    imgs.forEach((img) => {
+      if (!img.complete) {
+        img.addEventListener('load', done, { once: true });
+        img.addEventListener('error', done, { once: true });
+      }
+    });
+    window.setTimeout(resolve, 4500);
+  });
+}
+
+async function resolveMarqueeUrls() {
+  let urls = staticAlbumUrls(MARQUEE_BASE);
+  try {
+    const uploaded = await Promise.race([
+      fetchUploadedAlbumUrls(),
+      new Promise((resolve) => setTimeout(() => resolve([]), UPLOAD_WAIT_MS)),
+    ]);
+    if (uploaded.length) {
+      const seen = new Set(urls);
+      uploaded.forEach((url) => {
+        if (url && !seen.has(url)) {
+          seen.add(url);
+          urls.push(url);
+        }
+      });
+    }
+  } catch {
+    /* giữ ảnh static trong repo */
   }
+  return urls;
 }
 
 function wireInvitePhotoMarqueeInteraction(root, viewport, track) {
@@ -31,13 +68,31 @@ function wireInvitePhotoMarqueeInteraction(root, viewport, track) {
   let dragging = false;
   let pointerId = null;
   let startX = 0;
-  let startScroll = 0;
+  let startOffset = 0;
   let touchActive = false;
   let resumeAutoTimer = null;
+  let offsetPx = 0;
+  let segmentHalf = 0;
 
   const speed = 0.42;
 
   const isUserBlockingAuto = () => dragging || touchActive;
+
+  const applyTransform = () => {
+    track.style.transform = `translate3d(${-offsetPx}px, 0, 0)`;
+  };
+
+  const normalizeOffset = () => {
+    if (segmentHalf <= 0) return;
+    while (offsetPx >= segmentHalf) offsetPx -= segmentHalf;
+    while (offsetPx < 0) offsetPx += segmentHalf;
+    applyTransform();
+  };
+
+  const measure = () => {
+    segmentHalf = track.offsetWidth / 2;
+    normalizeOffset();
+  };
 
   const scheduleAutoResume = (delayMs = 550) => {
     clearTimeout(resumeAutoTimer);
@@ -47,20 +102,19 @@ function wireInvitePhotoMarqueeInteraction(root, viewport, track) {
   };
 
   const tick = () => {
-    if (!isUserBlockingAuto()) {
-      viewport.scrollLeft += speed;
-      loopScroll(viewport, track);
+    if (!isUserBlockingAuto() && segmentHalf > 0) {
+      offsetPx += speed;
+      normalizeOffset();
     }
     rafId = requestAnimationFrame(tick);
   };
 
-  viewport.addEventListener(
-    'scroll',
-    () => {
-      loopScroll(viewport, track);
-    },
-    { passive: true },
-  );
+  const resizeObserver =
+    typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(() => measure())
+      : null;
+  if (resizeObserver) resizeObserver.observe(track);
+  else window.addEventListener('resize', measure);
 
   viewport.addEventListener(
     'touchstart',
@@ -71,21 +125,8 @@ function wireInvitePhotoMarqueeInteraction(root, viewport, track) {
     { passive: true },
   );
 
-  viewport.addEventListener(
-    'touchend',
-    () => {
-      scheduleAutoResume(700);
-    },
-    { passive: true },
-  );
-
-  viewport.addEventListener(
-    'touchcancel',
-    () => {
-      scheduleAutoResume(400);
-    },
-    { passive: true },
-  );
+  viewport.addEventListener('touchend', () => scheduleAutoResume(700), { passive: true });
+  viewport.addEventListener('touchcancel', () => scheduleAutoResume(400), { passive: true });
 
   viewport.addEventListener(
     'pointerdown',
@@ -95,7 +136,7 @@ function wireInvitePhotoMarqueeInteraction(root, viewport, track) {
       dragging = true;
       pointerId = e.pointerId;
       startX = e.clientX;
-      startScroll = viewport.scrollLeft;
+      startOffset = offsetPx;
       root.classList.add('is-dragging');
       try {
         viewport.setPointerCapture(e.pointerId);
@@ -110,8 +151,8 @@ function wireInvitePhotoMarqueeInteraction(root, viewport, track) {
     'pointermove',
     (e) => {
       if (!dragging || e.pointerId !== pointerId) return;
-      viewport.scrollLeft = startScroll - (e.clientX - startX);
-      loopScroll(viewport, track);
+      offsetPx = startOffset - (e.clientX - startX);
+      normalizeOffset();
     },
     { passive: true },
   );
@@ -136,11 +177,13 @@ function wireInvitePhotoMarqueeInteraction(root, viewport, track) {
     root.classList.remove('is-dragging');
   });
 
+  measure();
   rafId = requestAnimationFrame(tick);
 
   return () => {
     cancelAnimationFrame(rafId);
     clearTimeout(resumeAutoTimer);
+    resizeObserver?.disconnect();
   };
 }
 
@@ -151,12 +194,7 @@ export async function buildInvitePhotoMarquee(root) {
   const track = root.querySelector('.invite-photo-marquee__track');
   if (!viewport || !track) return;
 
-  let urls = [];
-  try {
-    urls = await loadAllAlbumImageUrls('kimono_image/');
-  } catch {
-    urls = [];
-  }
+  const urls = await resolveMarqueeUrls();
   if (!urls.length) return;
 
   track.replaceChildren();
@@ -168,6 +206,9 @@ export async function buildInvitePhotoMarquee(root) {
   appendPass(0);
   appendPass(urls.length);
 
-  root.classList.add('is-ready');
-  wireInvitePhotoMarqueeInteraction(root, viewport, track);
+  await waitForMarqueeImages(track);
+  requestAnimationFrame(() => {
+    root.classList.add('is-ready');
+    wireInvitePhotoMarqueeInteraction(root, viewport, track);
+  });
 }
