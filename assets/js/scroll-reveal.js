@@ -20,7 +20,7 @@
     '.rsvp-form-heading, .form-group-item, .rsvp-submit-btn, a.formal-invite-directions, ' +
     '.formal-invite-schedule-text, .album-section-title, .footer-couple-title, ' +
     '.footer-script-thankyou, .footer-closing-text, .chuc-phuc-footer__title, .chuc-phuc-footer__lead, ' +
-    '.chuc-phuc-footer__role, .chuc-phuc-footer__name, .wedding-calendar-countdown, ' +
+    '.chuc-phuc-footer__role, .chuc-phuc-footer__name, .chuc-phuc-footer__thanks, .chuc-phuc-footer__credit, .wedding-calendar-countdown, ' +
     '.wedding-calendar-grid';
 
   const OPENING_ROOTS = '.hero-canvas-section';
