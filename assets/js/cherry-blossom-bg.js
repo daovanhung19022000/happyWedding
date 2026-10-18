@@ -30,16 +30,42 @@
     hero: [26, 34],
     polaroid: [28, 36],
     invite: [30, 38],
+    lovestory: [32, 44],
+    alwaysyou: [18, 26],
+    marriagetrio: [16, 24],
     rsvp: [32, 40],
     footer: [22, 30],
     loingo: [38, 50],
   };
 
+  /** Mobile — nhiều hơn bản quá gọn, vẫn nhẹ hơn desktop */
+  const ZONE_COUNTS_LITE = {
+    global: [20, 28],
+    topbar: [10, 14],
+    hero: [16, 22],
+    polaroid: [16, 22],
+    invite: [18, 24],
+    lovestory: [26, 36],
+    alwaysyou: [14, 20],
+    marriagetrio: [12, 18],
+    rsvp: [18, 24],
+    footer: [14, 20],
+    loingo: [24, 32],
+  };
+
+  function isLiteDevice() {
+    return window.WeddingPerf?.isLiteDevice?.() ?? window.matchMedia('(max-width: 768px)').matches;
+  }
+
   let started = false;
 
   function countForLayer(layer) {
     const zone = layer.dataset.blossomZone || 'global';
-    const range = ZONE_COUNTS[zone] || ZONE_COUNTS.global;
+    if (isLiteDevice()) {
+      const liteRange = ZONE_COUNTS_LITE[zone] || [14, 20];
+      return liteRange[0] + Math.floor(Math.random() * (liteRange[1] - liteRange[0] + 1));
+    }
+    const range = ZONE_COUNTS[zone] || [14, 22];
     return range[0] + Math.floor(Math.random() * (range[1] - range[0] + 1));
   }
 
@@ -53,11 +79,15 @@
       return;
     }
 
+    const countPlanned = countForLayer(layer);
+    if (countPlanned <= 0) {
+      layer.classList.add('blossom-pulse-layer--static');
+      return;
+    }
+
     const isSection = layer.classList.contains('blossom-pulse-layer--section');
     const isHeart = layer.dataset.blossomKind === 'heart';
-    const count = countForLayer(layer);
-
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < countPlanned; i++) {
       const el = document.createElement('div');
       el.className = isHeart ? 'blossom-pulse-item blossom-pulse-item--heart' : 'blossom-pulse-item';
       el.innerHTML = isHeart ? HEART_SVG : BLOSSOM_SVG;

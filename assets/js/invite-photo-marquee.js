@@ -74,7 +74,12 @@ function wireInvitePhotoMarqueeInteraction(root, viewport, track) {
   let offsetPx = 0;
   let segmentHalf = 0;
 
-  const speed = 0.42;
+  const lite = window.WeddingPerf?.isLiteDevice?.() ?? false;
+  const speed = lite ? 0.3 : 0.42;
+  const frameStride = lite ? 2 : 1;
+  let frameCounter = 0;
+  let pageVisible = document.visibilityState === 'visible';
+  let marqueeInView = true;
 
   const isUserBlockingAuto = () => dragging || touchActive;
 
@@ -101,13 +106,29 @@ function wireInvitePhotoMarqueeInteraction(root, viewport, track) {
     }, delayMs);
   };
 
+  const ensureLoop = () => {
+    if (!rafId && pageVisible && marqueeInView) {
+      rafId = requestAnimationFrame(tick);
+    }
+  };
+
   const tick = () => {
-    if (!isUserBlockingAuto() && segmentHalf > 0) {
-      offsetPx += speed;
+    rafId = 0;
+    if (!pageVisible || !marqueeInView) return;
+    frameCounter += 1;
+    if (frameCounter % frameStride === 0 && !isUserBlockingAuto() && segmentHalf > 0) {
+      offsetPx += speed * frameStride;
       normalizeOffset();
     }
     rafId = requestAnimationFrame(tick);
   };
+
+  document.addEventListener('visibilitychange', () => {
+    pageVisible = document.visibilityState === 'visible';
+    if (pageVisible) ensureLoop();
+    else if (rafId) cancelAnimationFrame(rafId);
+    rafId = 0;
+  });
 
   const resizeObserver =
     typeof ResizeObserver !== 'undefined'
@@ -177,13 +198,28 @@ function wireInvitePhotoMarqueeInteraction(root, viewport, track) {
     root.classList.remove('is-dragging');
   });
 
+  const viewObserver =
+    typeof IntersectionObserver !== 'undefined'
+      ? new IntersectionObserver(
+          ([entry]) => {
+            marqueeInView = Boolean(entry?.isIntersecting);
+            if (marqueeInView) ensureLoop();
+            else if (rafId) cancelAnimationFrame(rafId);
+            rafId = 0;
+          },
+          { root: null, threshold: 0, rootMargin: '48px 0px' },
+        )
+      : null;
+  viewObserver?.observe(root);
+
   measure();
-  rafId = requestAnimationFrame(tick);
+  ensureLoop();
 
   return () => {
     cancelAnimationFrame(rafId);
     clearTimeout(resumeAutoTimer);
     resizeObserver?.disconnect();
+    viewObserver?.disconnect();
   };
 }
 

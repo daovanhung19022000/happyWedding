@@ -25,7 +25,8 @@ function initIntroHearts(layer) {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   layer.innerHTML = '';
-  const count = 22 + Math.floor(Math.random() * 10);
+  const lite = window.WeddingPerf?.isLiteDevice?.() ?? window.matchMedia('(max-width: 768px)').matches;
+  const count = lite ? 14 + Math.floor(Math.random() * 8) : 22 + Math.floor(Math.random() * 10);
 
   for (let i = 0; i < count; i++) {
     const heart = document.createElement('div');
@@ -175,6 +176,11 @@ function startIdleAutoScroll() {
 
   const tick = (ts) => {
     if (stopped) return;
+    if (document.visibilityState === 'hidden') {
+      rafId = requestAnimationFrame(tick);
+      lastFrameTs = 0;
+      return;
+    }
     if (!lastFrameTs) lastFrameTs = ts;
     const deltaMs = Math.min(48, Math.max(8, ts - lastFrameTs));
     lastFrameTs = ts;

@@ -156,8 +156,8 @@ function tickerFrame(ts) {
     return;
   }
   if (tickerReducedMotion() || tickerPaused) {
-    tickerLastTs = ts;
-    tickerRaf = requestAnimationFrame(tickerFrame);
+    tickerRaf = null;
+    tickerLastTs = 0;
     return;
   }
   if (!tickerLastTs) tickerLastTs = ts;
@@ -223,7 +223,8 @@ function finalizeTickerLayout(track, layer, groupA, { prevScroll, prevSegment, i
   if (layer) layer.classList.add('is-ready');
   attachSegmentObserver(groupA);
   tickerLayoutReady = true;
-  startTickerEngine();
+  if (!tickerPaused) startTickerEngine();
+  else stopTickerEngine();
 }
 
 function rebuildTickerTrack() {
@@ -406,6 +407,7 @@ function setTickerLayerVisible(visible) {
   layer.classList.toggle('wish-ticker-layer--hidden', !visible);
   tickerPaused = !visible;
   if (visible) startTickerEngine();
+  else stopTickerEngine();
 }
 
 function readWishTickerPref() {

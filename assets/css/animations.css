@@ -116,6 +116,18 @@
   }
 }
 
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+  .blossom-pulse-item,
+  .blossom-pulse-item--heart {
+    will-change: auto;
+    filter: none;
+  }
+
+  .blossom-pulse-item--heart {
+    filter: none;
+  }
+}
+
 /* Floating effect */
 @keyframes floatGentle {
   0%, 100% {
