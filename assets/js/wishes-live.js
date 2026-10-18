@@ -17,11 +17,20 @@ let tickerWishes = [];
 let tickerListSignature = '';
 let tickerRebuildTimer = null;
 let tickerHasRendered = false;
+let tickerLayoutReady = false;
 let tickerRaf = null;
-let tickerOffsetPx = 0;
+/** Vị trí cuộn logic — chỉ tăng, không bị modulo ghi đè (tránh kẹt). */
+let tickerScrollPx = 0;
 let tickerSegmentPx = 0;
+let tickerSegmentPxLast = 0;
+let tickerViewportPx = 0;
+let tickerLeadPx = 0;
 let tickerLastTs = 0;
 let tickerPaused = false;
+let tickerSegmentObserver = null;
+
+const TICKER_BUBBLE_EST_PX = 34;
+const TICKER_GROUP_GAP_PX = 7;
 
 function escapeHtml(str) {
   return String(str || '')
@@ -65,6 +74,49 @@ function buildTickerGroup(items) {
   return group;
 }
 
+function getTickerViewportEl() {
+  return document.querySelector('.wish-ticker-viewport');
+}
+
+function measureTickerViewport() {
+  const vp = getTickerViewportEl();
+  return vp?.offsetHeight || Math.round(window.innerHeight * 0.33) || 280;
+}
+
+/** Lặp danh sách đủ cao để vòng cuộn ≥ viewport — tránh khựng khi ít lời chúc. */
+function expandCycleItems(items, viewportH) {
+  if (!items.length) return items;
+  const minSegment = Math.ceil(viewportH * 1.12);
+  const estPerItem = TICKER_BUBBLE_EST_PX + TICKER_GROUP_GAP_PX;
+  const minCount = Math.max(items.length, Math.ceil(minSegment / estPerItem));
+  let cycle = items.slice();
+  let guard = 0;
+  while (cycle.length < minCount && guard < 32) {
+    cycle = cycle.concat(items);
+    guard += 1;
+  }
+  return cycle;
+}
+
+function createTickerLeadSpacer(heightPx) {
+  const el = document.createElement('div');
+  el.className = 'wish-ticker-lead';
+  el.style.height = `${Math.max(0, Math.round(heightPx))}px`;
+  el.setAttribute('aria-hidden', 'true');
+  return el;
+}
+
+function getActiveSegmentPx() {
+  return tickerSegmentPx > 0 ? tickerSegmentPx : tickerSegmentPxLast;
+}
+
+function getTickerDrawOffset(scrollPx = tickerScrollPx, lead = tickerLeadPx, segment = getActiveSegmentPx()) {
+  const pos = Math.max(0, scrollPx);
+  if (segment <= 0 || lead <= 0) return pos;
+  if (pos <= lead) return pos;
+  return lead + ((pos - lead) % segment);
+}
+
 function wishesSignature(list) {
   return list
     .map((w) => w.id || `${w.timestamp || ''}\t${w.name || ''}\t${w.text || ''}`)
@@ -77,7 +129,19 @@ function measureSegmentHeight(groupEl) {
 }
 
 function applyTickerTransform(track) {
-  track.style.transform = `translate3d(0, ${-tickerOffsetPx}px, 0)`;
+  const drawY = getTickerDrawOffset();
+  track.style.transform = `translate3d(0, ${-drawY}px, 0)`;
+}
+
+function preserveScrollAcrossSegmentChange(prevScroll, prevSegment, nextSegment, lead = tickerLeadPx) {
+  if (nextSegment <= 0) return Math.max(0, prevScroll);
+  if (prevScroll <= lead) return Math.max(0, prevScroll);
+  if (prevSegment <= 0) return prevScroll;
+  const loopPos = (prevScroll - lead) % prevSegment;
+  const safeLoop =
+    loopPos >= 0 ? loopPos : loopPos + prevSegment * (1 + Math.ceil(-loopPos / prevSegment));
+  const ratio = safeLoop / prevSegment;
+  return lead + ratio * nextSegment;
 }
 
 function tickerReducedMotion() {
@@ -90,7 +154,7 @@ function tickerFrame(ts) {
     tickerRaf = requestAnimationFrame(tickerFrame);
     return;
   }
-  if (tickerReducedMotion() || tickerPaused || !tickerSegmentPx) {
+  if (tickerReducedMotion() || tickerPaused) {
     tickerLastTs = ts;
     tickerRaf = requestAnimationFrame(tickerFrame);
     return;
@@ -98,11 +162,10 @@ function tickerFrame(ts) {
   if (!tickerLastTs) tickerLastTs = ts;
   const dt = Math.min(0.05, (ts - tickerLastTs) / 1000);
   tickerLastTs = ts;
-  tickerOffsetPx += SCROLL_SPEED_PX * dt;
-  while (tickerSegmentPx > 0 && tickerOffsetPx >= tickerSegmentPx) {
-    tickerOffsetPx -= tickerSegmentPx;
+  if (getActiveSegmentPx() > 0) {
+    tickerScrollPx += SCROLL_SPEED_PX * dt;
+    applyTickerTransform(track);
   }
-  applyTickerTransform(track);
   tickerRaf = requestAnimationFrame(tickerFrame);
 }
 
@@ -118,39 +181,81 @@ function stopTickerEngine() {
   tickerLastTs = 0;
 }
 
+function attachSegmentObserver(groupA) {
+  if (tickerSegmentObserver) tickerSegmentObserver.disconnect();
+  if (typeof ResizeObserver === 'undefined' || !groupA) return;
+  tickerSegmentObserver = new ResizeObserver(() => {
+    if (!groupA.isConnected) return;
+    const next = measureSegmentHeight(groupA);
+    if (next <= 0 || next === tickerSegmentPx) return;
+    const prevScroll = tickerScrollPx;
+    const prevSegment = tickerSegmentPx;
+    tickerSegmentPx = next;
+    tickerSegmentPxLast = next;
+    tickerScrollPx = preserveScrollAcrossSegmentChange(prevScroll, prevSegment, next);
+    const track = document.getElementById('wish-ticker-track');
+    if (track) applyTickerTransform(track);
+  });
+  tickerSegmentObserver.observe(groupA);
+}
+
+function finalizeTickerLayout(track, layer, groupA, { prevScroll, prevSegment, isFirstPaint }) {
+  void track.offsetHeight;
+  let measured = measureSegmentHeight(groupA);
+  if (measured <= 0) {
+    void groupA.offsetHeight;
+    measured = measureSegmentHeight(groupA);
+  }
+  tickerSegmentPx = measured;
+  if (measured > 0) tickerSegmentPxLast = measured;
+
+  tickerLeadPx = tickerViewportPx;
+
+  if (isFirstPaint) {
+    tickerScrollPx = 0;
+  } else {
+    tickerScrollPx = preserveScrollAcrossSegmentChange(prevScroll, prevSegment, measured);
+  }
+
+  applyTickerTransform(track);
+  track.classList.add('is-ready');
+  if (layer) layer.classList.add('is-ready');
+  attachSegmentObserver(groupA);
+  tickerLayoutReady = true;
+  startTickerEngine();
+}
+
 function rebuildTickerTrack() {
   const track = document.getElementById('wish-ticker-track');
   const layer = document.getElementById('wish-ticker-layer');
   if (!track) return;
 
-  const items = orderedWishList(tickerWishes);
-  const prevRatio =
-    tickerSegmentPx > 0 ? (tickerOffsetPx % tickerSegmentPx) / tickerSegmentPx : 0;
+  const baseItems = orderedWishList(tickerWishes);
+  const prevScroll = tickerScrollPx;
+  const prevSegment = tickerSegmentPx;
+  const isFirstPaint = !tickerLayoutReady;
 
-  if (!items.length) {
+  tickerViewportPx = measureTickerViewport();
+  tickerLeadPx = tickerViewportPx;
+
+  if (!baseItems.length) {
     track.replaceChildren();
     tickerSegmentPx = 0;
     track.classList.remove('is-ready');
+    if (tickerSegmentObserver) tickerSegmentObserver.disconnect();
     return;
   }
 
+  const cycleItems = expandCycleItems(baseItems, tickerViewportPx);
+  if (tickerSegmentObserver) tickerSegmentObserver.disconnect();
   track.replaceChildren();
-  const groupA = buildTickerGroup(items);
-  const groupB = buildTickerGroup(items);
+  const groupA = buildTickerGroup(cycleItems);
+  const groupB = buildTickerGroup(cycleItems);
   groupB.setAttribute('aria-hidden', 'true');
-  track.append(groupA, groupB);
-  track.dataset.wishCount = String(items.length);
+  track.append(createTickerLeadSpacer(tickerLeadPx), groupA, groupB);
+  track.dataset.wishCount = String(baseItems.length);
 
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      tickerSegmentPx = measureSegmentHeight(groupA);
-      tickerOffsetPx = tickerSegmentPx && prevRatio > 0 ? prevRatio * tickerSegmentPx : 0;
-      applyTickerTransform(track);
-      track.classList.add('is-ready');
-      if (layer) layer.classList.add('is-ready');
-      startTickerEngine();
-    });
-  });
+  finalizeTickerLayout(track, layer, groupA, { prevScroll, prevSegment, isFirstPaint });
 }
 
 function setTickerWishes(list, { force = false, fromCache = false } = {}) {
