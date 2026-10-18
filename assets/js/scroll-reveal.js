@@ -464,12 +464,27 @@
     });
   }
 
+  function refreshGallerySection() {
+    const section = document.querySelector('.gallery-canvas-section');
+    if (!section) return;
+    if (
+      !document.body.classList.contains('intro-complete') &&
+      !document.body.classList.contains('intro-revealing')
+    ) {
+      return;
+    }
+    markAll();
+    observeAll();
+    setupGalleryLazyReveal();
+  }
+
   function boot() {
     markAll();
     lockHeroOpeningVisible();
     playOpening();
     observeAll();
     setupGalleryLazyReveal();
+    refreshGallerySection();
     lockHeroOpeningVisible();
   }
 
@@ -496,7 +511,19 @@
 
   }
 
-  window.WeddingScrollReveal = { boot, markAll, refresh: observeAll, freezeForAutoScroll };
+  window.WeddingScrollReveal = {
+    boot,
+    markAll,
+    refresh: observeAll,
+    refreshGallery: refreshGallerySection,
+    freezeForAutoScroll,
+  };
+
+  window.addEventListener('wedding:gallery-built', () => {
+    if (document.body.classList.contains('intro-complete')) {
+      refreshGallerySection();
+    }
+  });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', wireEvents);

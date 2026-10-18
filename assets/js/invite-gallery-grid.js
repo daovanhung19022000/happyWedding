@@ -108,5 +108,33 @@ export function buildInviteGalleryGrid(container) {
     if (figures[index]) container.appendChild(figures[index]);
   });
 
-  queueMicrotask(() => {
+  syncGalleryAfterBuild(container);
+}
+
+function syncGalleryAfterBuild(container) {
+  const run = () => {
     window.WeddingBlossomPulse?.refresh?.();
+    if (typeof window.WeddingScrollReveal?.refreshGallery === 'function') {
+      window.WeddingScrollReveal.refreshGallery();
+      return;
+    }
+    if (typeof window.WeddingScrollReveal?.markAll === 'function') {
+      window.WeddingScrollReveal.markAll();
+      window.WeddingScrollReveal.refresh?.();
+    }
+    if (document.body.classList.contains('intro-complete')) {
+      container.querySelectorAll('.gallery-grid-item').forEach((el) => {
+        el.classList.add('scroll-reveal', 'scroll-reveal--gallery', 'scroll-reveal--persist', 'is-visible');
+        el.dataset.revealDone = '1';
+      });
+    }
+  };
+
+  queueMicrotask(() => {
+    run();
+    window.dispatchEvent(new Event('wedding:gallery-built'));
+  });
+  if (!document.body.classList.contains('intro-complete')) {
+    window.addEventListener('wedding:intro-complete', run, { once: true });
+  }
+}
