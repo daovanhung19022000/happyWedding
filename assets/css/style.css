@@ -2409,9 +2409,73 @@ img.polaroid-role-sticker--groom {
   min-width: 0;
 }
 
-.album-section-head-row .album-more-link {
-  flex-shrink: 0;
-  white-space: nowrap;
+.album-loi-ngo-zone {
+  grid-column: 1 / -1;
+  position: relative;
+  isolation: isolate;
+  margin: 10px calc(-1 * var(--gallery-pad-x, 10px)) 6px;
+  padding: 22px 14px 26px;
+  background: linear-gradient(
+    165deg,
+    rgba(255, 236, 244, 0.92) 0%,
+    rgba(252, 245, 238, 0.97) 42%,
+    rgba(251, 248, 242, 1) 100%
+  );
+  border-top: 1px solid rgba(197, 107, 133, 0.28);
+  border-bottom: 1px solid rgba(197, 107, 133, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.album-loi-ngo-zone .blossom-pulse-layer--hearts {
+  bottom: 0;
+}
+
+.album-more-inline {
+  grid-column: 1 / -1;
+  text-align: right;
+  padding: 4px 10px 12px;
+  line-height: 1.4;
+}
+
+.album-loi-ngo-head {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 8px 8px 18px;
+}
+
+.album-loi-ngo-zone .album-loi-ngo-head {
+  grid-column: unset;
+  position: relative;
+  z-index: 1;
+  padding: 0 8px 4px;
+}
+
+.album-loi-ngo-title {
+  font-family: 'Ephesis', 'Allura', var(--font-script);
+  font-size: clamp(3.05rem, 13.5vw, 4.15rem);
+  font-weight: 400;
+  font-style: normal;
+  color: #6e2233;
+  line-height: 1;
+  margin: 0 0 16px;
+  padding: 0 4px;
+  letter-spacing: 0.12em;
+  -webkit-font-smoothing: antialiased;
+  text-shadow: 0 4px 28px rgba(148, 34, 51, 0.11);
+}
+
+.album-loi-ngo-lead {
+  font-family: var(--font-serif);
+  font-size: clamp(0.92rem, 3.6vw, 1.02rem);
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin: 0 auto;
+  max-width: 340px;
+  padding: 0 6px;
+  white-space: pre-line;
+  text-align: center;
 }
 
 .album-section-rule {
@@ -2496,7 +2560,9 @@ img.polaroid-role-sticker--groom {
 }
 
 .album-more-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--font-body);
   font-size: clamp(0.72rem, 2.8vw, 0.8rem);
   font-weight: 500;
@@ -2506,12 +2572,26 @@ img.polaroid-role-sticker--groom {
   text-decoration: none;
   border-bottom: 1px solid rgba(154, 99, 79, 0.35);
   padding-bottom: 2px;
-  transition: color 0.2s ease, border-color 0.2s ease;
+  transition: color 0.2s ease, border-color 0.2s ease, gap 0.2s ease;
+}
+
+.album-more-link::after {
+  content: '→';
+  font-size: 1.05em;
+  line-height: 1;
+  color: rgba(148, 34, 51, 0.55);
+  transition: transform 0.2s ease, color 0.2s ease;
 }
 
 .album-more-link:hover {
   color: var(--primary);
   border-color: rgba(148, 34, 51, 0.45);
+  gap: 8px;
+}
+
+.album-more-link:hover::after {
+  color: var(--primary);
+  transform: translateX(2px);
 }
 
 .gallery-grid-item img {

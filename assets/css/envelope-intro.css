@@ -39,6 +39,25 @@ body.intro-active #audio-toggle-btn {
   visibility: hidden;
 }
 
+/* Lời chúc / dock nằm ngoài #app-canvas — ẩn hết khi chưa mở phong */
+body.intro-active .wish-ticker-layer,
+body.intro-active .wish-dock,
+body.intro-revealing .wish-ticker-layer,
+body.intro-revealing .wish-dock {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+body.intro-active .wish-compose-backdrop,
+body.intro-active .wish-compose-sheet,
+body.intro-revealing .wish-compose-backdrop,
+body.intro-revealing .wish-compose-sheet {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 /* Crossfade mượt: nội dung chính hiện dần trong khi lớp intro mờ đi */
 body.intro-revealing #app-canvas,
 body.intro-complete #app-canvas {
@@ -65,7 +84,7 @@ body.intro-complete #audio-toggle-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ffffff;
+  background: transparent;
   transition: opacity 1.15s cubic-bezier(0.25, 1, 0.35, 1);
   overflow: hidden;
 }
@@ -82,11 +101,11 @@ body.intro-complete #audio-toggle-btn {
 }
 
 body.intro-active {
-  background: #ffffff;
+  background: transparent;
 }
 
 html:has(body.intro-active) {
-  background: #ffffff;
+  background: transparent;
 }
 
 /* Chế độ tạm: chỉ nền trắng, chưa vẽ phong thiệp */
@@ -234,13 +253,46 @@ html:has(body.intro-active) {
 }
 
 /* Scene phong bì */
+.envelope-couple-names {
+  margin: 0 0 6px;
+  padding: 0 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35em 0.45em;
+  line-height: 1.2;
+  text-align: center;
+  z-index: 3;
+}
+
+.envelope-couple-names__name {
+  display: inline-block;
+  font-family: var(--font-couple);
+  font-size: clamp(1.55rem, 6.8vw, 2rem);
+  font-weight: 400;
+  color: #6e2233;
+  letter-spacing: 0.04em;
+  -webkit-font-smoothing: antialiased;
+  transition: transform 0.9s cubic-bezier(0.33, 1, 0.45, 1), opacity 0.65s ease;
+}
+
+.envelope-couple-names__amp {
+  display: inline-block;
+  font-family: var(--font-script);
+  font-size: clamp(1.05rem, 4.2vw, 1.25rem);
+  color: #c4a066;
+  line-height: 1;
+  transition: transform 0.9s cubic-bezier(0.33, 1, 0.45, 1), opacity 0.65s ease;
+}
+
 .envelope-scene {
   position: relative;
   z-index: 25;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 28px;
+  gap: 20px;
   padding: 20px;
   max-width: 440px;
   width: 100%;
@@ -321,28 +373,24 @@ html:has(body.intro-active) {
 /* ——— Thiệp 3 mảnh ngang (xếp chồng) · đỏ hồng · không dạng cột dọc ——— */
 .invite-tri {
   position: relative;
-  width: min(92vw, 320px);
-  height: min(58vw, 208px);
+  width: min(70vw, 301px);
+  height: min(62vw, 238px);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   pointer-events: auto;
   touch-action: manipulation;
   z-index: 2;
+  overflow: visible;
 }
 
 .invite-tri__shadow {
-  position: absolute;
-  left: 6%;
-  right: 6%;
-  bottom: -14px;
-  height: 28px;
-  background: radial-gradient(ellipse, rgba(120, 45, 65, 0.16) 0%, transparent 72%);
-  filter: blur(8px);
+  display: none;
 }
 
 .invite-tri__stack {
   position: absolute;
   inset: 0;
+  overflow: visible;
 }
 
 /* Cùng kích thước thiệp ngang — xếp chồng như bộ 3 tấm */
@@ -386,9 +434,17 @@ html:has(body.intro-active) {
   pointer-events: none;
 }
 
+.invite-tri__card--back,
+.invite-tri__card--mid {
+  inset: 12% 14%;
+  opacity: 1;
+  pointer-events: none;
+  transform: translate(0, 0) rotate(0deg);
+  transform-origin: center center;
+}
+
 .invite-tri__card--back {
   z-index: 1;
-  transform: translate(10px, 10px) rotate(4deg);
 }
 
 .invite-tri__card--back .invite-tri__face {
@@ -397,19 +453,88 @@ html:has(body.intro-active) {
 
 .invite-tri__card--mid {
   z-index: 2;
-  transform: translate(-8px, 5px) rotate(-3deg);
 }
 
 .invite-tri__card--mid .invite-tri__face {
   background: linear-gradient(145deg, #b83650 0%, #a02d45 100%);
 }
 
-.invite-tri__card--front {
-  z-index: 3;
+.invite-tri__card--back .invite-tri__face,
+.invite-tri__card--mid .invite-tri__face {
+  padding: 12px 10px;
+}
+
+.invite-tri__card--back .invite-tri__date,
+.invite-tri__card--mid .invite-tri__date {
+  font-size: 0.82rem;
+  margin-top: 4px;
+}
+
+.invite-tri__card--back .invite-tri__label,
+.invite-tri__card--mid .invite-tri__label {
+  font-size: 0.5rem;
+  letter-spacing: 0.18em;
+}
+
+.invite-tri__card--back .invite-tri__note,
+.invite-tri__card--mid .invite-tri__note {
+  font-size: 0.58rem;
+  margin-top: 4px;
+}
+
+.invite-tri__card.invite-tri__card--front {
+  z-index: 4;
+  inset: -24% -28%;
   transform: translate(0, 0) rotate(0deg);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.28) inset,
-    0 18px 44px rgba(110, 35, 55, 0.22);
+  overflow: visible;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.invite-tri__face--photo {
+  padding: 0;
+  background: transparent;
+}
+
+.invite-tri__photo-eyebrow {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(calc(-50% - 65px));
+  margin: 0;
+  padding: 0 10px;
+  font-family: var(--font-couple);
+  font-size: clamp(0.95rem, 4vw, 1.18rem);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: capitalize;
+  color: #fff4f8;
+  text-align: center;
+  line-height: 1.25;
+  -webkit-font-smoothing: antialiased;
+  text-shadow: 0 2px 18px rgba(197, 107, 133, 0.42), 0 1px 6px rgba(110, 34, 51, 0.22);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.invite-tri__face--photo::before,
+.invite-tri__face--photo::after {
+  display: none;
+}
+
+.invite-tri__face--photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  filter: drop-shadow(0 12px 32px rgba(40, 25, 30, 0.16));
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .invite-tri__eyebrow {
@@ -487,14 +612,29 @@ html:has(body.intro-active) {
   letter-spacing: 0.06em;
 }
 
-/* Mở: 3 tấm trượt ngang — bộ thiệp, không cột dọc */
+/* Mở: 2 tấm phụ từ giữa bay sang trái / phải */
 .envelope-intro.is-opening .invite-tri__card--back {
-  transform: translate(-98%, 4px) rotate(-12deg);
+  transform: translate(-115%, 0) rotate(-10deg);
   opacity: 0;
 }
 
 .envelope-intro.is-opening .invite-tri__card--mid {
-  transform: translate(98%, 4px) rotate(12deg);
+  transform: translate(115%, 0) rotate(10deg);
+  opacity: 0;
+}
+
+.envelope-intro.is-opening .envelope-couple-names__name--groom {
+  transform: translate(-115%, 0) rotate(-10deg);
+  opacity: 0;
+}
+
+.envelope-intro.is-opening .envelope-couple-names__name--bride {
+  transform: translate(115%, 0) rotate(10deg);
+  opacity: 0;
+}
+
+.envelope-intro.is-opening .envelope-couple-names__amp {
+  transform: scale(0.6);
   opacity: 0;
 }
 

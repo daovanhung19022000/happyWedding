@@ -30,6 +30,53 @@ function layoutClassForIndex(index, total) {
   return '';
 }
 
+function createAlbumMoreLink() {
+  const wrap = document.createElement('div');
+  wrap.className = 'album-more-inline';
+  const link = document.createElement('a');
+  link.className = 'album-more-link';
+  link.href = 'album/';
+  link.textContent = 'Xem thêm ảnh cưới';
+  link.setAttribute('aria-label', 'Xem thêm ảnh cưới — mở trang album');
+  wrap.appendChild(link);
+  return wrap;
+}
+
+const LOI_NGO_BODY =
+  'Cảm ơn bạn đã dành tình cảm cho vợ chồng mình. Chúng mình biết các bạn đều đang rất bận, bận với công việc, với cuộc sống và với cả gia đình bạn. Nhưng thực sự sẽ rất tuyệt vời nếu như ngày Hạnh Phúc của chúng mình có thêm sự góp mặt của bạn. Vợ chồng mình rất hi vọng sẽ có mặt bạn trong ngày quan trọng này để chứng kiến và chia sẻ niềm hạnh phúc này cùng chúng mình.\nMột lần nữa, chân thành cảm ơn bạn ❤️';
+
+function createAlbumLoiNgoBlock() {
+  const wrap = document.createElement('div');
+  wrap.className = 'album-loi-ngo-head';
+
+  const title = document.createElement('h2');
+  title.className = 'album-loi-ngo-title';
+  title.textContent = 'Lời Ngỏ';
+
+  const body = document.createElement('p');
+  body.className = 'album-loi-ngo-lead';
+  body.textContent = LOI_NGO_BODY;
+
+  wrap.appendChild(title);
+  wrap.appendChild(body);
+  return wrap;
+}
+
+function createAlbumLoiNgoZone() {
+  const zone = document.createElement('div');
+  zone.className = 'album-loi-ngo-zone blossom-zone-section';
+
+  const pulse = document.createElement('div');
+  pulse.className = 'blossom-pulse-layer blossom-pulse-layer--section blossom-pulse-layer--hearts';
+  pulse.dataset.blossomZone = 'loingo';
+  pulse.dataset.blossomKind = 'heart';
+  pulse.setAttribute('aria-hidden', 'true');
+
+  zone.appendChild(pulse);
+  zone.appendChild(createAlbumLoiNgoBlock());
+  return zone;
+}
+
 export function buildInviteGalleryGrid(container) {
   if (!container) return;
   container.replaceChildren();
@@ -54,10 +101,12 @@ export function buildInviteGalleryGrid(container) {
   });
 
   galleryDisplayOrder(total).forEach((index) => {
+    if (index === total - 1) {
+      container.appendChild(createAlbumMoreLink());
+      container.appendChild(createAlbumLoiNgoZone());
+    }
     if (figures[index]) container.appendChild(figures[index]);
   });
 
   queueMicrotask(() => {
-    window.WeddingScrollReveal?.boot?.();
-  });
-}
+    window.WeddingBlossomPulse?.refresh?.();

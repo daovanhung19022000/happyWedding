@@ -16,7 +16,7 @@
 
   const REVEAL_TEXT =
     'h1, h2, h3, h4, h5, h6, p, li, .hero-eyebrow, .hero-journey-tagline, .hero-date-ribbon, ' +
-    '.love-story-title, .love-story-lead, ' +
+    '.love-story-title, .love-story-lead, .album-loi-ngo-title, .album-loi-ngo-lead, ' +
     '.rsvp-form-heading, .form-group-item, .rsvp-submit-btn, a.formal-invite-directions, ' +
     '.formal-invite-schedule-text, .album-section-title, .footer-couple-title, ' +
     '.footer-script-thankyou, .footer-closing-text, .chuc-phuc-footer__title, .chuc-phuc-footer__lead, ' +
@@ -217,10 +217,12 @@
     if (section.classList.contains('gallery-canvas-section')) {
       const title = section.querySelector('.album-section-title');
       const moreLink = section.querySelector('.album-more-link');
+      const loiNgo = section.querySelector('.album-loi-ngo-title');
+      const loiNgoLead = section.querySelector('.album-loi-ngo-lead');
       if (title) push(title);
       if (moreLink) push(moreLink);
-      section.querySelectorAll('.gallery-grid-item').forEach(push);
-      return list;
+      if (loiNgo) push(loiNgo);
+      if (loiNgoLead) push(loiNgoLead);
     }
 
     section.querySelectorAll(REVEAL_MEDIA).forEach((el) => {

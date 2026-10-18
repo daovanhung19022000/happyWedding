@@ -32,6 +32,7 @@
     invite: [30, 38],
     rsvp: [32, 40],
     footer: [22, 30],
+    loingo: [38, 50],
   };
 
   let started = false;

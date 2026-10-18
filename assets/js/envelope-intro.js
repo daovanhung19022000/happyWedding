@@ -316,14 +316,14 @@ function initEnvelopeIntro() {
   window.setTimeout(() => {
     if (!intro.isConnected || opened) return;
     openEnvelope();
-  }, 2500);
+  }, 15000);
 
   window.setTimeout(() => {
     if (!intro.isConnected) return;
     if (document.body.classList.contains('intro-active')) {
       finishIntro(intro);
     }
-  }, 8000);
+  }, 22000);
 }
 
 window.startIdleAutoScroll = startIdleAutoScroll;
