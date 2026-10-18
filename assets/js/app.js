@@ -108,6 +108,19 @@ export function updateModeUI(modeKey) {
   if (heroOpeningDateShort) heroOpeningDateShort.textContent = modeData.saveTheDateShort || '';
   if (inviteAddress) inviteAddress.textContent = modeData.address;
   if (inviteMapLink) inviteMapLink.href = modeData.mapLink;
+  if (inviteVenueTitle) inviteVenueTitle.textContent = modeData.inviteVenueTitle || modeData.venue || '';
+  if (inviteWeekday) inviteWeekday.textContent = modeData.inviteWeekday || '';
+  if (inviteSideTime) inviteSideTime.textContent = formatInviteHour(modeData.welcomeTime);
+  if (inviteDayNum) inviteDayNum.textContent = modeData.inviteDay || '';
+  if (inviteMonthLabel) inviteMonthLabel.textContent = modeData.inviteMonthLabel || '';
+  if (inviteYear) inviteYear.textContent = modeData.inviteYear ? `Năm ${modeData.inviteYear}` : '';
+  if (inviteLunarParen && modeData.lunarDate) {
+    inviteLunarParen.textContent = modeData.lunarDate.startsWith('(')
+      ? modeData.lunarDate
+      : `(${modeData.lunarDate})`;
+  }
+  if (inviteScheduleWelcome) inviteScheduleWelcome.textContent = formatInviteHour(modeData.welcomeTime);
+  if (inviteScheduleParty) inviteScheduleParty.textContent = formatInviteHour(modeData.partyTime);
 
   renderWeddingCalendar(modeData.specialDateDay);
 
