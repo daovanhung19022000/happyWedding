@@ -206,19 +206,32 @@ function initLightbox() {
   }
 }
 
+function syncRsvpGuestsGroup(form) {
+  const group = document.getElementById('rsvp-guests-group');
+  if (!group) return;
+  const attending = form.querySelector('input[name="attendance"]:checked')?.value === 'attending';
+  group.hidden = !attending;
+}
+
 // Xử lý RSVP (Xác nhận tham dự)
 function initRSVPForm() {
   const form = document.getElementById('rsvp-form');
   const statusMsg = document.getElementById('rsvp-status-msg');
   if (!form) return;
 
+  form.querySelectorAll('input[name="attendance"]').forEach((radio) => {
+    radio.addEventListener('change', () => syncRsvpGuestsGroup(form));
+  });
+  syncRsvpGuestsGroup(form);
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('rsvp-name').value.trim();
     const attendance = form.elements['attendance'].value;
-    const guestsEl = document.getElementById('rsvp-guests');
     const noteEl = document.getElementById('rsvp-note');
-    const guests = guestsEl ? guestsEl.value : '1';
+    const guestsSelected = form.querySelector('input[name="guests"]:checked');
+    const guests =
+      attendance === 'declined' ? '0' : guestsSelected ? guestsSelected.value : '1';
     const note = noteEl ? noteEl.value.trim() : '';
 
     if (!name) {
@@ -263,6 +276,9 @@ function initRSVPForm() {
       form.reset();
       const attendingDefault = form.querySelector('input[name="attendance"][value="attending"]');
       if (attendingDefault) attendingDefault.checked = true;
+      const guestsDefault = form.querySelector('input[name="guests"][value="1"]');
+      if (guestsDefault) guestsDefault.checked = true;
+      syncRsvpGuestsGroup(form);
     } catch (error) {
       console.error(error);
       alert("Đã xảy ra lỗi khi gửi. Vui lòng thử lại!");

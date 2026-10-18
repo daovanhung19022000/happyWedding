@@ -463,6 +463,13 @@ body.customer-page::before {
   min-width: 5rem;
 }
 
+.customer-td-guests {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  min-width: 4.5rem;
+  white-space: nowrap;
+}
+
 .customer-td-actions {
   white-space: nowrap;
 }

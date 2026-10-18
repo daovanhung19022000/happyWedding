@@ -158,6 +158,7 @@ function renderGuestTable() {
     const rsvp = rsvpByKey.get(guest.guestKey);
     const confirmName = rsvp?.name || '—';
     const confirmStatus = rsvp ? formatRsvpConfirm(rsvp.attendance) : '—';
+    const guestCount = formatRsvpGuestCount(rsvp);
 
     tr.innerHTML = `
       <td class="customer-td-name">${escapeHtml(guest.name)}</td>
@@ -169,6 +170,7 @@ function renderGuestTable() {
       <td class="customer-td-visits">${formatVisitCount(guest.visitCount)}</td>
       <td>${escapeHtml(confirmName)}</td>
       <td><span class="customer-confirm-badge${rsvp ? ' is-filled' : ''}">${escapeHtml(confirmStatus)}</span></td>
+      <td class="customer-td-guests">${escapeHtml(guestCount)}</td>
     `;
 
     const linkCell = tr.children[4];
@@ -206,6 +208,14 @@ function formatVisitCount(n) {
   const v = Number(n);
   if (!Number.isFinite(v) || v <= 0) return '0';
   return String(Math.trunc(v));
+}
+
+function formatRsvpGuestCount(rsvp) {
+  if (!rsvp) return '—';
+  if (rsvp.attendance === 'declined') return '—';
+  const n = Number(rsvp.guests);
+  if (!Number.isFinite(n) || n <= 0) return '1';
+  return String(Math.trunc(n));
 }
 
 function escapeHtml(str) {

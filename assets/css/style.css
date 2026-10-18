@@ -255,13 +255,17 @@ body {
 }
 
 .hero-opening-save {
-  margin: 0 0 14px;
-  font-family: var(--font-condensed);
-  font-size: clamp(0.82rem, 3.4vw, 0.96rem);
-  font-weight: 500;
-  letter-spacing: 0.34em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.94);
+  margin: 0 0 16px;
+  padding: 0 6px;
+  font-family: var(--font-couple);
+  font-size: clamp(2.65rem, 12vw, 3.55rem);
+  font-weight: 400;
+  line-height: 1.06;
+  letter-spacing: 0.03em;
+  text-transform: none;
+  color: rgba(255, 250, 246, 0.97);
+  -webkit-font-smoothing: antialiased;
+  text-shadow: 0 3px 28px rgba(0, 0, 0, 0.22);
 }
 
 .hero-opening-layout {
@@ -2693,6 +2697,31 @@ img.polaroid-role-sticker--groom {
   margin-bottom: 0;
 }
 
+.rsvp-invite-intro p.rsvp-save-the-date {
+  font-family: var(--font-couple);
+  font-size: clamp(2.55rem, 11.5vw, 3.45rem);
+  font-weight: 400;
+  line-height: 1.06;
+  letter-spacing: 0.03em;
+  color: #6e2233;
+  margin: 0 0 18px;
+  -webkit-font-smoothing: antialiased;
+  text-shadow: 0 2px 24px rgba(110, 34, 51, 0.14);
+}
+
+.rsvp-save-the-date__heart {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 0.65em;
+  font-weight: 400;
+  color: #c56b85;
+  vertical-align: middle;
+  margin: 0 0.08em;
+  transform: translateY(-0.08em);
+  text-shadow: none;
+  opacity: 0.92;
+}
+
 .rsvp-box-card {
   background: rgba(255, 255, 255, 0.9);
   border-radius: 16px;
@@ -2752,6 +2781,53 @@ img.polaroid-role-sticker--groom {
 .rsvp-radios-pair--plain .rsvp-radio-label input {
   margin-top: 3px;
   flex-shrink: 0;
+}
+
+.rsvp-guests-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.rsvp-guest-option {
+  position: relative;
+  margin: 0;
+  cursor: pointer;
+}
+
+.rsvp-guest-option input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.rsvp-guest-option span {
+  display: block;
+  padding: 10px 4px;
+  border-radius: 8px;
+  border: 1px solid rgba(92, 61, 46, 0.22);
+  background: #fff;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-secondary);
+  line-height: 1.2;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.rsvp-guest-option input:checked + span {
+  border-color: rgba(92, 61, 46, 0.55);
+  background: rgba(92, 61, 46, 0.08);
+  color: #5c3d2e;
+}
+
+.rsvp-guest-option input:focus-visible + span {
+  outline: 2px solid rgba(92, 61, 46, 0.45);
+  outline-offset: 2px;
 }
 
 .rsvp-status-msg {
