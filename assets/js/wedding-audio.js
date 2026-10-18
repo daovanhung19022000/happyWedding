@@ -118,7 +118,7 @@ async function bootstrapMutedAutoplay() {
 
 function restoreFromSession() {
   const saved = readSavedState();
-  if (!saved?.src) return false;
+  if (!saved?.src || !saved.playing) return false;
 
   audioElement.src = saved.src;
   currentTrackIndex =
@@ -137,13 +137,9 @@ function restoreFromSession() {
   if (audioElement.readyState >= 1) seek();
   else audioElement.addEventListener('loadedmetadata', seek, { once: true });
 
-  if (saved.playing) {
-    audioUnlocked = true;
-    audioElement.muted = false;
-    startPlayback(true);
-  } else {
-    markPaused();
-  }
+  audioUnlocked = true;
+  audioElement.muted = false;
+  startPlayback(true);
   return true;
 }
 

@@ -170,11 +170,25 @@ body.has-wish-dock {
   align-items: flex-end;
 }
 
-.wish-ticker-toggle {
+.wish-ticker-toggle-stack {
   position: absolute;
   bottom: calc(100% + 5px);
   left: 50%;
   transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: max-content;
+  pointer-events: none;
+}
+
+.wish-ticker-toggle-stack .wish-ticker-toggle {
+  pointer-events: auto;
+}
+
+.wish-ticker-toggle {
+  position: relative;
   display: inline-flex;
   cursor: pointer;
   margin: 0;
@@ -192,11 +206,11 @@ body.has-wish-dock {
   width: 20px;
   height: 38px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.28);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(8px);
   transition: background 0.2s ease, border-color 0.2s ease;
-  box-shadow: 0 1px 6px rgba(20, 16, 14, 0.15);
+  box-shadow: 0 1px 6px rgba(20, 16, 14, 0.12);
 }
 
 .wish-ticker-toggle__heart {
@@ -207,7 +221,7 @@ body.has-wish-dock {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, 0.42);
+  color: #e85a8a;
   transition: top 0.22s ease, color 0.22s ease, transform 0.22s ease;
   line-height: 0;
 }
@@ -224,7 +238,7 @@ body.has-wish-dock {
 }
 
 .wish-ticker-toggle input:not(:checked) + .wish-ticker-toggle__track .wish-ticker-toggle__heart {
-  opacity: 0.85;
+  color: #e85a8a;
 }
 
 .wish-ticker-layer--hidden {

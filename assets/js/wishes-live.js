@@ -12,6 +12,7 @@ const SEED_WISHES = [
 const SCROLL_SPEED_PX = 42;
 const TICKER_REBUILD_DEBOUNCE_MS = 300;
 const TICKER_WISH_LIMIT = 200;
+const WISH_TICKER_PREF_KEY = 'wedding_wish_ticker_on_v1';
 
 let tickerWishes = [];
 let tickerListSignature = '';
@@ -407,14 +408,39 @@ function setTickerLayerVisible(visible) {
   if (visible) startTickerEngine();
 }
 
+function readWishTickerPref() {
+  try {
+    return sessionStorage.getItem(WISH_TICKER_PREF_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function saveWishTickerPref(on) {
+  try {
+    sessionStorage.setItem(WISH_TICKER_PREF_KEY, on ? '1' : '0');
+  } catch {
+    /* ignore */
+  }
+}
+
+export function enableWishTicker(show = true) {
+  const input = document.getElementById('wish-ticker-toggle');
+  if (input) input.checked = show;
+  saveWishTickerPref(show);
+  setTickerLayerVisible(show);
+}
+
 function bindTickerToggle() {
   const input = document.getElementById('wish-ticker-toggle');
   if (!input) return;
 
-  input.checked = true;
-  setTickerLayerVisible(true);
+  const initialOn = readWishTickerPref();
+  input.checked = initialOn;
+  setTickerLayerVisible(initialOn);
 
   input.addEventListener('change', () => {
+    saveWishTickerPref(input.checked);
     setTickerLayerVisible(input.checked);
   });
 }
@@ -456,6 +482,7 @@ function bindComposeForm() {
       const guestPreset = document.getElementById('wish-name')?.dataset?.guestPreset;
       if (guestPreset) document.getElementById('wish-name').value = guestPreset;
       if (statusEl) statusEl.textContent = 'Đã gửi lời chúc — cảm ơn bạn!';
+      enableWishTicker(true);
       window.setTimeout(closeComposeSheet, 700);
     } catch (err) {
       console.error(err);

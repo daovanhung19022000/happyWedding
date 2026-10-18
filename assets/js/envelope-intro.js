@@ -147,6 +147,17 @@ function startIdleAutoScroll() {
     window.removeEventListener('pointerdown', onUserIntent);
   };
 
+  /** Nút phụ (nhạc, ticker lời chúc) — không coi là “khách muốn tự cuộn”. */
+  const IDLE_SCROLL_CHROME =
+    '#audio-toggle-btn, .audio-floating-btn, .wish-ticker-toggle-stack, .wish-ticker-toggle, #wish-ticker-toggle';
+
+  function isIdleScrollChromeInteraction(e) {
+    const fromTarget = e?.target?.closest?.(IDLE_SCROLL_CHROME);
+    if (fromTarget) return true;
+    const active = document.activeElement;
+    return Boolean(active?.closest?.(IDLE_SCROLL_CHROME));
+  }
+
   const stop = () => {
     if (stopped) return;
     stopped = true;
@@ -157,7 +168,8 @@ function startIdleAutoScroll() {
     removeListeners();
   };
 
-  function onUserIntent() {
+  function onUserIntent(e) {
+    if (isIdleScrollChromeInteraction(e)) return;
     stop();
   }
 

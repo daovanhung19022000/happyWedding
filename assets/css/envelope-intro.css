@@ -277,6 +277,38 @@ html:has(body.intro-active) {
   transition: transform 0.9s cubic-bezier(0.33, 1, 0.45, 1), opacity 0.65s ease;
 }
 
+@keyframes envelopeCoupleNamePlay {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  20% {
+    transform: translateY(-4px) rotate(-1.5deg);
+  }
+  40% {
+    transform: translateY(2px) rotate(1deg);
+  }
+  60% {
+    transform: translateY(-2px) rotate(-0.8deg);
+  }
+  80% {
+    transform: translateY(1px) rotate(0.5deg);
+  }
+}
+
+.envelope-intro:not(.is-opening):not(.is-revealing) .envelope-couple-names__name--groom {
+  animation: envelopeCoupleNamePlay 2.5s ease-in-out infinite;
+}
+
+.envelope-intro:not(.is-opening):not(.is-revealing) .envelope-couple-names__name--bride {
+  animation: envelopeCoupleNamePlay 2.85s ease-in-out infinite;
+  animation-delay: 0.45s;
+}
+
+.envelope-intro.is-opening .envelope-couple-names__name {
+  animation: none;
+}
+
 .envelope-couple-names__amp {
   display: inline-block;
   font-family: var(--font-script);
@@ -706,6 +738,9 @@ html:has(body.intro-active) {
   .envelope-intro.is-opening .invite-tri__card {
     transition-duration: 0.01ms;
     opacity: 0;
+  }
+  .envelope-couple-names__name {
+    animation: none !important;
   }
   .envelope-petal,
   .envelope-sparkle,
