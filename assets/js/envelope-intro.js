@@ -1,5 +1,3 @@
-import { parseInviteFromLocation } from './invite-config.js';
-
 window.__weddingEnvelopeModuleLoaded = true;
 
 const INTRO_STORAGE_KEY = 'wedding_envelope_opened_v1';
@@ -236,14 +234,7 @@ function shouldSkipEnvelopeIntro() {
   if (typeof window.__weddingShouldSkipEnvelope === 'function') {
     return window.__weddingShouldSkipEnvelope();
   }
-  if (shouldSkipIntro()) return true;
-  try {
-    return Boolean(parseInviteFromLocation(window.location).guestName);
-  } catch {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('to') || params.get('guest')) return true;
-    return /\/(0|1|9)\/[^/?#]+/.test(window.location.pathname);
-  }
+  return shouldSkipIntro();
 }
 
 function scheduleWhenVisible(run) {
@@ -283,23 +274,33 @@ function startRevealTransition(intro) {
   window.dispatchEvent(new Event('wedding:intro-revealing'));
 }
 
+function finishSkippedIntro() {
+  document.documentElement.classList.remove('intro-active');
+  unlockPageInteraction();
+  if (window.__weddingIntroSkipDone) return;
+  window.__weddingIntroSkipDone = true;
+  setTimeout(() => {
+    window.dispatchEvent(new Event('wedding:first-open'));
+    window.dispatchEvent(new Event('wedding:intro-complete'));
+    startIdleAutoScroll();
+  }, 100);
+}
+
 function initEnvelopeIntro() {
+  if (shouldSkipEnvelopeIntro()) {
+    const intro = document.getElementById('envelope-intro');
+    if (intro) {
+      if (intro.dataset.bound) return;
+      intro.dataset.bound = '1';
+      intro.remove();
+    }
+    finishSkippedIntro();
+    return;
+  }
+
   const intro = document.getElementById('envelope-intro');
   if (!intro || intro.dataset.bound) return;
   intro.dataset.bound = '1';
-
-  if (shouldSkipEnvelopeIntro()) {
-    intro.remove();
-    document.documentElement.classList.remove('intro-active');
-    unlockPageInteraction();
-    lockIntroScroll();
-    setTimeout(() => {
-      window.dispatchEvent(new Event('wedding:first-open'));
-      window.dispatchEvent(new Event('wedding:intro-complete'));
-      startIdleAutoScroll();
-    }, 100);
-    return;
-  }
 
   document.documentElement.classList.add('intro-active');
   document.body.classList.add('intro-active');

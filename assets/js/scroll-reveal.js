@@ -487,6 +487,14 @@
     setupGalleryLazyReveal();
   }
 
+  function revealVisibleInViewport() {
+    const canvas = document.getElementById('app-canvas');
+    if (!canvas) return;
+    canvas.querySelectorAll('.scroll-reveal:not(.is-visible)').forEach((el) => {
+      if (isInViewport(el)) revealEl(el);
+    });
+  }
+
   function boot() {
     markAll();
     lockHeroOpeningVisible();
@@ -495,6 +503,7 @@
     setupGalleryLazyReveal();
     refreshGallerySection();
     lockHeroOpeningVisible();
+    revealVisibleInViewport();
   }
 
   function wireEvents() {
@@ -518,6 +527,17 @@
       window.setTimeout(boot, 50);
     }
 
+    window.addEventListener('load', () => {
+      window.setTimeout(revealVisibleInViewport, 0);
+    });
+
+    window.addEventListener('pageshow', (event) => {
+      if (!document.body.classList.contains('intro-complete')) return;
+      window.setTimeout(() => {
+        revealVisibleInViewport();
+        observeAll();
+      }, 0);
+    });
   }
 
   window.WeddingScrollReveal = {
@@ -526,6 +546,7 @@
     refresh: observeAll,
     refreshGallery: refreshGallerySection,
     freezeForAutoScroll,
+    revealVisibleInViewport,
   };
 
   window.addEventListener('wedding:gallery-built', () => {

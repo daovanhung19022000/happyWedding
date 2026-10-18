@@ -34,18 +34,15 @@
   </script>
   <script>
     (function () {
+      /** Chỉ bỏ phong khi mode session/once và đã mở trong tab/máy. Link ?to= vẫn mở phong (every-load). */
       window.__weddingShouldSkipEnvelope = function () {
         var mode = window.WEDDING_ENVELOPE_MODE || 'every-load';
-        if (mode !== 'every-load') {
-          try {
-            var KEY = 'wedding_envelope_opened_v1';
-            if (mode === 'session' && sessionStorage.getItem(KEY) === '1') return true;
-            if (mode === 'once' && localStorage.getItem(KEY) === '1') return true;
-          } catch (e) { /* ignore */ }
-        }
-        var params = new URLSearchParams(window.location.search);
-        if (params.get('to') || params.get('guest')) return true;
-        if (/\/(0|1|9)\/[^/?#]+/.test(window.location.pathname)) return true;
+        if (mode === 'every-load') return false;
+        try {
+          var KEY = 'wedding_envelope_opened_v1';
+          if (mode === 'session' && sessionStorage.getItem(KEY) === '1') return true;
+          if (mode === 'once' && localStorage.getItem(KEY) === '1') return true;
+        } catch (e) { /* ignore */ }
         return false;
       };
       if (window.__weddingShouldSkipEnvelope()) {
@@ -84,9 +81,20 @@
       pointer-events: none !important;
     }
 
-    /* Link cá nhân (?to=) — vào thẳng thiệp, không chờ JS gỡ phong */
+    /* session/once: đã mở phong — ẩn overlay, hiện thiệp ngay */
     html.intro-complete #envelope-intro {
       display: none !important;
+    }
+
+    html.intro-complete #app-canvas {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+
+    html.intro-complete #audio-toggle-btn {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      visibility: visible !important;
     }
   </style>
   <script>
@@ -838,7 +846,6 @@
       setTimeout(function () {
         if (window.__weddingEnvelopeModuleLoaded) return;
         var intro = document.getElementById('envelope-intro');
-        if (!intro || intro.dataset.bound) return;
         var KEY = 'wedding_envelope_opened_v1';
         var mode = window.WEDDING_ENVELOPE_MODE || 'every-load';
         function shouldSkip() {
@@ -851,6 +858,30 @@
             return localStorage.getItem(KEY) === '1';
           } catch (e) { return false; }
         }
+        if (shouldSkip()) {
+          if (intro && !intro.dataset.bound) intro.remove();
+          document.documentElement.classList.remove('intro-active');
+          document.documentElement.classList.add('intro-complete');
+          document.body.classList.remove('intro-active', 'intro-revealing');
+          document.body.classList.add('intro-complete');
+          document.getElementById('wedding-envelope-boot')?.remove();
+          var canvasEarly = document.getElementById('app-canvas');
+          if (canvasEarly) {
+            canvasEarly.style.pointerEvents = '';
+            canvasEarly.style.opacity = '';
+          }
+          if (!window.__weddingIntroSkipDone) {
+            window.__weddingIntroSkipDone = true;
+            setTimeout(function () {
+              window.dispatchEvent(new Event('wedding:intro-complete'));
+              if (window.WeddingScrollReveal) window.WeddingScrollReveal.boot();
+              if (window.startIdleAutoScroll) window.startIdleAutoScroll();
+            }, 100);
+          }
+          return;
+        }
+        if (document.documentElement.classList.contains('intro-complete')) return;
+        if (!intro || intro.dataset.bound) return;
         function markDone() {
           if (mode === 'every-load') return;
           try {
@@ -868,17 +899,6 @@
             canvas.style.pointerEvents = '';
             canvas.style.opacity = '';
           }
-        }
-        if (shouldSkip()) {
-          intro.remove();
-          document.documentElement.classList.remove('intro-active');
-          unlockPage();
-          setTimeout(function () {
-            window.dispatchEvent(new Event('wedding:intro-complete'));
-            if (window.WeddingScrollReveal) window.WeddingScrollReveal.boot();
-            if (window.startIdleAutoScroll) window.startIdleAutoScroll();
-          }, 100);
-          return;
         }
         document.documentElement.classList.add('intro-active');
         document.body.classList.add('intro-active');
