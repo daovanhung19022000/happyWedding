@@ -48,44 +48,45 @@
         if (/\/(0|1|9)\/[^/?#]+/.test(window.location.pathname)) return true;
         return false;
       };
-      if (!window.__weddingShouldSkipEnvelope()) {
+      if (window.__weddingShouldSkipEnvelope()) {
+        document.documentElement.classList.add('intro-complete');
+      } else {
         document.documentElement.classList.add('intro-active');
       }
     })();
   </script>
   <style id="wedding-envelope-boot">
-    html.intro-active,
-    html:has(#envelope-intro) {
+    html.intro-active {
       overflow: hidden;
       background: #f5f0e6;
     }
 
-    html.intro-active body,
-    html:has(#envelope-intro) body {
+    html.intro-active body {
       overflow: hidden;
       background: #f5f0e6;
     }
 
-    html.intro-active #app-canvas,
-    html:has(#envelope-intro) #app-canvas {
+    html.intro-active #app-canvas {
       opacity: 0 !important;
       pointer-events: none !important;
     }
 
-    html.intro-active #audio-toggle-btn,
-    html:has(#envelope-intro) #audio-toggle-btn {
+    html.intro-active #audio-toggle-btn {
       opacity: 0 !important;
       pointer-events: none !important;
       visibility: hidden !important;
     }
 
     html.intro-active .wish-ticker-layer,
-    html.intro-active .wish-dock,
-    html:has(#envelope-intro) .wish-ticker-layer,
-    html:has(#envelope-intro) .wish-dock {
+    html.intro-active .wish-dock {
       visibility: hidden !important;
       opacity: 0 !important;
       pointer-events: none !important;
+    }
+
+    /* Link cá nhân (?to=) — vào thẳng thiệp, không chờ JS gỡ phong */
+    html.intro-complete #envelope-intro {
+      display: none !important;
     }
   </style>
   <script>
@@ -107,6 +108,8 @@
   <script>
     if (document.documentElement.classList.contains('intro-active')) {
       document.body.classList.add('intro-active');
+    } else if (document.documentElement.classList.contains('intro-complete')) {
+      document.body.classList.add('intro-complete');
     }
   </script>
 
