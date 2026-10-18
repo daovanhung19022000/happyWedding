@@ -2511,7 +2511,9 @@ img.polaroid-role-sticker--groom {
   z-index: 2;
 }
 
-.gallery-grid-item--hero {
+.gallery-grid-item--hero,
+.gallery-grid-item--row-full,
+.gallery-grid-item[data-gallery-cols='1'] {
   grid-column: 1 / -1;
 }
 
@@ -2528,19 +2530,20 @@ img.polaroid-role-sticker--groom {
   z-index: 1;
 }
 
-.gallery-grid-item--duo {
+.gallery-grid-item--duo,
+.gallery-grid-item--row-half,
+.gallery-grid-item--half,
+.gallery-grid-item[data-gallery-cols='2'] {
   grid-column: span 3;
 }
 
-.gallery-grid-item--third {
+.gallery-grid-item--third,
+.gallery-grid-item--row-third,
+.gallery-grid-item[data-gallery-cols='3'] {
   grid-column: span 2;
 }
 
-.gallery-grid-item--half {
-  grid-column: span 3;
-}
-
-.gallery-grid-item:not(.gallery-grid-item--hero):not(.gallery-grid-item--duo):not(.gallery-grid-item--finale):not(.gallery-grid-item--fit-feet):not(.gallery-grid-item--third):not(.gallery-grid-item--half) {
+.gallery-grid-item:not(.gallery-grid-item--hero):not(.gallery-grid-item--duo):not(.gallery-grid-item--finale):not(.gallery-grid-item--fit-feet):not(.gallery-grid-item--third):not(.gallery-grid-item--half):not(.gallery-grid-item--row-full):not(.gallery-grid-item--row-half):not(.gallery-grid-item--row-third):not([data-gallery-cols]) {
   grid-column: span 2;
 }
 

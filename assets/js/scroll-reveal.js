@@ -58,33 +58,42 @@
     return milestone ? loveStorySide(milestone) : null;
   }
 
-  /** Khớp invite-gallery-grid.js — lưới 6 cột editorial */
-  function galleryItemSpan(index, total) {
+  /** Khớp invite-gallery-grid.js — lưới 6 cột (1/2/3 ảnh mỗi hàng) */
+  function galleryItemSpan(el, index, total) {
+    const cols = el?.dataset?.galleryCols;
+    if (cols === '1') return 6;
+    if (cols === '2') return 3;
+    if (cols === '3') return 2;
     if (index === 0 || index === total - 1) return 6;
     const pos = (index - 1) % 5;
     return pos >= 3 ? 3 : 2;
   }
 
-  function galleryColumnStart(index, total) {
-    if (index === 0 || index === total - 1) return 1;
+  function galleryColumnStart(index, total, items) {
+    const el = items?.[index];
+    if (galleryItemSpan(el, index, total) === 6) return 1;
     let col = 1;
-    for (let i = 1; i < index; i++) {
-      if (i === total - 1) continue;
-      const span = galleryItemSpan(i, total);
+    for (let i = 0; i < index; i++) {
+      const span = galleryItemSpan(items[i], i, total);
+      if (span === 6) {
+        col = 1;
+        continue;
+      }
       if (col + span - 1 > 6) col = 1;
       col += span;
       if (col > 6) col = 1;
     }
-    const span = galleryItemSpan(index, total);
+    const span = galleryItemSpan(el, index, total);
     if (col + span - 1 > 6) col = 1;
     return col;
   }
 
-  function gallerySideFromLayout(index, total) {
+  function gallerySideFromLayout(index, total, items) {
+    const el = items?.[index];
     if (index === 0) return 'merge-left';
     if (index === total - 1) return 'merge-right';
-    const start = galleryColumnStart(index, total);
-    const span = galleryItemSpan(index, total);
+    const start = galleryColumnStart(index, total, items);
+    const span = galleryItemSpan(el, index, total);
     if (start >= 4) return 'merge-right';
     if (start + span - 1 <= 3) return 'merge-left';
     return start >= 4 ? 'merge-right' : 'merge-left';
@@ -98,7 +107,7 @@
     const items = grid.querySelectorAll('.gallery-grid-item');
     const index = Array.prototype.indexOf.call(items, el);
     if (index < 0) return 'merge-left';
-    return gallerySideFromLayout(index, items.length);
+    return gallerySideFromLayout(index, items.length, items);
   }
 
   function alwaysYouSideFor(el) {
