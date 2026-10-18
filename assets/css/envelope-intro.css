@@ -84,7 +84,7 @@ body.intro-complete #audio-toggle-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: var(--cream-mid, #f5f0e6);
   transition: opacity 1.15s cubic-bezier(0.25, 1, 0.35, 1);
   overflow: hidden;
 }

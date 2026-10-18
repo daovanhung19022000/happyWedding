@@ -1,6 +1,10 @@
 import { parseInviteFromLocation } from './invite-config.js';
 
+window.__weddingEnvelopeModuleLoaded = true;
+
 const INTRO_STORAGE_KEY = 'wedding_envelope_opened_v1';
+const AUTO_OPEN_DELAY_MS = 15000;
+const INTRO_SAFETY_TIMEOUT_MS = 22000;
 /** Sau khi mở thiệp xong, chờ bao lâu rồi mới tự cuộn (ms) */
 const IDLE_AUTO_SCROLL_DELAY_MS = 5000;
 
@@ -202,6 +206,7 @@ function unlockPageInteraction() {
   document.documentElement.classList.remove('intro-active');
   document.body.classList.remove('intro-active', 'intro-revealing');
   document.body.classList.add('intro-complete');
+  document.getElementById('wedding-envelope-boot')?.remove();
   const canvas = document.getElementById('app-canvas');
   if (canvas) {
     canvas.style.pointerEvents = '';
@@ -209,13 +214,32 @@ function unlockPageInteraction() {
   }
 }
 
-function hasPersonalInviteLink() {
+function shouldSkipEnvelopeIntro() {
+  if (typeof window.__weddingShouldSkipEnvelope === 'function') {
+    return window.__weddingShouldSkipEnvelope();
+  }
+  if (shouldSkipIntro()) return true;
   try {
     return Boolean(parseInviteFromLocation(window.location).guestName);
   } catch {
     const params = new URLSearchParams(window.location.search);
-    return Boolean(params.get('to') || params.get('guest'));
+    if (params.get('to') || params.get('guest')) return true;
+    return /\/(0|1|9)\/[^/?#]+/.test(window.location.pathname);
   }
+}
+
+function scheduleWhenVisible(run) {
+  if (document.visibilityState === 'visible') {
+    run();
+    return () => {};
+  }
+  const onVis = () => {
+    if (document.visibilityState !== 'visible') return;
+    document.removeEventListener('visibilitychange', onVis);
+    run();
+  };
+  document.addEventListener('visibilitychange', onVis);
+  return () => document.removeEventListener('visibilitychange', onVis);
 }
 
 function finishIntro(intro) {
@@ -243,11 +267,12 @@ function startRevealTransition(intro) {
 
 function initEnvelopeIntro() {
   const intro = document.getElementById('envelope-intro');
-  if (!intro || intro.dataset.bound === '1') return;
+  if (!intro || intro.dataset.bound) return;
   intro.dataset.bound = '1';
 
-  if (shouldSkipIntro() || hasPersonalInviteLink()) {
+  if (shouldSkipEnvelopeIntro()) {
     intro.remove();
+    document.documentElement.classList.remove('intro-active');
     unlockPageInteraction();
     lockIntroScroll();
     setTimeout(() => {
@@ -289,7 +314,6 @@ function initEnvelopeIntro() {
 
   const bind = (el) => {
     if (!el) return;
-    el.addEventListener('pointerup', openEnvelope);
     el.addEventListener('click', openEnvelope);
     el.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -313,17 +337,32 @@ function initEnvelopeIntro() {
   intro.setAttribute('role', 'button');
   intro.setAttribute('aria-label', 'Chạm để mở thiệp cưới');
 
-  window.setTimeout(() => {
-    if (!intro.isConnected || opened) return;
-    openEnvelope();
-  }, 15000);
+  let autoOpenTimer = null;
+  const clearAutoOpen = scheduleWhenVisible(() => {
+    autoOpenTimer = window.setTimeout(() => {
+      if (!intro.isConnected || opened) return;
+      openEnvelope();
+    }, AUTO_OPEN_DELAY_MS);
+  });
 
   window.setTimeout(() => {
     if (!intro.isConnected) return;
-    if (document.body.classList.contains('intro-active')) {
-      finishIntro(intro);
+    if (document.body.classList.contains('intro-active') && !opened) {
+      openEnvelope();
     }
-  }, 22000);
+  }, INTRO_SAFETY_TIMEOUT_MS);
+
+  window.addEventListener('pageshow', (event) => {
+    if (!event.persisted || !intro.isConnected || opened) return;
+    if (autoOpenTimer) window.clearTimeout(autoOpenTimer);
+    clearAutoOpen();
+    scheduleWhenVisible(() => {
+      autoOpenTimer = window.setTimeout(() => {
+        if (!intro.isConnected || opened) return;
+        openEnvelope();
+      }, AUTO_OPEN_DELAY_MS);
+    });
+  });
 }
 
 window.startIdleAutoScroll = startIdleAutoScroll;
