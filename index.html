@@ -110,6 +110,19 @@
       window.location.replace(base + '/index.html' + q + window.location.hash);
     })();
   </script>
+  <script>
+    (function () {
+      function isNamInviteMode() {
+        var params = new URLSearchParams(window.location.search);
+        var m = String(params.get('mode') || '').trim().toLowerCase();
+        if (m === '9' || m === '2' || m === 'nam') return true;
+        return /\/(9)\/[^/?#]+/.test(window.location.pathname);
+      }
+      if (isNamInviteMode()) {
+        document.documentElement.classList.add('invite-mode-nam');
+      }
+    })();
+  </script>
 </head>
 
 <body>
@@ -422,7 +435,7 @@
 
           <div class="formal-invite-schedule-wrap">
             <hr class="formal-invite-schedule-rule" aria-hidden="true" />
-            <div class="formal-invite-schedule">
+            <div id="invite-schedule-dual" class="formal-invite-schedule">
               <div class="formal-invite-schedule-pair">
                 <p class="formal-invite-schedule-text">
                   <span id="invite-schedule-welcome">10h00</span>
@@ -436,6 +449,9 @@
                 </p>
               </div>
             </div>
+            <p id="invite-schedule-ceremony" class="formal-invite-schedule-ceremony" hidden>
+              Lễ thành hôn bắt đầu từ 17h
+            </p>
             <hr class="formal-invite-schedule-rule" aria-hidden="true" />
           </div>
 

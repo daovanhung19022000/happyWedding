@@ -89,6 +89,8 @@ export function updateModeUI(modeKey) {
   const inviteLunarParen = document.getElementById('invite-lunar-paren');
   const inviteScheduleWelcome = document.getElementById('invite-schedule-welcome');
   const inviteScheduleParty = document.getElementById('invite-schedule-party');
+  const inviteScheduleDual = document.getElementById('invite-schedule-dual');
+  const inviteScheduleCeremony = document.getElementById('invite-schedule-ceremony');
   const inviteVenueTitle = document.getElementById('invite-venue-title');
   const inviteAddress = document.getElementById('invite-address');
   const inviteMapLink = document.getElementById('invite-map-link');
@@ -112,7 +114,12 @@ export function updateModeUI(modeKey) {
   if (inviteMapLink) inviteMapLink.href = modeData.mapLink;
   if (inviteVenueTitle) inviteVenueTitle.textContent = modeData.inviteVenueTitle || modeData.venue || '';
   if (inviteWeekday) inviteWeekday.textContent = modeData.inviteWeekday || '';
-  if (inviteSideTime) inviteSideTime.textContent = formatInviteHour(modeData.welcomeTime);
+  if (inviteSideTime) {
+    const sideTime = modeData.inviteHideGuestSchedule
+      ? modeData.partyTime
+      : modeData.welcomeTime;
+    inviteSideTime.textContent = formatInviteHour(sideTime);
+  }
   if (inviteDayNum) inviteDayNum.textContent = modeData.inviteDay || '';
   if (inviteMonthLabel) inviteMonthLabel.textContent = modeData.inviteMonthLabel || '';
   if (inviteYear) inviteYear.textContent = modeData.inviteYear ? `Năm ${modeData.inviteYear}` : '';
@@ -121,8 +128,25 @@ export function updateModeUI(modeKey) {
       ? modeData.lunarDate
       : `(${modeData.lunarDate})`;
   }
-  if (inviteScheduleWelcome) inviteScheduleWelcome.textContent = formatInviteHour(modeData.welcomeTime);
-  if (inviteScheduleParty) inviteScheduleParty.textContent = formatInviteHour(modeData.partyTime);
+  document.documentElement.classList.toggle(
+    'invite-mode-nam',
+    Boolean(modeData.inviteHideGuestSchedule),
+  );
+
+  if (modeData.inviteHideGuestSchedule) {
+    if (inviteScheduleDual) inviteScheduleDual.hidden = true;
+    if (inviteScheduleCeremony) {
+      inviteScheduleCeremony.hidden = false;
+      inviteScheduleCeremony.textContent = `Lễ thành hôn bắt đầu từ ${formatInviteHour(modeData.partyTime)}`;
+    }
+  } else {
+    if (inviteScheduleDual) inviteScheduleDual.hidden = false;
+    if (inviteScheduleCeremony) inviteScheduleCeremony.hidden = true;
+    if (inviteScheduleWelcome) {
+      inviteScheduleWelcome.textContent = formatInviteHour(modeData.welcomeTime);
+    }
+    if (inviteScheduleParty) inviteScheduleParty.textContent = formatInviteHour(modeData.partyTime);
+  }
 
   renderWeddingCalendar(modeData.specialDateDay);
 
