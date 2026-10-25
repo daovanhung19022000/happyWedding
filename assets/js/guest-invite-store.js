@@ -27,14 +27,16 @@ function normalizeGuestRecord(raw, docId) {
   const role = String(raw.role || '').trim();
   const mode = String(raw.mode ?? '0').trim();
   const nickname = String(raw.nickname || '').trim();
+  const withGuest = String(raw.withGuest || raw.with || '').trim();
   const guestKey = raw.guestKey || buildGuestKey(mode, name, role);
   return {
     id: raw.id || docId || guestKey,
     name,
     role,
     nickname,
+    withGuest,
     mode,
-    url: raw.url || buildInviteUrl(mode, name, role, nickname),
+    url: raw.url || buildInviteUrl(mode, name, role, nickname, withGuest),
     guestKey,
     createdAt: raw.createdAt || new Date().toISOString(),
     visitCount: Number(raw.visitCount) || 0,
@@ -42,18 +44,20 @@ function normalizeGuestRecord(raw, docId) {
   };
 }
 
-export function createGuestInvite(name, role, modeCode, nickname = '') {
+export function createGuestInvite(name, role, modeCode, nickname = '', withGuest = '') {
   const trimmedName = String(name || '').trim();
   const trimmedRole = String(role || '').trim();
   const trimmedNick = String(nickname || '').trim();
+  const trimmedWith = String(withGuest || '').trim();
   const mode = String(modeCode ?? '0');
   return {
     id: crypto.randomUUID(),
     name: trimmedName,
     role: trimmedRole,
     nickname: trimmedNick,
+    withGuest: trimmedWith,
     mode,
-    url: buildInviteUrl(mode, trimmedName, trimmedRole, trimmedNick),
+    url: buildInviteUrl(mode, trimmedName, trimmedRole, trimmedNick, trimmedWith),
     guestKey: buildGuestKey(mode, trimmedName, trimmedRole),
     createdAt: new Date().toISOString(),
   };
@@ -120,6 +124,7 @@ export async function syncGuestInvitesToFirestore(list) {
         name: guest.name,
         role: guest.role,
         nickname: guest.nickname || '',
+        withGuest: guest.withGuest || '',
         mode: guest.mode,
         url: guest.url,
         guestKey: guest.guestKey,

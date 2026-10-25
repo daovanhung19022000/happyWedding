@@ -31,6 +31,7 @@ function handleQueryParams() {
   const guestName = parsed.guestName;
   const role = parsed.role || urlParams.get('role');
   const nickname = parsed.nickname || urlParams.get('nick') || urlParams.get('nickname');
+  const withGuest = parsed.withGuest || urlParams.get('with');
   currentMode = parsed.mode;
 
   const rsvpNameInput = document.getElementById('rsvp-name');
@@ -39,7 +40,7 @@ function handleQueryParams() {
   const inviteGuestTitle = document.getElementById('invite-guest-title');
 
   if (guestName) {
-    const inviteLine = formatInviteGuestTitle(role, guestName, nickname);
+    const inviteLine = formatInviteGuestTitle(role, guestName, nickname, withGuest);
     const rsvpLine = formatRsvpGuestName(role, guestName);
     const wishLine = formatWishGuestName(role, guestName, nickname);
     if (rsvpNameInput) rsvpNameInput.value = rsvpLine;
@@ -50,6 +51,7 @@ function handleQueryParams() {
       ...parsed,
       role: role || parsed.role,
       nickname: nickname || parsed.nickname,
+      withGuest: withGuest || parsed.withGuest,
     });
   } else if (inviteGuestTitle) {
     inviteGuestTitle.textContent = 'Quý khách';

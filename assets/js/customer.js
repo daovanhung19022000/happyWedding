@@ -2,7 +2,10 @@ import {
   parseInviteModeCode,
   MODE_SHORT_LABELS,
   buildInviteUrl,
+  buildGuestKey,
   formatInviteGuestTitle,
+  normalizeInviteWith,
+  INVITE_WITH,
 } from './invite-config.js';
 import { initFirebaseClient, isFirebaseConfigured } from './firebase-config.js';
 import {
@@ -23,11 +26,57 @@ const FILTER_ALL = 'all';
 let modeFilter = FILTER_ALL;
 let guestList = loadGuestInvites();
 let rsvpByKey = new Map();
+let editingGuestId = null;
+
+function formatWithGuestLabel(withRaw) {
+  const w = normalizeInviteWith(withRaw);
+  if (w === INVITE_WITH.NGUOI_THUONG) return 'Người thương';
+  if (w === INVITE_WITH.VO_CHONG) return 'Vợ chồng';
+  return '—';
+}
+
+function updateGuestRecord(existing, name, role, modeCode, nickname, withGuest) {
+  const trimmedName = String(name || '').trim();
+  const trimmedRole = String(role || '').trim();
+  const trimmedNick = String(nickname || '').trim();
+  const trimmedWith = String(withGuest || '').trim();
+  const mode = String(modeCode ?? '0');
+  const guestKey = buildGuestKey(mode, trimmedName, trimmedRole);
+  return {
+    ...existing,
+    name: trimmedName,
+    role: trimmedRole,
+    nickname: trimmedNick,
+    withGuest: trimmedWith,
+    mode,
+    guestKey,
+    url: buildInviteUrl(mode, trimmedName, trimmedRole, trimmedNick, trimmedWith),
+  };
+}
+
+function deleteGuestById(id) {
+  const guest = guestList.find((g) => g.id === id);
+  if (!guest) return;
+  const ok = window.confirm(`Xóa khách "${guest.name}" khỏi danh sách?`);
+  if (!ok) return;
+  guestList = guestList.filter((g) => g.id !== id);
+  replaceGuestInvites(guestList);
+  persistGuests();
+  if (editingGuestId === id) clearEditMode();
+  renderGuestTable();
+  showUploadStatus('Đã xóa khách.');
+}
 
 function refreshStoredInviteUrls() {
   let changed = false;
   guestList = guestList.map((guest) => {
-    const url = buildInviteUrl(guest.mode, guest.name, guest.role, guest.nickname);
+    const url = buildInviteUrl(
+      guest.mode,
+      guest.name,
+      guest.role,
+      guest.nickname,
+      guest.withGuest,
+    );
     if (guest.url !== url) changed = true;
     return { ...guest, url };
   });
@@ -94,9 +143,12 @@ function rowFromExcel(rawRow) {
   const nickname = String(
     row.nickname || row['biệt danh'] || row['biet danh'] || row.nick || '',
   ).trim();
+  const withGuest = String(
+    row.with || row['đi cùng'] || row['di cung'] || row['di_cung'] || '',
+  ).trim();
   const modeCode = parseInviteModeCode(row.mode ?? row['buổi tiệc']);
   if (!name || !role || !modeCode) return null;
-  return createGuestInvite(name, role, modeCode, nickname);
+  return createGuestInvite(name, role, modeCode, nickname, withGuest);
 }
 
 function parseExcelRows(rows) {
@@ -165,16 +217,21 @@ function renderGuestTable() {
       <td>${escapeHtml(guest.nickname || '—')}</td>
       <td>${escapeHtml(MODE_SHORT_LABELS[guest.mode] || guest.mode)}</td>
       <td>${escapeHtml(guest.role)}</td>
+      <td>${escapeHtml(formatWithGuestLabel(guest.withGuest))}</td>
       <td class="customer-td-actions"></td>
       <td class="customer-td-actions"></td>
       <td class="customer-td-visits">${formatVisitCount(guest.visitCount)}</td>
       <td>${escapeHtml(confirmName)}</td>
       <td><span class="customer-confirm-badge${rsvp ? ' is-filled' : ''}">${escapeHtml(confirmStatus)}</span></td>
       <td class="customer-td-guests">${escapeHtml(guestCount)}</td>
+      <td class="customer-td-actions"></td>
+      <td class="customer-td-actions"></td>
     `;
 
-    const linkCell = tr.children[4];
-    const qrCell = tr.children[5];
+    const linkCell = tr.children[5];
+    const qrCell = tr.children[6];
+    const editCell = tr.children[11];
+    const deleteCell = tr.children[12];
 
     const linkBtn = document.createElement('button');
     linkBtn.type = 'button';
@@ -198,8 +255,22 @@ function renderGuestTable() {
       }
     });
 
+    const editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.className = 'customer-table-btn';
+    editBtn.textContent = 'Sửa';
+    editBtn.addEventListener('click', () => beginEditGuest(guest));
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'customer-table-btn customer-table-btn--danger';
+    deleteBtn.textContent = 'Xóa';
+    deleteBtn.addEventListener('click', () => deleteGuestById(guest.id));
+
     linkCell.appendChild(linkBtn);
     qrCell.appendChild(qrBtn);
+    editCell.appendChild(editBtn);
+    deleteCell.appendChild(deleteBtn);
     tbody.appendChild(tr);
   }
 }
@@ -264,12 +335,54 @@ async function bootstrapGuestList() {
   refreshStoredInviteUrls();
 }
 
+function clearEditMode() {
+  editingGuestId = null;
+  const submitBtn = document.getElementById('customer-submit');
+  const cancelBtn = document.getElementById('customer-edit-cancel');
+  const banner = document.getElementById('customer-edit-banner');
+  if (submitBtn) submitBtn.textContent = 'Tạo link & QR';
+  if (cancelBtn) cancelBtn.hidden = true;
+  if (banner) banner.hidden = true;
+}
+
+function beginEditGuest(guest) {
+  const form = document.getElementById('customer-form');
+  const nameInput = document.getElementById('customer-guest-name');
+  const nickInput = document.getElementById('customer-nickname');
+  const roleSelect = document.getElementById('customer-role');
+  const withSelect = document.getElementById('customer-with');
+  const modeSelect = document.getElementById('customer-mode');
+  const submitBtn = document.getElementById('customer-submit');
+  const cancelBtn = document.getElementById('customer-edit-cancel');
+  const banner = document.getElementById('customer-edit-banner');
+  if (!nameInput || !roleSelect || !modeSelect) return;
+
+  editingGuestId = guest.id;
+  nameInput.value = guest.name || '';
+  if (nickInput) nickInput.value = guest.nickname || '';
+  roleSelect.value = guest.role || '';
+  if (withSelect) withSelect.value = normalizeInviteWith(guest.withGuest) || '';
+  modeSelect.value = String(guest.mode ?? '0');
+  if (submitBtn) submitBtn.textContent = 'Lưu sửa';
+  if (cancelBtn) cancelBtn.hidden = false;
+  if (banner) {
+    banner.hidden = false;
+    banner.textContent = `Đang sửa: ${guest.name}`;
+  }
+  form?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  nameInput.focus();
+  nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
 function initCustomerPage() {
   const form = document.getElementById('customer-form');
   const nameInput = document.getElementById('customer-guest-name');
   const nickInput = document.getElementById('customer-nickname');
   const roleSelect = document.getElementById('customer-role');
+  const withSelect = document.getElementById('customer-with');
   const modeSelect = document.getElementById('customer-mode');
+  const submitBtn = document.getElementById('customer-submit');
+  const cancelEditBtn = document.getElementById('customer-edit-cancel');
   const greetingPreview = document.getElementById('customer-greeting-preview');
   const excelInput = document.getElementById('customer-excel-input');
   const excelBtn = document.getElementById('customer-excel-upload');
@@ -300,10 +413,11 @@ function initCustomerPage() {
     const name = nameInput.value.trim();
     const role = roleSelect.value;
     const nickname = nickInput?.value.trim() || '';
+    const withGuest = withSelect?.value || '';
     if (greetingPreview) {
       if (name && role) {
         greetingPreview.hidden = false;
-        greetingPreview.textContent = `Trên thiệp: ${formatInviteGuestTitle(role, name, nickname)}`;
+        greetingPreview.textContent = `Trên thiệp: ${formatInviteGuestTitle(role, name, nickname, withGuest)}`;
       } else {
         greetingPreview.hidden = true;
       }
@@ -313,14 +427,25 @@ function initCustomerPage() {
   nameInput.addEventListener('input', updatePreview);
   nickInput?.addEventListener('input', updatePreview);
   roleSelect.addEventListener('change', updatePreview);
+  withSelect?.addEventListener('change', updatePreview);
   modeSelect.addEventListener('change', updatePreview);
   updatePreview();
+
+  cancelEditBtn?.addEventListener('click', () => {
+    clearEditMode();
+    form.reset();
+    if (roleSelect) roleSelect.selectedIndex = 0;
+    if (withSelect) withSelect.value = '';
+    updatePreview();
+    nameInput.focus();
+  });
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const guest = nameInput.value.trim();
     const nickname = nickInput?.value.trim() || '';
     const role = roleSelect.value.trim();
+    const withGuest = withSelect?.value || '';
     const modeCode = modeSelect.value;
 
     if (!guest) {
@@ -332,15 +457,53 @@ function initCustomerPage() {
       return;
     }
 
-    const entry = createGuestInvite(guest, role, modeCode, nickname);
+    if (editingGuestId) {
+      const idx = guestList.findIndex((g) => g.id === editingGuestId);
+      if (idx < 0) {
+        clearEditMode();
+        return;
+      }
+      const updated = updateGuestRecord(
+        guestList[idx],
+        guest,
+        role,
+        modeCode,
+        nickname,
+        withGuest,
+      );
+      const duplicate = guestList.some(
+        (g) => g.id !== editingGuestId && g.guestKey === updated.guestKey,
+      );
+      if (duplicate) {
+        showUploadStatus('Trùng khách (cùng tên, buổi tiệc, xưng hô).');
+        return;
+      }
+      guestList[idx] = updated;
+      replaceGuestInvites(guestList);
+      persistGuests();
+      showUploadStatus(
+        `Đã cập nhật: ${formatInviteGuestTitle(role, guest, nickname, withGuest)}.`,
+      );
+      clearEditMode();
+      form.reset();
+      if (roleSelect) roleSelect.selectedIndex = 0;
+      if (withSelect) withSelect.value = '';
+      updatePreview();
+      nameInput.focus();
+      renderGuestTable();
+      return;
+    }
+
+    const entry = createGuestInvite(guest, role, modeCode, nickname, withGuest);
     const { added, skipped } = addGuests([entry]);
 
     if (added) {
       showUploadStatus(
-        `Đã thêm: ${formatInviteGuestTitle(role, guest, nickname)} (đã lưu Firestore).`,
+        `Đã thêm: ${formatInviteGuestTitle(role, guest, nickname, withGuest)} (đã lưu Firestore).`,
       );
       nameInput.value = '';
       if (nickInput) nickInput.value = '';
+      if (withSelect) withSelect.value = '';
       nameInput.focus();
       updatePreview();
     } else if (skipped) {

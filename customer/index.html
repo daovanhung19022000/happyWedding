@@ -61,6 +61,15 @@
             </select>
           </div>
 
+          <div class="customer-field customer-field--with">
+            <label class="customer-label" for="customer-with">Đi cùng</label>
+            <select id="customer-with" class="customer-select" name="with">
+              <option value="" selected>Không</option>
+              <option value="nguoi-thuong">Người thương</option>
+              <option value="vo-chong">Vợ chồng</option>
+            </select>
+          </div>
+
           <div class="customer-field customer-field--mode">
             <label class="customer-label" for="customer-mode">Buổi tiệc</label>
             <select id="customer-mode" class="customer-select" name="mode" required>
@@ -70,10 +79,12 @@
             </select>
           </div>
 
-          <button type="submit" class="customer-submit">Tạo link &amp; QR</button>
+          <button type="submit" id="customer-submit" class="customer-submit">Tạo link &amp; QR</button>
+          <button type="button" id="customer-edit-cancel" class="customer-edit-cancel" hidden>Hủy sửa</button>
         </div>
 
         <div class="customer-form-below">
+          <p id="customer-edit-banner" class="customer-edit-banner" hidden></p>
           <p id="customer-greeting-preview" class="customer-greeting-preview" hidden></p>
         </div>
 
@@ -102,12 +113,15 @@
                   <th>Biệt danh</th>
                   <th>Mode</th>
                   <th>Xưng hô</th>
+                  <th>Đi cùng</th>
                   <th>Link</th>
                   <th>QR</th>
                   <th>Lượt mở link</th>
                   <th>Confirm name</th>
                   <th>Confirm</th>
                   <th>Số người</th>
+                  <th>Sửa</th>
+                  <th>Xóa</th>
                 </tr>
               </thead>
               <tbody id="customer-guest-tbody"></tbody>

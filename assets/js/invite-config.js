@@ -186,7 +186,28 @@ export function buildInvitePath(modeCode, guestRaw) {
  * python -m http.server, Live Server (không cần rewrite /0/tên).
  * Đường dẫn /0/tên vẫn đọc được qua 404.html + redirect trong index.html.
  */
-export function buildInviteUrl(modeCode, guestRaw, roleRaw, nicknameRaw) {
+/** Giá trị query `with=` — đi cùng trên dòng mời thiệp */
+export const INVITE_WITH = {
+  NGUOI_THUONG: 'nguoi-thuong',
+  VO_CHONG: 'vo-chong',
+};
+
+export function normalizeInviteWith(raw) {
+  const v = String(raw || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '-');
+  if (!v) return '';
+  if (v === 'nguoi-thuong' || v === 'nguoithuong') {
+    return INVITE_WITH.NGUOI_THUONG;
+  }
+  if (v === 'vo-chong' || v === 'vochong') {
+    return INVITE_WITH.VO_CHONG;
+  }
+  return '';
+}
+
+export function buildInviteUrl(modeCode, guestRaw, roleRaw, nicknameRaw, withRaw) {
   const origin = window.location.origin;
   const base = getSiteBasePath();
   const params = new URLSearchParams();
@@ -196,6 +217,8 @@ export function buildInviteUrl(modeCode, guestRaw, roleRaw, nicknameRaw) {
   if (role) params.set('role', role);
   const nick = nicknameRaw != null ? String(nicknameRaw).trim() : '';
   if (nick) params.set('nick', nick);
+  const withGuest = normalizeInviteWith(withRaw);
+  if (withGuest) params.set('with', withGuest);
   const prefix = base ? `${base}/` : '/';
   return `${origin}${prefix}index.html?${params.toString()}`;
 }
@@ -210,14 +233,19 @@ export function guestDisplayName(fullName, nickname) {
   return parts[parts.length - 1];
 }
 
-/** Dòng “TRÂN TRỌNG KÍNH MỜI” — Bạn → Bạn & người thương; còn lại: Xưng hô + biệt danh/tên riêng. */
-export function formatInviteGuestTitle(role, fullName, nickname) {
+/** Dòng “TRÂN TRỌNG KÍNH MỜI” — xưng hô + tên; tùy chọn đi cùng (query `with=`). */
+export function formatInviteGuestTitle(role, fullName, nickname, withRaw) {
   const r = String(role || '').trim();
-  if (/^bạn$/i.test(r)) return 'Bạn & người thương';
   const who = guestDisplayName(fullName, nickname);
-  if (!who && !r) return 'Quý khách';
-  if (!r) return who;
-  return `${r} ${who}`.trim();
+  let line;
+  if (!who && !r) line = 'Quý khách';
+  else if (!r) line = who;
+  else line = `${r} ${who}`.trim();
+
+  const withGuest = normalizeInviteWith(withRaw);
+  if (withGuest === INVITE_WITH.NGUOI_THUONG) return `${line} và người thương`;
+  if (withGuest === INVITE_WITH.VO_CHONG) return `Vợ chồng ${line}`;
+  return line;
 }
 
 /** Xác nhận tham dự — xưng hô + họ và tên đầy đủ. */
@@ -246,6 +274,7 @@ export function parseInviteFromLocation(loc = window.location) {
 
   const qRole = params.get('role');
   const qNick = params.get('nick') || params.get('nickname');
+  const qWith = normalizeInviteWith(params.get('with'));
 
   const pathMatch = loc.pathname.match(/\/(0|1|9)\/([^/?#]+)\/?$/);
   if (pathMatch) {
@@ -254,17 +283,19 @@ export function parseInviteFromLocation(loc = window.location) {
       guestName: decodeGuestId(pathMatch[2]),
       role: qRole ? qRole.trim() : null,
       nickname: qNick ? qNick.trim() : null,
+      withGuest: qWith || null,
     };
   }
 
-  if (qMode || qGuest || qRole || qNick) {
+  if (qMode || qGuest || qRole || qNick || qWith) {
     return {
       mode: resolveEventMode(qMode || '0'),
       guestName: qGuest ? decodeGuestId(qGuest) : null,
       role: qRole ? qRole.trim() : null,
       nickname: qNick ? qNick.trim() : null,
+      withGuest: qWith || null,
     };
   }
 
-  return { mode: 'trai', guestName: null, role: null, nickname: null };
+  return { mode: 'trai', guestName: null, role: null, nickname: null, withGuest: null };
 }

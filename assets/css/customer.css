@@ -226,6 +226,10 @@ body.customer-page::before {
   flex: 0 1 118px;
 }
 
+.customer-field--with {
+  flex: 0 1 128px;
+}
+
 .customer-field--mode {
   flex: 1 1 168px;
 }
@@ -494,6 +498,42 @@ body.customer-page::before {
 .customer-table-btn:disabled {
   opacity: 0.75;
   cursor: default;
+}
+
+.customer-table-btn--danger {
+  border-color: rgba(180, 40, 40, 0.35);
+  color: #9b1c1c;
+}
+
+.customer-table-btn--danger:hover:not(:disabled) {
+  background: rgba(180, 40, 40, 0.08);
+}
+
+.customer-edit-cancel {
+  flex: 0 0 auto;
+  padding: clamp(10px, 1.4vw, 12px) clamp(14px, 2vw, 18px);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--c-border);
+  background: #fff;
+  color: var(--c-muted);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.customer-edit-cancel:hover {
+  background: rgba(107, 98, 92, 0.06);
+}
+
+.customer-edit-banner {
+  margin: 0 0 6px;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(148, 34, 51, 0.08);
+  color: var(--c-wine);
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
 .customer-confirm-badge {
