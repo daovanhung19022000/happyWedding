@@ -190,6 +190,7 @@ export function buildInvitePath(modeCode, guestRaw) {
 export const INVITE_WITH = {
   NGUOI_THUONG: 'nguoi-thuong',
   VO_CHONG: 'vo-chong',
+  GIA_DINH: 'gia-dinh',
 };
 
 export function normalizeInviteWith(raw) {
@@ -203,6 +204,9 @@ export function normalizeInviteWith(raw) {
   }
   if (v === 'vo-chong' || v === 'vochong') {
     return INVITE_WITH.VO_CHONG;
+  }
+  if (v === 'gia-dinh' || v === 'giadinh') {
+    return INVITE_WITH.GIA_DINH;
   }
   return '';
 }
@@ -245,6 +249,7 @@ export function formatInviteGuestTitle(role, fullName, nickname, withRaw) {
   const withGuest = normalizeInviteWith(withRaw);
   if (withGuest === INVITE_WITH.NGUOI_THUONG) return `${line} và người thương`;
   if (withGuest === INVITE_WITH.VO_CHONG) return `Vợ chồng ${line}`;
+  if (withGuest === INVITE_WITH.GIA_DINH) return `${line} và gia đình`;
   return line;
 }
 

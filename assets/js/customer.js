@@ -32,6 +32,7 @@ function formatWithGuestLabel(withRaw) {
   const w = normalizeInviteWith(withRaw);
   if (w === INVITE_WITH.NGUOI_THUONG) return 'Người thương';
   if (w === INVITE_WITH.VO_CHONG) return 'Vợ chồng';
+  if (w === INVITE_WITH.GIA_DINH) return 'Gia đình';
   return '—';
 }
 
@@ -144,7 +145,13 @@ function rowFromExcel(rawRow) {
     row.nickname || row['biệt danh'] || row['biet danh'] || row.nick || '',
   ).trim();
   const withGuest = String(
-    row.with || row['đi cùng'] || row['di cung'] || row['di_cung'] || '',
+    row.with ||
+      row['đi cùng'] ||
+      row['di cung'] ||
+      row['di_cung'] ||
+      row['gia đình'] ||
+      row['gia dinh'] ||
+      '',
   ).trim();
   const modeCode = parseInviteModeCode(row.mode ?? row['buổi tiệc']);
   if (!name || !role || !modeCode) return null;
