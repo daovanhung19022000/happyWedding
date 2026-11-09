@@ -18,7 +18,8 @@
       var STORAGE_KEY = 'wedding_invite_look_v1';
       var SESSION_KEY = 'wedding_invite_look_session_v1';
       var KIMONO_RATE = 0.3;
-      var DEV_DEFAULT_MODERN = true;
+      /** false = localhost cũng bốc 30% kimono / 70% hiện đại như khách (không luôn modern). */
+      var DEV_DEFAULT_MODERN = false;
       function isLocalDev() {
         var h = location.hostname;
         return h === 'localhost' || h === '127.0.0.1' || h === '0.0.0.0';
@@ -77,22 +78,12 @@
       var look = q.get('look');
       if (look === 'reset' || look === 'rand') {
         clearStored(toNorm);
+        clearStored('');
         look = rollLook();
-        persist(look, toNorm);
-      } else if (isLook(look)) {
-        persist(look, toNorm);
-      } else if (toNorm) {
-        look = readStored(toNorm);
-        if (!look) {
-          look = hashGuestLook(toParam);
-          persist(look, toNorm);
-        }
-      } else {
-        look = readStored('');
-        if (!look) {
-          look = (isLocalDev() && DEV_DEFAULT_MODERN) ? 'modern' : rollLook();
-          persist(look, '');
-        }
+      } else if (!isLook(look)) {
+        clearStored(toNorm);
+        clearStored('');
+        look = (isLocalDev() && DEV_DEFAULT_MODERN) ? 'modern' : rollLook();
       }
       document.documentElement.dataset.inviteLook = look;
       document.documentElement.classList.add('invite-look--' + look);

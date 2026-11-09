@@ -6,8 +6,8 @@ export const INVITE_LOOK_MODERN = 'modern';
 /** Xác suất mở thiệp kimono (phần còn lại = hiện đại). */
 export const INVITE_LOOK_KIMONO_RATE = 0.3;
 
-/** Trên localhost: lần đầu không ghim → hiện đại (dễ xem ảnh MOD). Production vẫn 30/70. */
-export const INVITE_LOOK_DEV_DEFAULT_MODERN = true;
+/** true = localhost luôn modern (chỉ khi dev cần). false = cùng tỉ lệ 30/70 như production. */
+export const INVITE_LOOK_DEV_DEFAULT_MODERN = false;
 
 export function isLocalDevHost(loc = typeof window !== 'undefined' ? window.location : null) {
   if (!loc) return false;
@@ -74,7 +74,7 @@ export function purgeLegacyInviteLookStorage() {
   }
 }
 
-/** Cùng tên khách (`?to=`) → cùng bộ ảnh trên mọi thiết bị. */
+/** Băm tên → kimono/modern (dùng công cụ / test; mặc định mỗi F5 vẫn bốc ngẫu nhiên). */
 export function lookFromGuestKey(guest) {
   const s = String(guest || '').trim().toLowerCase();
   if (!s) return null;
@@ -94,11 +94,9 @@ export function rollInviteLook() {
 
 /**
  * Thứ tự ưu tiên:
- * 1. `?look=kimono|modern` — xem thử / admin
- * 2. `?look=reset` — xóa bộ nhớ, bốc lại
- * 3. `?to=` — băm tên khách (ổn định)
- * 4. localStorage
- * 5. random 30/70 rồi lưu
+ * 1. `?look=kimono|modern` — ép look (chỉ lần load đó)
+ * 2. `?look=reset|rand` — xóa bộ nhớ cũ, bốc lại
+ * 3. Mọi trường hợp khác (kể cả `?to=tên`) — mỗi F5 bốc lại 30/70
  */
 export function resolveInviteLookFromLocation(loc = window.location) {
   const q = new URLSearchParams(loc.search);
@@ -110,34 +108,21 @@ export function resolveInviteLookFromLocation(loc = window.location) {
 
   if (forced === 'reset' || forced === 'rand') {
     clearInviteLookStorage({ guest: guestKey });
-    const rolled = rollInviteLook();
-    persistInviteLook(rolled, { guest: guestKey, sessionOnly: !guestKey });
-    return rolled;
+    clearInviteLookStorage({ guest: '' });
+    return rollInviteLook();
   }
   if (isInviteLook(forced)) {
-    persistInviteLook(forced, { guest: guestKey, sessionOnly: !guestKey });
     return forced;
   }
 
-  if (guestKey) {
-    const storedGuest = readStoredInviteLook(guestKey);
-    if (storedGuest) return storedGuest;
-    const fromGuest = lookFromGuestKey(guestRaw);
-    persistInviteLook(fromGuest, { guest: guestKey });
-    return fromGuest;
-  }
-
-  const stored = readStoredInviteLook();
-  if (stored) return stored;
+  clearInviteLookStorage({ guest: guestKey });
+  clearInviteLookStorage({ guest: '' });
 
   if (isLocalDevHost(loc) && INVITE_LOOK_DEV_DEFAULT_MODERN) {
-    persistInviteLook(INVITE_LOOK_MODERN, { sessionOnly: true });
     return INVITE_LOOK_MODERN;
   }
 
-  const rolled = rollInviteLook();
-  persistInviteLook(rolled, { sessionOnly: true });
-  return rolled;
+  return rollInviteLook();
 }
 
 export function getInviteLook() {
