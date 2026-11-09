@@ -72,7 +72,7 @@ export async function loadAlbumPickerUrlsForAdmin(look) {
 
   let urls = addList(kimonoUrls);
   if (look === INVITE_LOOK_MODERN) {
-    urls = addList([...urls, ...modernStaticAlbumUrls('../modern_image/')]);
+    urls = addList([...urls, ...modernStaticAlbumUrls('../modern_image/web/')]);
   }
   return mergeUploadedAlbumUrls(urls);
 }

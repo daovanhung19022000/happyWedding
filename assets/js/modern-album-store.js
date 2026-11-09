@@ -3,10 +3,18 @@
  * Đường dẫn encode khoảng trắng cho trình duyệt / GitHub Pages.
  */
 
-export function modernImagePath(fileName) {
+/** Ảnh gốc (file lớn) — chỉ khi cần tải full. */
+export function modernImageOriginalPath(fileName) {
   const name = String(fileName || '').trim();
   if (!name) return 'modern_image/';
   return `modern_image/${encodeURI(name)}`;
+}
+
+/** Ảnh hiển thị trên thiệp — bản nén trong `modern_image/web/`. */
+export function modernImagePath(fileName) {
+  const name = String(fileName || '').trim();
+  if (!name) return 'modern_image/web/';
+  return `modern_image/web/${encodeURI(name)}`;
 }
 
 /** Toàn bộ ảnh trong folder (album cuộn + picker /view2). */
@@ -45,13 +53,36 @@ export const MODERN_STATIC_ALBUM_FILES = [
 /** Ảnh full-width cuối trang thiệp (look modern). */
 export const MODERN_GALLERY_FINALE_FILE = 'LCN07147.jpg';
 
+/** Lớp chữ ảnh đầu album (full width). */
+export const MODERN_GALLERY_OPENING_CAPTION = {
+  title: 'Two Hearts, One Love',
+};
+
+export const KIMONO_GALLERY_OPENING_CAPTION = {
+  title: 'Two Hearts, One Love',
+};
+
+/** Lớp chữ trên ảnh cuối — look modern. */
+export const MODERN_GALLERY_FINALE_CAPTION = {
+  eyebrow: 'Hùng & Trang',
+  title: 'The Beginning of Forever',
+  subtitle: '15 · 11 · 2026',
+};
+
+/** Look kimono — cùng bố cục, khác copy. */
+export const KIMONO_GALLERY_FINALE_CAPTION = {
+  eyebrow: 'Văn Hùng & Thu Trang',
+  title: 'Khởi đầu hạnh phúc',
+  subtitle: 'Forever & Always',
+};
+
 /**
  * Ảnh mặc định từng vị trí trên thiệp (look modern) — theo bố cục bạn chọn.
  */
 export const MODERN_CORE_DEFAULTS = {
   'hero-arch': 'LCN06348 copy ok copy-+.jpg',
   'love-story-1': 'LCN06137.jpg',
-  'love-story-2': 'LCN06142.jpg',
+  'love-story-2': 'LCN06382.jpg',
   'love-story-3': 'LCN06213.jpg',
   'love-story-4': 'LCN06311.jpg',
   'polaroid-bride': 'LCN07101.JPEG',
@@ -69,6 +100,6 @@ export function modernDefaultSrcForSlot(slotId) {
   return file ? modernImagePath(file) : '';
 }
 
-export function modernStaticAlbumUrls(basePath = 'modern_image/') {
+export function modernStaticAlbumUrls(basePath = 'modern_image/web/') {
   return MODERN_STATIC_ALBUM_FILES.map((name) => `${basePath}${encodeURI(name)}`);
 }

@@ -1,5 +1,13 @@
 import { STATIC_ALBUM_FILES } from './album-store.js';
-import { MODERN_GALLERY_FINALE_FILE, MODERN_STATIC_ALBUM_FILES } from './modern-album-store.js';
+import {
+  KIMONO_GALLERY_FINALE_CAPTION,
+  KIMONO_GALLERY_OPENING_CAPTION,
+  MODERN_GALLERY_FINALE_CAPTION,
+  MODERN_GALLERY_OPENING_CAPTION,
+  MODERN_GALLERY_FINALE_FILE,
+  MODERN_STATIC_ALBUM_FILES,
+  modernImagePath,
+} from './modern-album-store.js';
 import { albumBasePathForLook, getInviteLook, INVITE_LOOK_MODERN } from './invite-look.js';
 
 /**
@@ -80,11 +88,55 @@ function createAlbumLoiNgoZone() {
   return zone;
 }
 
-function createGalleryFigure(fileName, index, base, { rowCols, finale = false, eager = false }) {
+function finaleCaptionForLook(look) {
+  return look === INVITE_LOOK_MODERN ? MODERN_GALLERY_FINALE_CAPTION : KIMONO_GALLERY_FINALE_CAPTION;
+}
+
+function openingCaptionForLook(look) {
+  return look === INVITE_LOOK_MODERN ? MODERN_GALLERY_OPENING_CAPTION : KIMONO_GALLERY_OPENING_CAPTION;
+}
+
+function appendGalleryCaption(fig, caption, kind) {
+  if (!caption?.title) return;
+  const overlay = document.createElement('figcaption');
+  overlay.className =
+    kind === 'opening' ? 'gallery-opening-overlay gallery-finale-overlay' : 'gallery-finale-overlay';
+  if (caption.eyebrow) {
+    const eyebrow = document.createElement('p');
+    eyebrow.className = 'gallery-finale-eyebrow';
+    eyebrow.textContent = caption.eyebrow;
+    overlay.appendChild(eyebrow);
+  }
+  const decor = document.createElement('span');
+  decor.className = 'gallery-finale-rule';
+  decor.setAttribute('aria-hidden', 'true');
+  overlay.appendChild(decor);
+  const title = document.createElement('p');
+  title.className = 'gallery-finale-title';
+  title.textContent = caption.title;
+  overlay.appendChild(title);
+  if (caption.subtitle) {
+    const sub = document.createElement('p');
+    sub.className = 'gallery-finale-subtitle';
+    sub.textContent = caption.subtitle;
+    overlay.appendChild(sub);
+  }
+  fig.appendChild(overlay);
+}
+
+function createGalleryFigure(
+  fileName,
+  index,
+  base,
+  look,
+  { rowCols, finale = false, opening = false, eager = false, caption = null },
+) {
   const slotId = `gallery-${index + 1}`;
   const extra = [
     layoutClassForRowCols(rowCols),
     finale ? 'gallery-grid-item--finale' : '',
+    finale && caption ? 'gallery-grid-item--finale-editorial' : '',
+    opening && caption ? 'gallery-grid-item--opening-editorial' : '',
   ].filter(Boolean);
 
   const fig = document.createElement('figure');
@@ -92,12 +144,18 @@ function createGalleryFigure(fileName, index, base, { rowCols, finale = false, e
   fig.dataset.galleryCols = String(rowCols);
 
   const img = document.createElement('img');
-  img.src = `${base}${encodeURI(fileName)}`;
+  img.src =
+    look === INVITE_LOOK_MODERN ? modernImagePath(fileName) : `${base}${encodeURI(fileName)}`;
   img.alt = 'Ảnh cưới Văn Hùng và Thu Trang';
   img.loading = eager ? 'eager' : 'lazy';
   img.setAttribute('data-invite-slot', slotId);
 
   fig.appendChild(img);
+
+  if ((finale || opening) && caption) {
+    appendGalleryCaption(fig, caption, opening ? 'opening' : 'finale');
+  }
+
   return fig;
 }
 
@@ -109,17 +167,24 @@ export function buildInviteGalleryGrid(container) {
   const base = albumBasePathForLook(look);
   const files = albumFilesForLook(look);
 
+  const maxEager = look === INVITE_LOOK_MODERN ? 1 : 3;
   let eagerCount = 0;
+  let albumLeadPlaced = false;
+  const openingCaption = openingCaptionForLook(look);
 
   INVITE_GALLERY_BODY_LAYOUT.forEach(({ cols, slots }) => {
     slots.forEach((slot) => {
       const fileIndex = INVITE_GALLERY_BODY_FILE_INDICES[slot];
       const fileName = files[fileIndex];
       if (!fileName) return;
-      const fig = createGalleryFigure(fileName, fileIndex, base, {
+      const isAlbumLead = !albumLeadPlaced;
+      const fig = createGalleryFigure(fileName, fileIndex, base, look, {
         rowCols: cols,
-        eager: eagerCount < 3,
+        eager: eagerCount < maxEager,
+        opening: isAlbumLead,
+        caption: isAlbumLead ? openingCaption : null,
       });
+      if (isAlbumLead) albumLeadPlaced = true;
       eagerCount += 1;
       container.appendChild(fig);
     });
@@ -138,11 +203,18 @@ export function buildInviteGalleryGrid(container) {
       : INVITE_GALLERY_FINALE_FILE_INDEX;
   if (finaleName) {
     container.appendChild(
-      createGalleryFigure(finaleName, finaleIndex >= 0 ? finaleIndex : INVITE_GALLERY_FINALE_FILE_INDEX, base, {
-        rowCols: 1,
-        finale: true,
-        eager: false,
-      }),
+      createGalleryFigure(
+        finaleName,
+        finaleIndex >= 0 ? finaleIndex : INVITE_GALLERY_FINALE_FILE_INDEX,
+        base,
+        look,
+        {
+          rowCols: 1,
+          finale: true,
+          eager: false,
+          caption: finaleCaptionForLook(look),
+        },
+      ),
     );
   }
 

@@ -63,6 +63,9 @@ async function resolveMarqueeUrls() {
   } catch {
     /* giữ ảnh static trong repo */
   }
+  if (look === INVITE_LOOK_MODERN && urls.length > 14) {
+    urls = urls.slice(0, 14);
+  }
   return urls;
 }
 

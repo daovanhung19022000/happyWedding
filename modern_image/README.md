@@ -1,11 +1,16 @@
-# Ảnh cưới hiện đại (`modern_image/`)
+# Ảnh cưới hiện đại
 
-Thư mục này dùng cho **phiên bản hiện đại** (~70% khách mở link sẽ thấy).
+| Thư mục | Dùng cho |
+|---------|----------|
+| **Gốc** (file JPG lớn từ studio) | Lưu trữ, in ấn |
+| **`web/`** | Thiệp online — đã nén ~1600px |
 
-1. Copy ảnh studio / Việt Nam vào đây.
-2. Thêm tên file mới vào `MODERN_STATIC_ALBUM_FILES` trong `assets/js/modern-album-store.js`.
-3. Đổi ảnh từng vị trí: sửa `MODERN_CORE_DEFAULTS` hoặc dùng `/view2/`.
-3. Polaroid: thêm `crop_image/trang.png`, `crop_image/hung.png` (cùng cấu trúc kimono).
-4. Gán từng vị trí trên thiệp qua **http://…/view2/** (Firestore `invite_images_modern`).
+Sau khi thêm ảnh gốc mới:
 
-Ảnh kimono giữ nguyên trong `kimono_image/` và quản lý tại **/view/**.
+```bash
+./scripts/build-modern-web.sh
+```
+
+Rồi cập nhật tên file trong `assets/js/modern-album-store.js` nếu cần.
+
+Gán slot: **/view2/**. Look modern: `?look=modern`.

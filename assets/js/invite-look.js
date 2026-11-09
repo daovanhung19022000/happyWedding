@@ -6,6 +6,14 @@ export const INVITE_LOOK_MODERN = 'modern';
 /** Xác suất mở thiệp kimono (phần còn lại = hiện đại). */
 export const INVITE_LOOK_KIMONO_RATE = 0.3;
 
+/** Trên localhost: lần đầu không ghim → hiện đại (dễ xem ảnh MOD). Production vẫn 30/70. */
+export const INVITE_LOOK_DEV_DEFAULT_MODERN = true;
+
+export function isLocalDevHost(loc = typeof window !== 'undefined' ? window.location : null) {
+  if (!loc) return false;
+  return /^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/i.test(loc.hostname);
+}
+
 export const INVITE_LOOK_STORAGE_KEY = 'wedding_invite_look_v1';
 export const INVITE_LOOK_SESSION_KEY = 'wedding_invite_look_session_v1';
 
@@ -49,13 +57,20 @@ export function readStoredInviteLook(guest = '') {
     if (guest) {
       const perGuest = localStorage.getItem(guestStorageKey(guest));
       if (isInviteLook(perGuest)) return perGuest;
+      return null;
     }
     const session = sessionStorage.getItem(INVITE_LOOK_SESSION_KEY);
-    if (isInviteLook(session)) return session;
-    const legacy = localStorage.getItem(INVITE_LOOK_STORAGE_KEY);
-    return isInviteLook(legacy) ? legacy : null;
+    return isInviteLook(session) ? session : null;
   } catch {
     return null;
+  }
+}
+
+export function purgeLegacyInviteLookStorage() {
+  try {
+    localStorage.removeItem(INVITE_LOOK_STORAGE_KEY);
+  } catch {
+    /* bỏ qua */
   }
 }
 
@@ -91,7 +106,9 @@ export function resolveInviteLookFromLocation(loc = window.location) {
   const guestKey = guestRaw ? String(guestRaw).trim().toLowerCase() : '';
 
   const forced = q.get('look');
-  if (forced === 'reset') {
+  purgeLegacyInviteLookStorage();
+
+  if (forced === 'reset' || forced === 'rand') {
     clearInviteLookStorage({ guest: guestKey });
     const rolled = rollInviteLook();
     persistInviteLook(rolled, { guest: guestKey, sessionOnly: !guestKey });
@@ -112,6 +129,11 @@ export function resolveInviteLookFromLocation(loc = window.location) {
 
   const stored = readStoredInviteLook();
   if (stored) return stored;
+
+  if (isLocalDevHost(loc) && INVITE_LOOK_DEV_DEFAULT_MODERN) {
+    persistInviteLook(INVITE_LOOK_MODERN, { sessionOnly: true });
+    return INVITE_LOOK_MODERN;
+  }
 
   const rolled = rollInviteLook();
   persistInviteLook(rolled, { sessionOnly: true });

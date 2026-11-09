@@ -18,7 +18,15 @@
       var STORAGE_KEY = 'wedding_invite_look_v1';
       var SESSION_KEY = 'wedding_invite_look_session_v1';
       var KIMONO_RATE = 0.3;
+      var DEV_DEFAULT_MODERN = true;
+      function isLocalDev() {
+        var h = location.hostname;
+        return h === 'localhost' || h === '127.0.0.1' || h === '0.0.0.0';
+      }
       function isLook(v) { return v === 'kimono' || v === 'modern'; }
+      function purgeLegacy() {
+        try { localStorage.removeItem(STORAGE_KEY); } catch (e) { }
+      }
       function guestKey(to) {
         to = String(to || '').trim().toLowerCase();
         return to ? STORAGE_KEY + ':guest:' + to : '';
@@ -46,8 +54,7 @@
           }
           var s = sessionStorage.getItem(SESSION_KEY);
           if (isLook(s)) return s;
-          var legacy = localStorage.getItem(STORAGE_KEY);
-          return isLook(legacy) ? legacy : null;
+          return null;
         } catch (e) { return null; }
       }
       function hashGuestLook(to) {
@@ -66,8 +73,9 @@
       var q = new URLSearchParams(location.search);
       var toParam = q.get('to');
       var toNorm = toParam ? String(toParam).trim().toLowerCase() : '';
+      purgeLegacy();
       var look = q.get('look');
-      if (look === 'reset') {
+      if (look === 'reset' || look === 'rand') {
         clearStored(toNorm);
         look = rollLook();
         persist(look, toNorm);
@@ -82,7 +90,7 @@
       } else {
         look = readStored('');
         if (!look) {
-          look = rollLook();
+          look = (isLocalDev() && DEV_DEFAULT_MODERN) ? 'modern' : rollLook();
           persist(look, '');
         }
       }
@@ -90,7 +98,7 @@
       document.documentElement.classList.add('invite-look--' + look);
       if (look === 'modern') {
         var pre = document.getElementById('invite-hero-preload');
-        if (pre) pre.setAttribute('href', '/modern_image/LCN06348%20copy%20ok%20copy-+.jpg');
+        if (pre) pre.setAttribute('href', '/modern_image/web/LCN06348%20copy%20ok%20copy-+.jpg');
       }
     })();
   </script>

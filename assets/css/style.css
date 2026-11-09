@@ -2642,6 +2642,183 @@ html.invite-mode-nam #invite-schedule-ceremony {
   object-position: center center;
 }
 
+/* Ảnh đầu album — full bleed + chữ editorial */
+.gallery-grid-item--opening-editorial {
+  grid-column: 1 / -1;
+  min-height: min(62vh, 560px);
+  max-height: min(80vh, 680px);
+  display: grid;
+  grid-template-areas: 'stack';
+  align-self: stretch;
+  line-height: normal;
+  cursor: default;
+  background: #1a1412;
+}
+
+.gallery-grid-item--opening-editorial > img {
+  grid-area: stack;
+  width: 100%;
+  height: 100%;
+  min-height: min(62vh, 560px);
+  object-fit: cover;
+  object-position: center 40%;
+}
+
+.gallery-opening-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(12, 10, 12, 0.06) 0%,
+    rgba(12, 10, 12, 0.02) 40%,
+    rgba(12, 10, 12, 0.42) 78%,
+    rgba(12, 10, 12, 0.68) 100%
+  );
+}
+
+.gallery-grid-item--opening-editorial:hover,
+.gallery-grid-item--opening-editorial:focus-within {
+  box-shadow: none;
+}
+
+.gallery-grid-item--opening-editorial:hover img,
+.gallery-grid-item--opening-editorial:focus-within img {
+  transform: scale(1.02);
+  filter: brightness(1.04);
+}
+
+/* Ảnh cuối album — full bleed + chữ editorial */
+.gallery-grid-item--finale-editorial {
+  grid-column: 1 / -1;
+  min-height: min(78vh, 720px);
+  max-height: min(92vh, 920px);
+  display: grid;
+  grid-template-areas: 'stack';
+  align-self: stretch;
+  line-height: normal;
+  cursor: default;
+  border-radius: 0;
+  background: #1a1412;
+}
+
+.gallery-grid-item--finale-editorial > img {
+  grid-area: stack;
+  width: 100%;
+  height: 100%;
+  min-height: min(78vh, 720px);
+  object-fit: cover;
+  object-position: center 42%;
+}
+
+.gallery-finale-overlay {
+  grid-area: stack;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  text-align: center;
+  padding: clamp(2.5rem, 12vw, 4.5rem) clamp(1.25rem, 5vw, 2.5rem) clamp(2rem, 10vw, 3.75rem);
+  background: linear-gradient(
+    180deg,
+    rgba(12, 10, 12, 0) 0%,
+    rgba(12, 10, 12, 0.08) 35%,
+    rgba(12, 10, 12, 0.55) 72%,
+    rgba(12, 10, 12, 0.78) 100%
+  );
+  pointer-events: none;
+  margin: 0;
+}
+
+.gallery-finale-eyebrow {
+  margin: 0 0 0.65rem;
+  font-family: var(--font-body);
+  font-size: clamp(0.62rem, 2.4vw, 0.72rem);
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(255, 248, 242, 0.82);
+}
+
+.gallery-finale-rule {
+  display: block;
+  width: clamp(2.5rem, 14vw, 4.5rem);
+  height: 1px;
+  margin: 0 0 1rem;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(245, 225, 210, 0.85) 50%,
+    transparent
+  );
+}
+
+.gallery-finale-title {
+  margin: 0 0 0.5rem;
+  font-family: 'Playfair Display', var(--font-display), serif;
+  font-size: clamp(1.65rem, 7.5vw, 2.75rem);
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  color: #fffaf6;
+  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.35);
+}
+
+.gallery-finale-subtitle {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: clamp(0.72rem, 2.8vw, 0.85rem);
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  color: rgba(255, 248, 242, 0.72);
+}
+
+html.invite-look--modern .gallery-grid-item--opening-editorial .gallery-finale-rule,
+html.invite-look--modern .gallery-grid-item--finale-editorial .gallery-finale-eyebrow {
+  font-weight: 400;
+  font-size: clamp(0.58rem, 2.2vw, 0.66rem);
+  letter-spacing: 0.38em;
+  color: rgba(255, 248, 242, 0.68);
+}
+
+html.invite-look--modern .gallery-grid-item--opening-editorial .gallery-finale-rule,
+html.invite-look--modern .gallery-grid-item--finale-editorial .gallery-finale-rule {
+  width: clamp(2rem, 10vw, 3.25rem);
+  margin-bottom: 0.65rem;
+  opacity: 0.75;
+}
+
+html.invite-look--modern .gallery-grid-item--opening-editorial .gallery-finale-title,
+html.invite-look--modern .gallery-grid-item--finale-editorial .gallery-finale-title {
+  font-family: var(--font-serif, 'Cormorant Garamond'), Georgia, serif;
+  font-size: clamp(0.95rem, 3.8vw, 1.22rem);
+  font-weight: 300;
+  font-style: italic;
+  letter-spacing: 0.12em;
+  line-height: 1.45;
+  text-transform: none;
+  color: rgba(255, 252, 248, 0.94);
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.22), 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+html.invite-look--modern .gallery-grid-item--opening-editorial .gallery-finale-subtitle,
+html.invite-look--modern .gallery-grid-item--finale-editorial .gallery-finale-subtitle {
+  font-size: clamp(0.62rem, 2.4vw, 0.72rem);
+  font-weight: 300;
+  letter-spacing: 0.24em;
+  color: rgba(255, 248, 242, 0.58);
+}
+
+.gallery-grid-item--finale-editorial:hover,
+.gallery-grid-item--finale-editorial:focus-within {
+  box-shadow: none;
+}
+
+.gallery-grid-item--finale-editorial:hover img,
+.gallery-grid-item--finale-editorial:focus-within img {
+  transform: scale(1.02);
+  filter: brightness(1.04);
+}
+
 .gallery-grid-item.scroll-reveal:not(.is-visible) img {
   transform: scale(1);
 }
