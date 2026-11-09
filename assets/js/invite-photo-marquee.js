@@ -1,7 +1,7 @@
 import { staticAlbumUrls, fetchUploadedAlbumUrls } from './album-store.js';
 import { modernStaticAlbumUrls } from './modern-album-store.js';
 import { albumBasePathForLook, getInviteLook, INVITE_LOOK_MODERN } from './invite-look.js';
-const UPLOAD_WAIT_MS = 2500;
+const UPLOAD_WAIT_MS = 600;
 
 function createMarqueeItem(src, index) {
   const fig = document.createElement('figure');
@@ -11,7 +11,8 @@ function createMarqueeItem(src, index) {
   const img = document.createElement('img');
   img.src = src;
   img.alt = 'Ảnh cưới Văn Hùng và Thu Trang';
-  img.loading = index < 6 ? 'eager' : 'lazy';
+  img.loading = index < 12 ? 'eager' : 'lazy';
+  if (index < 4) img.setAttribute('fetchpriority', 'high');
   img.decoding = 'async';
   img.draggable = false;
   frame.appendChild(img);
@@ -37,7 +38,7 @@ function waitForMarqueeImages(track) {
         img.addEventListener('error', done, { once: true });
       }
     });
-    window.setTimeout(resolve, 4500);
+    window.setTimeout(resolve, 1600);
   });
 }
 
@@ -46,25 +47,28 @@ async function resolveMarqueeUrls() {
   const base = albumBasePathForLook(look);
   let urls =
     look === INVITE_LOOK_MODERN ? modernStaticAlbumUrls(base) : staticAlbumUrls(base);
+  if (look === INVITE_LOOK_MODERN && urls.length > 14) {
+    urls = urls.slice(0, 14);
+  }
+  return urls;
+}
+
+async function appendUploadedMarqueeUrls(urls) {
   try {
     const uploaded = await Promise.race([
       fetchUploadedAlbumUrls(),
       new Promise((resolve) => setTimeout(() => resolve([]), UPLOAD_WAIT_MS)),
     ]);
-    if (uploaded.length) {
-      const seen = new Set(urls);
-      uploaded.forEach((url) => {
-        if (url && !seen.has(url)) {
-          seen.add(url);
-          urls.push(url);
-        }
-      });
-    }
+    if (!uploaded.length) return urls;
+    const seen = new Set(urls);
+    uploaded.forEach((url) => {
+      if (url && !seen.has(url)) {
+        seen.add(url);
+        urls.push(url);
+      }
+    });
   } catch {
-    /* giữ ảnh static trong repo */
-  }
-  if (look === INVITE_LOOK_MODERN && urls.length > 14) {
-    urls = urls.slice(0, 14);
+    /* giữ ảnh static */
   }
   return urls;
 }
@@ -236,21 +240,31 @@ export async function buildInvitePhotoMarquee(root) {
   const track = root.querySelector('.invite-photo-marquee__track');
   if (!viewport || !track) return;
 
-  const urls = await resolveMarqueeUrls();
+  let urls = await resolveMarqueeUrls();
   if (!urls.length) return;
 
-  track.replaceChildren();
-  const appendPass = (offset) => {
-    urls.forEach((src, index) => {
-      track.appendChild(createMarqueeItem(src, offset + index));
-    });
+  const paintTrack = (list) => {
+    track.replaceChildren();
+    const appendPass = (offset) => {
+      list.forEach((src, index) => {
+        track.appendChild(createMarqueeItem(src, offset + index));
+      });
+    };
+    appendPass(0);
+    appendPass(list.length);
   };
-  appendPass(0);
-  appendPass(urls.length);
 
-  await waitForMarqueeImages(track);
-  requestAnimationFrame(() => {
-    root.classList.add('is-ready');
-    wireInvitePhotoMarqueeInteraction(root, viewport, track);
+  paintTrack(urls);
+  root.classList.add('is-ready');
+  let unwire = wireInvitePhotoMarqueeInteraction(root, viewport, track);
+
+  appendUploadedMarqueeUrls(urls).then((merged) => {
+    if (merged.length <= urls.length) return;
+    urls = merged;
+    paintTrack(urls);
+    unwire?.();
+    unwire = wireInvitePhotoMarqueeInteraction(root, viewport, track);
   });
+
+  waitForMarqueeImages(track);
 }

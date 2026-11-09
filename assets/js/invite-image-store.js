@@ -17,17 +17,27 @@ function collectionForResolvedLook(look) {
   return inviteImagesCollectionForLook(resolveLook(look));
 }
 
+const INVITE_OVERRIDE_FETCH_MS = 1200;
+
 export async function fetchInviteImageOverrides(look) {
   const resolved = resolveLook(look);
   if (!window.firebaseDb) return {};
   const collection = collectionForResolvedLook(resolved);
-  const snap = await window.firebaseDb.collection(collection).get();
-  const map = {};
-  snap.forEach((doc) => {
-    const data = doc.data();
-    if (data?.url) map[doc.id] = data.url;
-  });
-  return map;
+  try {
+    const snap = await Promise.race([
+      window.firebaseDb.collection(collection).get(),
+      new Promise((resolve) => setTimeout(() => resolve(null), INVITE_OVERRIDE_FETCH_MS)),
+    ]);
+    if (!snap) return {};
+    const map = {};
+    snap.forEach((doc) => {
+      const data = doc.data();
+      if (data?.url) map[doc.id] = data.url;
+    });
+    return map;
+  } catch {
+    return {};
+  }
 }
 
 export function applyInviteImageOverrides(overrides, look) {
@@ -67,6 +77,7 @@ export function applyInviteImageOverrides(overrides, look) {
 export function applyInviteLookDefaultImages(look = getInviteLook()) {
   const slots = getInviteImageSlotsForLook(look);
   const byId = Object.fromEntries(slots.map((s) => [s.id, s]));
+  let heroPreloadSrc = '';
   document.querySelectorAll('[data-invite-slot]').forEach((el) => {
     if (el.tagName !== 'IMG') return;
     const slot = byId[el.dataset.inviteSlot];
@@ -74,7 +85,12 @@ export function applyInviteLookDefaultImages(look = getInviteLook()) {
     const src = String(slot.defaultSrc).replace(/^\//, '');
     el.dataset.defaultSrc = src;
     el.src = src;
+    if (slot.id === 'hero-arch') heroPreloadSrc = src;
   });
+  if (heroPreloadSrc) {
+    const pre = document.getElementById('invite-hero-preload');
+    if (pre) pre.setAttribute('href', heroPreloadSrc);
+  }
 }
 
 export async function loadAndApplyInviteImages() {

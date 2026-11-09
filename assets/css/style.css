@@ -589,6 +589,11 @@ body {
   transition: transform 0.8s ease;
 }
 
+html.invite-look--modern .hero-opening-photo .hero-arch-img {
+  object-fit: cover;
+  object-position: center 38%;
+}
+
 .hero-arch-container:hover .hero-arch-img {
   transform: scale(1.03);
 }

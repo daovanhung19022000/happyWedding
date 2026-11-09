@@ -2,23 +2,35 @@ import './firebase-config.js';
 import { initFirebaseClient } from './firebase-config.js';
 import { buildInviteGalleryGrid } from './invite-gallery-grid.js';
 import { buildInvitePhotoMarquee } from './invite-photo-marquee.js';
-import { loadAndApplyInviteImages } from './invite-image-store.js';
+import {
+  applyInviteImageOverrides,
+  applyInviteLookDefaultImages,
+  fetchInviteImageOverrides,
+} from './invite-image-store.js';
+import { getInviteLook } from './invite-look.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+function bootInviteImages() {
   initFirebaseClient();
+  const look = getInviteLook();
+  applyInviteLookDefaultImages(look);
+
   const grid = document.getElementById('invite-gallery-grid');
   const marqueeRoot = document.querySelector('.invite-photo-marquee');
 
-  loadAndApplyInviteImages().finally(() => {
-    buildInviteGalleryGrid(grid);
-  });
+  buildInviteGalleryGrid(grid);
+  if (marqueeRoot) buildInvitePhotoMarquee(marqueeRoot);
 
-  const startMarquee = () => {
-    if (marqueeRoot) buildInvitePhotoMarquee(marqueeRoot);
-  };
-  if (typeof requestIdleCallback === 'function') {
-    requestIdleCallback(startMarquee, { timeout: 3000 });
-  } else {
-    window.setTimeout(startMarquee, 600);
-  }
-});
+  fetchInviteImageOverrides(look)
+    .then((overrides) => {
+      applyInviteImageOverrides(overrides, look);
+    })
+    .catch((err) => {
+      console.warn('Không áp dụng được ảnh thiệp từ Firebase:', err);
+    });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootInviteImages);
+} else {
+  bootInviteImages();
+}
