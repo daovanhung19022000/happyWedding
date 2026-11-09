@@ -1,25 +1,36 @@
 import { STATIC_ALBUM_FILES } from './album-store.js';
-import { MODERN_STATIC_ALBUM_FILES } from './modern-album-store.js';
+import {
+  MODERN_CORE_DEFAULTS,
+  MODERN_STATIC_ALBUM_FILES,
+  modernImagePath,
+} from './modern-album-store.js';
 import { INVITE_LOOK_KIMONO, INVITE_LOOK_MODERN, getInviteLook } from './invite-look.js';
 
 const KIMONO_BASE = 'kimono_image/';
 const MODERN_BASE = 'modern_image/';
 
-const CORE_SLOT_BLUEPRINT = [
-  { id: 'hero-arch', label: 'Hero — khung vòm', kimono: '/kimono_image/THA_3400.JPG', modern: `${MODERN_BASE}MOD_3400.JPG` },
-  { id: 'polaroid-bride', label: 'Polaroid — cô dâu', kimono: `${KIMONO_BASE}crop_image/trang.png`, modern: `${MODERN_BASE}crop_image/trang.png` },
-  { id: 'polaroid-groom', label: 'Polaroid — chú rể', kimono: `${KIMONO_BASE}crop_image/hung.png`, modern: `${MODERN_BASE}crop_image/hung.png` },
-  { id: 'calendar-bg', label: 'Lịch cưới — nền', kimono: `${KIMONO_BASE}THA_3880.JPG`, modern: `${MODERN_BASE}MOD_3880.JPG` },
-  { id: 'always-you-main', label: 'Always You — ảnh 1 (lớn trái)', kimono: `${KIMONO_BASE}THA_4408.JPG`, modern: `${MODERN_BASE}MOD_4408.JPG` },
-  { id: 'always-you-top', label: 'Always You — ảnh 2 (trên phải)', kimono: `${KIMONO_BASE}THA_4057.JPG`, modern: `${MODERN_BASE}MOD_4057.JPG` },
-  { id: 'always-you-bottom', label: 'Always You — ảnh 3 (dưới phải)', kimono: `${KIMONO_BASE}THA_4188.JPG`, modern: `${MODERN_BASE}MOD_4188.JPG` },
-  { id: 'marriage-trio-left', label: 'Lưới hôn nhân — ảnh 4 (trái)', kimono: `${KIMONO_BASE}THA_3637.JPG`, modern: `${MODERN_BASE}MOD_3637.JPG` },
-  { id: 'marriage-trio-right', label: 'Lưới hôn nhân — ảnh 5 (phải)', kimono: `${KIMONO_BASE}THA_3802.JPG`, modern: `${MODERN_BASE}MOD_3802.JPG` },
-  { id: 'love-story-1', label: 'Love Story — mốc 1', kimono: `${KIMONO_BASE}THA_3862.JPG`, modern: `${MODERN_BASE}MOD_3862.JPG` },
-  { id: 'love-story-2', label: 'Love Story — mốc 2', kimono: `${KIMONO_BASE}THA_3880.JPG`, modern: `${MODERN_BASE}MOD_3880.JPG` },
-  { id: 'love-story-3', label: 'Love Story — mốc 3', kimono: `${KIMONO_BASE}THA_3942.JPG`, modern: `${MODERN_BASE}MOD_3942.JPG` },
-  { id: 'love-story-4', label: 'Love Story — mốc 4', kimono: `${KIMONO_BASE}THA_3400.JPG`, modern: `${MODERN_BASE}MOD_3400.JPG` },
+const CORE_SLOT_IDS = [
+  { id: 'hero-arch', label: 'Hero — khung vòm', kimono: '/kimono_image/THA_3400.JPG' },
+  { id: 'polaroid-bride', label: 'Polaroid — cô dâu', kimono: `${KIMONO_BASE}crop_image/trang.png` },
+  { id: 'polaroid-groom', label: 'Polaroid — chú rể', kimono: `${KIMONO_BASE}crop_image/hung.png` },
+  { id: 'calendar-bg', label: 'Lịch cưới — nền', kimono: `${KIMONO_BASE}THA_3880.JPG` },
+  { id: 'always-you-main', label: 'Always You — ảnh 1 (lớn trái)', kimono: `${KIMONO_BASE}THA_4408.JPG` },
+  { id: 'always-you-top', label: 'Always You — ảnh 2 (trên phải)', kimono: `${KIMONO_BASE}THA_4057.JPG` },
+  { id: 'always-you-bottom', label: 'Always You — ảnh 3 (dưới phải)', kimono: `${KIMONO_BASE}THA_4188.JPG` },
+  { id: 'marriage-trio-left', label: 'Lưới hôn nhân — ảnh 4 (trái)', kimono: `${KIMONO_BASE}THA_3637.JPG` },
+  { id: 'marriage-trio-right', label: 'Lưới hôn nhân — ảnh 5 (phải)', kimono: `${KIMONO_BASE}THA_3802.JPG` },
+  { id: 'love-story-1', label: 'Love Story — mốc 1', kimono: `${KIMONO_BASE}THA_3862.JPG` },
+  { id: 'love-story-2', label: 'Love Story — mốc 2', kimono: `${KIMONO_BASE}THA_3880.JPG` },
+  { id: 'love-story-3', label: 'Love Story — mốc 3', kimono: `${KIMONO_BASE}THA_3942.JPG` },
+  { id: 'love-story-4', label: 'Love Story — mốc 4', kimono: `${KIMONO_BASE}THA_3400.JPG` },
 ];
+
+const CORE_SLOT_BLUEPRINT = CORE_SLOT_IDS.map((row) => ({
+  ...row,
+  modern: MODERN_CORE_DEFAULTS[row.id]
+    ? modernImagePath(MODERN_CORE_DEFAULTS[row.id])
+    : modernImagePath(MODERN_STATIC_ALBUM_FILES[0]),
+}));
 
 function gallerySlotsForLook(look) {
   const files = look === INVITE_LOOK_MODERN ? MODERN_STATIC_ALBUM_FILES : STATIC_ALBUM_FILES;
@@ -27,7 +38,8 @@ function gallerySlotsForLook(look) {
   return files.map((fileName, index) => ({
     id: `gallery-${index + 1}`,
     label: `Album trên thiệp — ${index + 1}`,
-    defaultSrc: `${base}${fileName}`,
+    defaultSrc:
+      look === INVITE_LOOK_MODERN ? modernImagePath(fileName) : `${base}${fileName}`,
   }));
 }
 
@@ -65,7 +77,7 @@ export function invitePageUsedAlbumFileNames(look = INVITE_LOOK_KIMONO) {
   if (look === INVITE_LOOK_KIMONO) {
     ['THA_3862.JPG', 'THA_3880.JPG', 'THA_3942.JPG', 'THA_3400.JPG'].forEach((name) => used.add(name));
   } else {
-    ['MOD_3862.JPG', 'MOD_3880.JPG', 'MOD_3942.JPG', 'MOD_3400.JPG'].forEach((name) => used.add(name));
+    Object.values(MODERN_CORE_DEFAULTS).forEach((name) => used.add(String(name).toUpperCase()));
   }
   return used;
 }

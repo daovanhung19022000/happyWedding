@@ -168,16 +168,6 @@ function wireSlotPreview(preview, slot, doc) {
     applyFallbackNote(false);
   };
 
-  const defaultPointsModern =
-    look === INVITE_LOOK_MODERN && !doc?.url && String(slot.defaultSrc).includes('modern_image/');
-  if (defaultPointsModern && fallback) {
-    preview.src = fallback;
-    preview.classList.add('view-slot-preview--placeholder');
-    preview.dataset.previewSource = 'kimono-fallback';
-    applyFallbackNote(true);
-    return;
-  }
-
   preview.src = primary;
   applyFallbackNote(false);
 }

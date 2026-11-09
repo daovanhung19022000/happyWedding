@@ -1,5 +1,5 @@
 import { STATIC_ALBUM_FILES } from './album-store.js';
-import { MODERN_STATIC_ALBUM_FILES } from './modern-album-store.js';
+import { MODERN_GALLERY_FINALE_FILE, MODERN_STATIC_ALBUM_FILES } from './modern-album-store.js';
 import { albumBasePathForLook, getInviteLook, INVITE_LOOK_MODERN } from './invite-look.js';
 
 /**
@@ -92,7 +92,7 @@ function createGalleryFigure(fileName, index, base, { rowCols, finale = false, e
   fig.dataset.galleryCols = String(rowCols);
 
   const img = document.createElement('img');
-  img.src = `${base}${fileName}`;
+  img.src = `${base}${encodeURI(fileName)}`;
   img.alt = 'Ảnh cưới Văn Hùng và Thu Trang';
   img.loading = eager ? 'eager' : 'lazy';
   img.setAttribute('data-invite-slot', slotId);
@@ -128,10 +128,17 @@ export function buildInviteGalleryGrid(container) {
   container.appendChild(createAlbumMoreLink());
   container.appendChild(createAlbumLoiNgoZone());
 
-  const finaleName = files[INVITE_GALLERY_FINALE_FILE_INDEX];
+  const finaleName =
+    look === INVITE_LOOK_MODERN
+      ? MODERN_GALLERY_FINALE_FILE
+      : files[INVITE_GALLERY_FINALE_FILE_INDEX];
+  const finaleIndex =
+    look === INVITE_LOOK_MODERN
+      ? files.indexOf(MODERN_GALLERY_FINALE_FILE)
+      : INVITE_GALLERY_FINALE_FILE_INDEX;
   if (finaleName) {
     container.appendChild(
-      createGalleryFigure(finaleName, INVITE_GALLERY_FINALE_FILE_INDEX, base, {
+      createGalleryFigure(finaleName, finaleIndex >= 0 ? finaleIndex : INVITE_GALLERY_FINALE_FILE_INDEX, base, {
         rowCols: 1,
         finale: true,
         eager: false,
