@@ -1,6 +1,6 @@
 import { staticAlbumUrls, fetchUploadedAlbumUrls } from './album-store.js';
-
-const MARQUEE_BASE = 'kimono_image/';
+import { modernStaticAlbumUrls } from './modern-album-store.js';
+import { albumBasePathForLook, getInviteLook, INVITE_LOOK_MODERN } from './invite-look.js';
 const UPLOAD_WAIT_MS = 2500;
 
 function createMarqueeItem(src, index) {
@@ -42,7 +42,10 @@ function waitForMarqueeImages(track) {
 }
 
 async function resolveMarqueeUrls() {
-  let urls = staticAlbumUrls(MARQUEE_BASE);
+  const look = getInviteLook();
+  const base = albumBasePathForLook(look);
+  let urls =
+    look === INVITE_LOOK_MODERN ? modernStaticAlbumUrls(base) : staticAlbumUrls(base);
   try {
     const uploaded = await Promise.race([
       fetchUploadedAlbumUrls(),

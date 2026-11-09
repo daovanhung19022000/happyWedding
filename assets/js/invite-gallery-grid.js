@@ -1,6 +1,6 @@
 import { STATIC_ALBUM_FILES } from './album-store.js';
-
-const BASE = 'kimono_image/';
+import { MODERN_STATIC_ALBUM_FILES } from './modern-album-store.js';
+import { albumBasePathForLook, getInviteLook, INVITE_LOOK_MODERN } from './invite-look.js';
 
 /**
  * 11 ảnh album (thứ tự hiển thị 1…11) — index trong STATIC_ALBUM_FILES.
@@ -21,6 +21,10 @@ const INVITE_GALLERY_BODY_LAYOUT = [
   { cols: 3, slots: [7, 8, 10] },
   { cols: 1, slots: [9] },
 ];
+
+function albumFilesForLook(look) {
+  return look === INVITE_LOOK_MODERN ? MODERN_STATIC_ALBUM_FILES : STATIC_ALBUM_FILES;
+}
 
 function layoutClassForRowCols(cols) {
   if (cols === 1) return 'gallery-grid-item--row-full';
@@ -76,7 +80,7 @@ function createAlbumLoiNgoZone() {
   return zone;
 }
 
-function createGalleryFigure(fileName, index, { rowCols, finale = false, eager = false }) {
+function createGalleryFigure(fileName, index, base, { rowCols, finale = false, eager = false }) {
   const slotId = `gallery-${index + 1}`;
   const extra = [
     layoutClassForRowCols(rowCols),
@@ -88,7 +92,7 @@ function createGalleryFigure(fileName, index, { rowCols, finale = false, eager =
   fig.dataset.galleryCols = String(rowCols);
 
   const img = document.createElement('img');
-  img.src = `${BASE}${fileName}`;
+  img.src = `${base}${fileName}`;
   img.alt = 'Ảnh cưới Văn Hùng và Thu Trang';
   img.loading = eager ? 'eager' : 'lazy';
   img.setAttribute('data-invite-slot', slotId);
@@ -101,14 +105,18 @@ export function buildInviteGalleryGrid(container) {
   if (!container) return;
   container.replaceChildren();
 
+  const look = getInviteLook();
+  const base = albumBasePathForLook(look);
+  const files = albumFilesForLook(look);
+
   let eagerCount = 0;
 
   INVITE_GALLERY_BODY_LAYOUT.forEach(({ cols, slots }) => {
     slots.forEach((slot) => {
       const fileIndex = INVITE_GALLERY_BODY_FILE_INDICES[slot];
-      const fileName = STATIC_ALBUM_FILES[fileIndex];
+      const fileName = files[fileIndex];
       if (!fileName) return;
-      const fig = createGalleryFigure(fileName, fileIndex, {
+      const fig = createGalleryFigure(fileName, fileIndex, base, {
         rowCols: cols,
         eager: eagerCount < 3,
       });
@@ -120,10 +128,10 @@ export function buildInviteGalleryGrid(container) {
   container.appendChild(createAlbumMoreLink());
   container.appendChild(createAlbumLoiNgoZone());
 
-  const finaleName = STATIC_ALBUM_FILES[INVITE_GALLERY_FINALE_FILE_INDEX];
+  const finaleName = files[INVITE_GALLERY_FINALE_FILE_INDEX];
   if (finaleName) {
     container.appendChild(
-      createGalleryFigure(finaleName, INVITE_GALLERY_FINALE_FILE_INDEX, {
+      createGalleryFigure(finaleName, INVITE_GALLERY_FINALE_FILE_INDEX, base, {
         rowCols: 1,
         finale: true,
         eager: false,

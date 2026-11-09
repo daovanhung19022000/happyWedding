@@ -1,11 +1,13 @@
 import { initFirebaseClient, isFirebaseConfigured } from './firebase-config.js';
-import { loadAllAlbumImageUrls } from './album-store.js';
+import { loadAlbumPickerUrlsForAdmin } from './album-store.js';
 import {
-  INVITE_IMAGE_SLOTS,
   assignInviteImageSlot,
-  fetchInviteImageDoc,
+  fetchAllInviteImageDocs,
+  getInviteImageSlotsForLook,
   resetInviteImageSlot,
 } from './invite-image-store.js';
+import { getViewAdminLook, getViewAdminLookLabel } from './view-admin-look.js';
+import { INVITE_LOOK_MODERN, albumBasePathForLook } from './invite-look.js';
 import {
   isViewAdminUnlocked,
   unlockViewAdmin,
@@ -13,9 +15,16 @@ import {
 } from './view-config.js';
 
 let albumPickerUrls = [];
+let pendingAlbumPick = null;
+let pickerUrlsKey = '';
 
 /** Thứ tự khớp luồng trang chủ index.html */
 const VIEW_SLOT_GROUPS = [
+  {
+    title: 'Love Story',
+    lead: 'Bốn ảnh dọc theo timeline (trước SAVE THE DATE trên thiệp).',
+    slotIds: ['love-story-1', 'love-story-2', 'love-story-3', 'love-story-4'],
+  },
   {
     title: 'SAVE THE DATE',
     lead: 'Ảnh khung vòm — mở đầu sau khi mở phong thiệp.',
@@ -62,9 +71,115 @@ function resolveDefaultPreviewSrc(defaultSrc) {
   return `../${path}`;
 }
 
+function fileNameFromUrl(url) {
+  try {
+    const u = new URL(String(url), window.location.href);
+    return decodeURIComponent(u.pathname.split('/').pop() || '');
+  } catch {
+    const seg = String(url).split('?')[0].split('/').pop() || '';
+    return decodeURIComponent(seg);
+  }
+}
+
+/** Ảnh modern chưa có file — xem trước tạm bằng ảnh kimono cùng index (MOD_3400 → THA_3400). */
+function kimonoFallbackForModernDefault(defaultSrc) {
+  const s = String(defaultSrc || '');
+  if (s.includes('crop_image/trang.png')) return '../kimono_image/crop_image/trang.png';
+  if (s.includes('crop_image/hung.png')) return '../kimono_image/crop_image/hung.png';
+  const mod = s.match(/MOD_(\d+)\.(jpe?g|png|webp)$/i);
+  if (mod) return `../kimono_image/THA_${mod[1]}.JPG`;
+  return '';
+}
+
 function resolvePreviewSrc(slot, doc) {
   if (doc?.url) return doc.url;
   return resolveDefaultPreviewSrc(slot.defaultSrc);
+}
+
+function applySlotAssignedPreview(preview, card, meta, url) {
+  preview.onerror = null;
+  preview.onload = null;
+  preview.classList.remove('view-slot-preview--placeholder', 'view-slot-preview--broken');
+  preview.dataset.previewSource = 'assigned';
+  preview.src = url;
+  const note = card.querySelector('.view-slot-preview-note');
+  if (note) {
+    note.hidden = true;
+    note.textContent = '';
+  }
+  meta.textContent = `Đang dùng: ${fileNameFromUrl(url)}`;
+}
+
+function wireSlotPreview(preview, slot, doc) {
+  const look = getViewAdminLook();
+  const primary = resolvePreviewSrc(slot, doc);
+  const fallback =
+    look === INVITE_LOOK_MODERN && !doc?.url ? kimonoFallbackForModernDefault(slot.defaultSrc) : '';
+
+  preview.classList.remove('view-slot-preview--placeholder', 'view-slot-preview--broken');
+  preview.dataset.previewSource = doc?.url ? 'firebase' : 'default';
+
+  const applyFallbackNote = (fromKimono) => {
+    const card = preview.closest('.view-slot-card');
+    const note = card?.querySelector('.view-slot-preview-note');
+    if (!note) return;
+    if (fromKimono) {
+      note.hidden = false;
+      note.textContent =
+        'Ảnh tạm từ kimono — chọn ảnh hiện đại bên dưới (lưu lên Firestore).';
+    } else {
+      note.hidden = true;
+      note.textContent = '';
+    }
+  };
+
+  if (doc?.url) {
+    const card = preview.closest('.view-slot-card');
+    const meta = card?.querySelector('.view-slot-meta');
+    if (card && meta) applySlotAssignedPreview(preview, card, meta, primary);
+    else {
+      preview.onerror = null;
+      preview.src = primary;
+    }
+    return;
+  }
+
+  const resolvedFallback = fallback
+    ? (() => {
+        try {
+          return new URL(fallback, window.location.href).href;
+        } catch {
+          return fallback;
+        }
+      })()
+    : '';
+
+  preview.onerror = function onPreviewError() {
+    if (resolvedFallback && preview.src !== resolvedFallback) {
+      preview.onerror = null;
+      preview.src = fallback;
+      preview.classList.add('view-slot-preview--placeholder');
+      preview.dataset.previewSource = 'kimono-fallback';
+      applyFallbackNote(true);
+      return;
+    }
+    preview.onerror = null;
+    preview.classList.add('view-slot-preview--broken');
+    applyFallbackNote(false);
+  };
+
+  const defaultPointsModern =
+    look === INVITE_LOOK_MODERN && !doc?.url && String(slot.defaultSrc).includes('modern_image/');
+  if (defaultPointsModern && fallback) {
+    preview.src = fallback;
+    preview.classList.add('view-slot-preview--placeholder');
+    preview.dataset.previewSource = 'kimono-fallback';
+    applyFallbackNote(true);
+    return;
+  }
+
+  preview.src = primary;
+  applyFallbackNote(false);
 }
 
 function slotsForGroup(group, slotByIdMap) {
@@ -72,7 +187,8 @@ function slotsForGroup(group, slotByIdMap) {
     return group.slotIds.map((id) => slotByIdMap[id]).filter(Boolean);
   }
   if (group.slotPrefix) {
-    return INVITE_IMAGE_SLOTS.filter((s) => s.id.startsWith(group.slotPrefix));
+    const slots = getInviteImageSlotsForLook(getViewAdminLook());
+    return slots.filter((s) => s.id.startsWith(group.slotPrefix));
   }
   return [];
 }
@@ -111,8 +227,8 @@ function buildMarqueeNoteSection() {
   section.innerHTML =
     '<h2 class="view-admin-group__title">Thiệp mời — dải ảnh cuộn</h2>' +
     '<p class="view-admin-group__lead">' +
-    'Section <strong>Thiệp Mời</strong> hiển thị toàn bộ album (kimono + upload) cuộn ngang. ' +
-    'Không có slot riêng; cập nhật ảnh qua trang Album hoặc upload mới.' +
+    'Section <strong>Thiệp Mời</strong> hiển thị album theo look (kimono / hiện đại) cuộn ngang. ' +
+    'Không có slot riêng; thêm ảnh qua thư mục hoặc upload album.' +
     '</p>';
   return section;
 }
@@ -138,51 +254,101 @@ function ensureAlbumPickerModal() {
   `;
   document.body.appendChild(modal);
 
+  const grid = modal.querySelector('#view-album-picker-grid');
+  grid?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.view-album-picker__thumb');
+    if (!btn?.dataset.url || !pendingAlbumPick) return;
+    modal.hidden = true;
+    const url = btn.dataset.url;
+    const cb = pendingAlbumPick;
+    pendingAlbumPick = null;
+    cb(url);
+  });
+
   modal.querySelector('[data-close]')?.addEventListener('click', () => {
     modal.hidden = true;
+    pendingAlbumPick = null;
   });
   modal.querySelector('.view-album-picker__close')?.addEventListener('click', () => {
     modal.hidden = true;
+    pendingAlbumPick = null;
   });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !modal.hidden) modal.hidden = true;
+    if (e.key === 'Escape' && !modal.hidden) {
+      modal.hidden = true;
+      pendingAlbumPick = null;
+    }
   });
 
   return modal;
+}
+
+function createPickerThumb(url) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'view-album-picker__thumb';
+  btn.dataset.url = url;
+  const img = document.createElement('img');
+  img.src = url;
+  img.alt = fileNameFromUrl(url);
+  img.loading = 'lazy';
+  img.decoding = 'async';
+  const cap = document.createElement('span');
+  cap.className = 'view-album-picker__caption';
+  cap.textContent = fileNameFromUrl(url);
+  if (url.includes('modern_image/')) cap.dataset.badge = 'modern';
+  else if (url.includes('kimono_image/')) cap.dataset.badge = 'kimono';
+  else if (/^https?:/i.test(url)) cap.dataset.badge = 'upload';
+  btn.appendChild(img);
+  btn.appendChild(cap);
+  return btn;
+}
+
+function rebuildPickerGrid(grid, urls) {
+  const key = urls.join('\n');
+  if (key === pickerUrlsKey && grid.childElementCount > 0) return;
+  pickerUrlsKey = key;
+  grid.replaceChildren();
+
+  if (!urls.length) {
+    const empty = document.createElement('p');
+    empty.className = 'view-album-picker__empty';
+    empty.textContent = 'Chưa có ảnh album.';
+    grid.appendChild(empty);
+    return;
+  }
+
+  const batchSize = 16;
+  let index = 0;
+  const pump = () => {
+    const frag = document.createDocumentFragment();
+    const end = Math.min(index + batchSize, urls.length);
+    for (; index < end; index += 1) {
+      frag.appendChild(createPickerThumb(urls[index]));
+    }
+    grid.appendChild(frag);
+    if (index < urls.length) requestAnimationFrame(pump);
+  };
+  requestAnimationFrame(pump);
 }
 
 function openAlbumPicker(slot, onPick) {
   const modal = ensureAlbumPickerModal();
   const grid = modal.querySelector('#view-album-picker-grid');
   const title = modal.querySelector('#view-album-picker-title');
+  const hint = modal.querySelector('.view-album-picker__hint');
   if (!grid || !title) return;
 
   title.textContent = `Chọn ảnh — ${slot.label}`;
-  grid.replaceChildren();
-
-  if (!albumPickerUrls.length) {
-    const empty = document.createElement('p');
-    empty.className = 'view-album-picker__empty';
-    empty.textContent = 'Chưa có ảnh album.';
-    grid.appendChild(empty);
-  } else {
-    albumPickerUrls.forEach((url) => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'view-album-picker__thumb';
-      const img = document.createElement('img');
-      img.src = url;
-      img.alt = '';
-      img.loading = 'lazy';
-      btn.appendChild(img);
-      btn.addEventListener('click', () => {
-        modal.hidden = true;
-        onPick(url);
-      });
-      grid.appendChild(btn);
-    });
+  if (hint) {
+    hint.textContent =
+      getViewAdminLook() === INVITE_LOOK_MODERN
+        ? 'Kimono + upload (chạm để gán slot hiện đại). Danh sách tải dần để tránh lag.'
+        : 'Ảnh kimono + upload — chạm để gán.';
   }
 
+  pendingAlbumPick = onPick;
+  rebuildPickerGrid(grid, albumPickerUrls);
   modal.hidden = false;
 }
 
@@ -191,11 +357,20 @@ function buildSlotCard(slot, doc) {
   card.className = 'view-slot-card';
   card.dataset.slotId = slot.id;
 
+  const previewWrap = document.createElement('div');
+  previewWrap.className = 'view-slot-preview-wrap';
+
   const preview = document.createElement('img');
   preview.className = 'view-slot-preview';
   preview.alt = slot.label;
-  preview.src = resolvePreviewSrc(slot, doc);
-  preview.loading = 'lazy';
+  preview.decoding = 'async';
+
+  const previewNote = document.createElement('p');
+  previewNote.className = 'view-slot-preview-note';
+  previewNote.hidden = true;
+
+  previewWrap.append(preview, previewNote);
+  wireSlotPreview(preview, slot, doc);
 
   const title = document.createElement('h2');
   title.className = 'view-slot-title';
@@ -204,7 +379,7 @@ function buildSlotCard(slot, doc) {
   const meta = document.createElement('p');
   meta.className = 'view-slot-meta';
   meta.textContent = doc?.url
-    ? 'Đang dùng ảnh chọn từ album'
+    ? `Đang dùng: ${fileNameFromUrl(doc.url)}`
     : `Mặc định: ${slot.defaultSrc}`;
 
   const actions = document.createElement('div');
@@ -221,24 +396,26 @@ function buildSlotCard(slot, doc) {
   resetBtn.textContent = 'Về ảnh gốc';
   resetBtn.disabled = !doc?.url;
 
+  let currentDoc = doc;
+
   pickBtn.addEventListener('click', () => {
     openAlbumPicker(slot, async (url) => {
+      const adminLook = getViewAdminLook();
+      const statusEl = document.getElementById('view-admin-status');
+
+      applySlotAssignedPreview(preview, card, meta, url);
+      resetBtn.disabled = false;
       pickBtn.disabled = true;
-      resetBtn.disabled = true;
-      setStatus(document.getElementById('view-admin-status'), `Đang lưu: ${slot.label}…`);
+      setStatus(statusEl, `Đang lưu: ${slot.label}…`);
+
       try {
-        const saved = await assignInviteImageSlot(slot.id, url);
-        preview.src = saved;
-        meta.textContent = 'Đang dùng ảnh chọn từ album';
-        resetBtn.disabled = false;
-        setStatus(document.getElementById('view-admin-status'), `Đã cập nhật ${slot.label}.`);
+        const saved = await assignInviteImageSlot(slot.id, url, adminLook);
+        currentDoc = { url: saved };
+        applySlotAssignedPreview(preview, card, meta, saved);
+        setStatus(statusEl, `Đã lưu ${slot.label} — ${fileNameFromUrl(saved)}`);
       } catch (err) {
-        setStatus(
-          document.getElementById('view-admin-status'),
-          err.message || 'Lưu thất bại.',
-          true,
-        );
-        preview.src = resolvePreviewSrc(slot, doc);
+        setStatus(statusEl, err.message || 'Lưu Firestore thất bại — preview chỉ trên máy này.', true);
+        currentDoc = { url };
       } finally {
         pickBtn.disabled = false;
       }
@@ -251,8 +428,9 @@ function buildSlotCard(slot, doc) {
     pickBtn.disabled = true;
     setStatus(document.getElementById('view-admin-status'), `Đang khôi phục ${slot.label}…`);
     try {
-      const defaultSrc = await resetInviteImageSlot(slot.id);
-      preview.src = resolveDefaultPreviewSrc(defaultSrc);
+      await resetInviteImageSlot(slot.id, getViewAdminLook());
+      currentDoc = null;
+      wireSlotPreview(preview, slot, null);
       meta.textContent = `Mặc định: ${slot.defaultSrc}`;
       resetBtn.disabled = true;
       setStatus(document.getElementById('view-admin-status'), `Đã về ảnh gốc: ${slot.label}.`);
@@ -262,14 +440,14 @@ function buildSlotCard(slot, doc) {
         err.message || 'Khôi phục thất bại.',
         true,
       );
-      resetBtn.disabled = !!doc?.url;
+      resetBtn.disabled = !!currentDoc?.url;
     } finally {
       pickBtn.disabled = false;
     }
   });
 
   actions.append(pickBtn, resetBtn);
-  card.append(preview, title, meta, actions);
+  card.append(previewWrap, title, meta, actions);
   return card;
 }
 
@@ -277,18 +455,19 @@ async function renderSlots(gridEl) {
   if (!gridEl) return;
   gridEl.replaceChildren();
 
-  const slotByIdMap = Object.fromEntries(INVITE_IMAGE_SLOTS.map((s) => [s.id, s]));
-  const docs = {};
-  for (const slot of INVITE_IMAGE_SLOTS) {
-    try {
-      docs[slot.id] = await fetchInviteImageDoc(slot.id);
-    } catch {
-      docs[slot.id] = null;
-    }
+  const adminLook = getViewAdminLook();
+  const inviteSlots = getInviteImageSlotsForLook(adminLook);
+  const slotByIdMap = Object.fromEntries(inviteSlots.map((s) => [s.id, s]));
+
+  let docs = {};
+  try {
+    docs = await fetchAllInviteImageDocs(adminLook);
+  } catch {
+    docs = {};
   }
 
-  VIEW_SLOT_GROUPS.forEach((group, index) => {
-    if (index === 2) {
+  VIEW_SLOT_GROUPS.forEach((group) => {
+    if (group.slotIds?.includes('calendar-bg')) {
       gridEl.appendChild(buildMarqueeNoteSection());
     }
     const section = buildGroupSection(group, slotByIdMap, docs);
@@ -346,14 +525,21 @@ function initViewAdminPage() {
       return;
     }
 
-    setStatus(statusEl, 'Đang tải album…');
+    const adminLook = getViewAdminLook();
+    const base = `../${albumBasePathForLook(adminLook)}`;
+    setStatus(statusEl, 'Đang tải…');
+    pickerUrlsKey = '';
     try {
-      albumPickerUrls = await loadAllAlbumImageUrls('../kimono_image/');
+      albumPickerUrls = await loadAlbumPickerUrlsForAdmin(adminLook);
     } catch {
       albumPickerUrls = [];
     }
     await renderSlots(gridEl);
-    setStatus(statusEl, albumPickerUrls.length ? '' : 'Chưa có ảnh album để chọn.');
+    if (albumPickerUrls.length) {
+      setStatus(statusEl, getViewAdminLookLabel(adminLook));
+    } else {
+      setStatus(statusEl, `Chưa có ảnh trong ${base} — thêm file hoặc upload album.`, true);
+    }
   };
 
   initPinGate(pinForm, panel, statusEl, onUnlocked);

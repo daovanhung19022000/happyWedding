@@ -30,6 +30,11 @@ service cloud.firestore {
       allow create, update, delete: if true;
     }
 
+    match /invite_images_modern/{slotId} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
     match /stats/{docId} {
       allow read: if true;
       allow create, update: if true;

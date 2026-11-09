@@ -1,5 +1,8 @@
 /** Ảnh gốc trong repo + ảnh upload qua Firebase */
 
+import { INVITE_LOOK_MODERN } from './invite-look.js';
+import { modernStaticAlbumUrls } from './modern-album-store.js';
+
 export const STATIC_ALBUM_FILES = [
   'THA_3400.JPG', 'THA_3524.JPG', 'THA_3557.JPG', 'THA_4408.JPG', 'THA_3637.JPG',
   'THA_3681.JPG', 'THA_3696.JPG', 'THA_3566.JPG', 'THA_3859.JPG', 'THA_3862.JPG',
@@ -25,8 +28,7 @@ export async function fetchUploadedAlbumUrls() {
 
 const UPLOAD_FETCH_TIMEOUT_MS = 2500;
 
-export async function loadAllAlbumImageUrls(basePath = '../kimono_image/') {
-  const urls = staticAlbumUrls(basePath);
+async function mergeUploadedAlbumUrls(urls) {
   try {
     const uploaded = await Promise.race([
       fetchUploadedAlbumUrls(),
@@ -45,6 +47,34 @@ export async function loadAllAlbumImageUrls(basePath = '../kimono_image/') {
     console.warn('Không tải được ảnh upload:', err);
     return urls;
   }
+}
+
+export async function loadAllAlbumImageUrls(basePath = '../kimono_image/') {
+  const urls = staticAlbumUrls(basePath);
+  return mergeUploadedAlbumUrls(urls);
+}
+
+/** Trang /view & /view2 — ảnh để chọn (view2: kimono + upload, không liệt kê MOD_ ảo 404). */
+export async function loadAlbumPickerUrlsForAdmin(look) {
+  const kimonoUrls = staticAlbumUrls('../kimono_image/');
+  const seen = new Set();
+
+  function addList(list) {
+    const out = [];
+    list.forEach((url) => {
+      const key = String(url).split('?')[0];
+      if (seen.has(key)) return;
+      seen.add(key);
+      out.push(url);
+    });
+    return out;
+  }
+
+  let urls = addList(kimonoUrls);
+  if (look === INVITE_LOOK_MODERN) {
+    urls = addList([...urls, ...modernStaticAlbumUrls('../modern_image/')]);
+  }
+  return mergeUploadedAlbumUrls(urls);
 }
 
 export function shuffle(list) {

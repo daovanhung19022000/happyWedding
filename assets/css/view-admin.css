@@ -73,13 +73,37 @@ body.view-admin-page .album-upload-wrap {
   background: rgba(255, 255, 255, 0.85);
 }
 
+.view-slot-preview-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .view-slot-preview {
   width: 100%;
+  min-height: 120px;
   max-height: 200px;
   object-fit: cover;
   border-radius: 8px;
   display: block;
   background: #f0e8e0;
+}
+
+.view-slot-preview--placeholder {
+  outline: 2px dashed rgba(148, 34, 51, 0.45);
+  outline-offset: -2px;
+}
+
+.view-slot-preview--broken {
+  object-fit: contain;
+  padding: 8px;
+}
+
+.view-slot-preview-note {
+  margin: 0;
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: #942233;
 }
 
 .view-slot-title {
@@ -176,13 +200,15 @@ body.view-admin-page .album-upload-wrap {
 }
 
 .view-album-picker__thumb {
+  display: flex;
+  flex-direction: column;
   border: 2px solid transparent;
   border-radius: 8px;
   padding: 0;
   overflow: hidden;
   cursor: pointer;
   background: #f0e8e0;
-  aspect-ratio: 1;
+  text-align: left;
 }
 
 .view-album-picker__thumb:hover {
@@ -191,9 +217,37 @@ body.view-admin-page .album-upload-wrap {
 
 .view-album-picker__thumb img {
   width: 100%;
-  height: 100%;
+  aspect-ratio: 1;
   object-fit: cover;
   display: block;
+}
+
+.view-album-picker__caption {
+  display: block;
+  padding: 3px 4px 4px;
+  font-size: 0.58rem;
+  line-height: 1.25;
+  color: #4a4541;
+  word-break: break-all;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.view-album-picker__caption[data-badge='kimono']::before {
+  content: 'K ';
+  font-weight: 700;
+  color: #942233;
+}
+
+.view-album-picker__caption[data-badge='modern']::before {
+  content: 'M ';
+  font-weight: 700;
+  color: #1a6b4a;
+}
+
+.view-album-picker__caption[data-badge='upload']::before {
+  content: '↑ ';
+  font-weight: 700;
+  color: #5a5a8a;
 }
 
 .view-album-picker__empty {
