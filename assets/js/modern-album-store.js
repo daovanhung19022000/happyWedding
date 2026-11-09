@@ -145,9 +145,12 @@ export const MODERN_CORE_DEFAULTS = {
   'marriage-trio-right': 'LCN06950.jpg',
 };
 
+/** Vòm hero — file gốc; slot khác dùng bản `web/`. */
 export function modernDefaultSrcForSlot(slotId) {
   const file = MODERN_CORE_DEFAULTS[slotId];
-  return file ? modernImagePath(file) : '';
+  if (!file) return '';
+  if (slotId === 'hero-arch') return modernImageOriginalPath(file);
+  return modernImagePath(file);
 }
 
 export function modernStaticAlbumUrls(basePath = 'modern_image/web/') {

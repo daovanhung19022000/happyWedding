@@ -2,6 +2,7 @@ import { STATIC_ALBUM_FILES } from './album-store.js';
 import {
   MODERN_CORE_DEFAULTS,
   MODERN_STATIC_ALBUM_FILES,
+  modernDefaultSrcForSlot,
   modernImagePath,
 } from './modern-album-store.js';
 import { INVITE_LOOK_KIMONO, INVITE_LOOK_MODERN, getInviteLook } from './invite-look.js';
@@ -28,7 +29,7 @@ const CORE_SLOT_IDS = [
 const CORE_SLOT_BLUEPRINT = CORE_SLOT_IDS.map((row) => ({
   ...row,
   modern: MODERN_CORE_DEFAULTS[row.id]
-    ? modernImagePath(MODERN_CORE_DEFAULTS[row.id])
+    ? modernDefaultSrcForSlot(row.id)
     : modernImagePath(MODERN_STATIC_ALBUM_FILES[0]),
 }));
 
