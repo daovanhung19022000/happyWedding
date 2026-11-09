@@ -3,18 +3,27 @@
  * Đường dẫn encode khoảng trắng cho trình duyệt / GitHub Pages.
  */
 
-/** Ảnh gốc (file lớn) — chỉ khi cần tải full. */
+function encodeModernFileName(fileName) {
+  return encodeURIComponent(String(fileName || '').trim());
+}
+
+/** Ảnh gốc (file lớn) — chỉ khi cần tải full / dev local. */
 export function modernImageOriginalPath(fileName) {
   const name = String(fileName || '').trim();
   if (!name) return 'modern_image/';
-  return `modern_image/${encodeURI(name)}`;
+  return `modern_image/${encodeModernFileName(name)}`;
 }
 
 /** Ảnh hiển thị trên thiệp — bản nén trong `modern_image/web/`. */
 export function modernImagePath(fileName) {
   const name = String(fileName || '').trim();
   if (!name) return 'modern_image/web/';
-  return `modern_image/web/${encodeURI(name)}`;
+  return `modern_image/web/${encodeModernFileName(name)}`;
+}
+
+function isLocalModernHost() {
+  if (typeof window === 'undefined') return false;
+  return /^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/i.test(window.location.hostname);
 }
 
 /** Toàn bộ ảnh trong folder (album cuộn + picker /view2). */
@@ -145,14 +154,23 @@ export const MODERN_CORE_DEFAULTS = {
   'marriage-trio-right': 'LCN06950.jpg',
 };
 
-/** Vòm hero — file gốc; slot khác dùng bản `web/`. */
+/**
+ * Vòm hero — local: file gốc; Vercel/production: bản `web/` (~500KB, tránh 23MB + lỗi `+` trên CDN).
+ */
+export function modernHeroArchSrc() {
+  const file = MODERN_CORE_DEFAULTS['hero-arch'];
+  if (!file) return '';
+  return isLocalModernHost() ? modernImageOriginalPath(file) : modernImagePath(file);
+}
+
+/** Slot modern — hero-arch đặc biệt; còn lại dùng `web/`. */
 export function modernDefaultSrcForSlot(slotId) {
   const file = MODERN_CORE_DEFAULTS[slotId];
   if (!file) return '';
-  if (slotId === 'hero-arch') return modernImageOriginalPath(file);
+  if (slotId === 'hero-arch') return modernHeroArchSrc();
   return modernImagePath(file);
 }
 
 export function modernStaticAlbumUrls(basePath = 'modern_image/web/') {
-  return MODERN_STATIC_ALBUM_FILES.map((name) => `${basePath}${encodeURI(name)}`);
+  return MODERN_STATIC_ALBUM_FILES.map((name) => `${basePath}${encodeModernFileName(name)}`);
 }

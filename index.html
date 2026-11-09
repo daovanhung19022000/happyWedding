@@ -88,12 +88,14 @@
       document.documentElement.dataset.inviteLook = look;
       document.documentElement.classList.add('invite-look--' + look);
 
+      var MODERN_HERO_FILE = 'LCN06348 copy ok copy-+.jpg';
       function applyHeroSlot(lookNow) {
         var img = document.querySelector('[data-invite-slot="hero-arch"]');
         if (!img) return;
         var heroSrc =
           lookNow === 'modern'
-            ? 'modern_image/LCN06348%20copy%20ok%20copy-+.jpg'
+            ? (isLocalDev() ? 'modern_image/' : 'modern_image/web/') +
+              encodeURIComponent(MODERN_HERO_FILE)
             : 'kimono_image/THA_3400.JPG';
         img.src = heroSrc;
         img.dataset.defaultSrc = heroSrc;
