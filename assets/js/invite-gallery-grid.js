@@ -1,4 +1,4 @@
-import { STATIC_ALBUM_FILES } from './album-store.js';
+import { resolveAlbumPageHref, STATIC_ALBUM_FILES } from './album-store.js';
 import {
   KIMONO_GALLERY_FINALE_CAPTION,
   KIMONO_GALLERY_OPENING_CAPTION,
@@ -46,7 +46,7 @@ function createAlbumMoreLink() {
   wrap.className = 'album-more-inline';
   const link = document.createElement('a');
   link.className = 'album-more-link';
-  link.href = 'album/';
+  link.href = resolveAlbumPageHref();
   link.textContent = 'Xem thêm ảnh cưới';
   link.setAttribute('aria-label', 'Xem thêm ảnh cưới — mở trang album');
   wrap.appendChild(link);
@@ -222,10 +222,28 @@ export function buildInviteGalleryGrid(container) {
 }
 
 function syncGalleryAfterBuild(container) {
+  const unlockAlbumMoreLink = () => {
+    container.querySelectorAll('.album-more-link').forEach((link) => {
+      link.classList.remove(
+        'scroll-reveal',
+        'scroll-reveal--merge-right',
+        'scroll-reveal--text',
+        'scroll-reveal--gallery',
+        'is-animating',
+      );
+      link.classList.add('is-visible');
+      link.style.removeProperty('--reveal-delay');
+      link.style.opacity = '';
+      link.style.pointerEvents = 'auto';
+    });
+  };
+
   const run = () => {
+    unlockAlbumMoreLink();
     window.WeddingBlossomPulse?.refresh?.();
     if (typeof window.WeddingScrollReveal?.refreshGallery === 'function') {
       window.WeddingScrollReveal.refreshGallery();
+      unlockAlbumMoreLink();
       return;
     }
     if (typeof window.WeddingScrollReveal?.markAll === 'function') {

@@ -2456,9 +2456,18 @@ html.invite-mode-nam #invite-schedule-ceremony {
 
 .album-more-inline {
   grid-column: 1 / -1;
+  position: relative;
+  z-index: 3;
   text-align: right;
   padding: 4px 10px 12px;
   line-height: 1.4;
+}
+
+.album-more-inline .album-more-link {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+  opacity: 1;
 }
 
 .album-loi-ngo-head {
@@ -3726,32 +3735,96 @@ html.invite-look--modern .gallery-grid-item--finale-editorial .gallery-finale-su
   inset: 0;
   background: rgba(0, 0, 0, 0.9);
   display: none;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 2000;
-  padding: 16px;
+  padding: 56px 12px 48px;
 }
 
 .lightbox-backdrop.active {
   display: flex;
 }
 
-.lightbox-backdrop img {
-  max-width: 95vw;
-  max-height: 90vh;
+body.lightbox-open {
+  overflow: hidden;
+}
+
+.lightbox-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(4px, 2vw, 12px);
+  max-width: min(100%, 520px);
+  width: 100%;
+}
+
+.lightbox-backdrop img,
+#lightbox-img {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: min(92vw, 440px);
+  max-height: min(78vh, 720px);
+  width: auto;
+  height: auto;
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
+.lightbox-nav-btn {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: rgba(18, 18, 18, 0.45);
+  color: #fff;
+  font-size: 1.65rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0 2px;
+  transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.lightbox-nav-btn:hover:not(:disabled) {
+  background: rgba(148, 34, 51, 0.65);
+}
+
+.lightbox-nav-btn:disabled {
+  opacity: 0.28;
+  cursor: default;
+}
+
+.lightbox-counter {
+  position: absolute;
+  bottom: max(16px, env(safe-area-inset-bottom, 16px));
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.42);
+  color: rgba(255, 255, 255, 0.92);
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  tab-size: 0;
+}
+
 .lightbox-close-btn {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: max(16px, env(safe-area-inset-top, 16px));
+  right: max(16px, env(safe-area-inset-right, 16px));
   background: transparent;
   border: none;
   color: #ffffff;
   font-size: 34px;
   cursor: pointer;
   line-height: 1;
+  z-index: 2;
 }

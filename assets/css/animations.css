@@ -313,14 +313,14 @@ body.intro-complete .hero-opening-details {
   }
 }
 
-#app-canvas .scroll-reveal {
+:is(#app-canvas, body.album-view-page .album-page-wrap) .scroll-reveal {
   opacity: 0;
   /* Không chặn click — tránh “không bấm được gì” khi chưa kịp reveal */
   pointer-events: auto;
   will-change: opacity, transform;
 }
 
-#app-canvas .scroll-reveal.is-visible {
+:is(#app-canvas, body.album-view-page .album-page-wrap) .scroll-reveal.is-visible {
   opacity: 1;
   animation-duration: 0.85s;
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
@@ -328,17 +328,17 @@ body.intro-complete .hero-opening-details {
   animation-delay: var(--reveal-delay, 0s);
 }
 
-#app-canvas .scroll-reveal--text.is-visible,
-#app-canvas .scroll-reveal--up.is-visible {
+:is(#app-canvas, body.album-view-page .album-page-wrap) .scroll-reveal--text.is-visible,
+:is(#app-canvas, body.album-view-page .album-page-wrap) .scroll-reveal--up.is-visible {
   animation-name: weddingRevealText;
 }
 
-#app-canvas .scroll-reveal--zoom.is-visible {
+:is(#app-canvas, body.album-view-page .album-page-wrap) .scroll-reveal--zoom.is-visible {
   animation-name: weddingRevealZoom;
 }
 
 /* Album — chỉ dùng bay từ dưới khi không thuộc vùng mép màn hình */
-#app-canvas .gallery-canvas-section:not(.scroll-reveal-edge-zone) .scroll-reveal {
+:is(#app-canvas, body.album-view-page .album-page-wrap) .gallery-canvas-section:not(.scroll-reveal-edge-zone) .scroll-reveal {
   opacity: 0;
   transform: translate3d(0, 32px, 0) scale(0.97);
   animation: none !important;
@@ -349,45 +349,45 @@ body.intro-complete .hero-opening-details {
   backface-visibility: hidden;
 }
 
-#app-canvas .gallery-canvas-section:not(.scroll-reveal-edge-zone) .scroll-reveal.is-visible {
+:is(#app-canvas, body.album-view-page .album-page-wrap) .gallery-canvas-section:not(.scroll-reveal-edge-zone) .scroll-reveal.is-visible {
   opacity: 1;
   transform: none;
 }
 
-#app-canvas .scroll-reveal-edge-zone .scroll-reveal--edge-left.is-visible {
+:is(#app-canvas, body.album-view-page .album-page-wrap) .scroll-reveal-edge-zone .scroll-reveal--edge-left.is-visible {
   animation-name: weddingRevealEdgeLeft;
 }
 
-#app-canvas .scroll-reveal-edge-zone .scroll-reveal--edge-right.is-visible {
+:is(#app-canvas, body.album-view-page .album-page-wrap) .scroll-reveal-edge-zone .scroll-reveal--edge-right.is-visible {
   animation-name: weddingRevealEdgeRight;
 }
 
-#app-canvas .scroll-reveal-edge-zone .scroll-reveal--merge-left.is-visible {
+:is(#app-canvas, body.album-view-page .album-page-wrap) .scroll-reveal-edge-zone .scroll-reveal--merge-left.is-visible {
   animation-name: weddingRevealEdgeLeft;
 }
 
-#app-canvas .scroll-reveal-edge-zone .scroll-reveal--merge-right.is-visible {
+:is(#app-canvas, body.album-view-page .album-page-wrap) .scroll-reveal-edge-zone .scroll-reveal--merge-right.is-visible {
   animation-name: weddingRevealEdgeRight;
 }
 
-#app-canvas .scroll-reveal--merge-left.is-visible {
+:is(#app-canvas, body.album-view-page .album-page-wrap) .scroll-reveal--merge-left.is-visible {
   animation-name: weddingRevealMergeLeft;
 }
 
-#app-canvas .scroll-reveal--merge-right.is-visible {
+:is(#app-canvas, body.album-view-page .album-page-wrap) .scroll-reveal--merge-right.is-visible {
   animation-name: weddingRevealMergeRight;
 }
 
-#app-canvas .scroll-reveal--left.is-visible {
+:is(#app-canvas, body.album-view-page .album-page-wrap) .scroll-reveal--left.is-visible {
   animation-name: weddingRevealMergeLeft;
 }
 
-#app-canvas .scroll-reveal--right.is-visible {
+:is(#app-canvas, body.album-view-page .album-page-wrap) .scroll-reveal--right.is-visible {
   animation-name: weddingRevealMergeRight;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #app-canvas .scroll-reveal {
+  :is(#app-canvas, body.album-view-page .album-page-wrap) .scroll-reveal {
     opacity: 1;
     pointer-events: auto;
     animation: none;

@@ -12,6 +12,7 @@ import {
   formatWishGuestName,
 } from './invite-config.js';
 import { recordGuestInviteVisit } from './guest-invite-store.js';
+import { bindGalleryLightbox } from './wedding-lightbox.js';
 
 export { eventModes, resolveEventMode };
 
@@ -219,29 +220,11 @@ function startCountdown(targetDateStr) {
   countdownInterval = setInterval(update, 1000);
 }
 
-// Lightbox xem ảnh
+// Lightbox xem ảnh (prev/next + 5/50)
 function initLightbox() {
-  const modal = document.getElementById('lightbox-modal');
-  const img = document.getElementById('lightbox-img');
-  const closeBtn = document.getElementById('lightbox-close');
-
   const gallerySection = document.querySelector('.gallery-canvas-section');
-  if (gallerySection && modal && img) {
-    gallerySection.addEventListener('click', (e) => {
-      const target = e.target;
-      if (!(target instanceof HTMLImageElement) || !target.closest('.gallery-item')) return;
-      img.src = target.currentSrc || target.src;
-      modal.classList.add('active');
-    });
-  }
-
-  if (closeBtn) {
-    closeBtn.addEventListener('click', () => modal.classList.remove('active'));
-  }
-  if (modal) {
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) modal.classList.remove('active');
-    });
+  if (gallerySection) {
+    bindGalleryLightbox(gallerySection, { imageSelector: '.gallery-grid-item img' });
   }
 }
 

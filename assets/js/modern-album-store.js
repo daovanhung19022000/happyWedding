@@ -50,8 +50,58 @@ export const MODERN_STATIC_ALBUM_FILES = [
   'LCN07201.jpg',
 ];
 
-/** Ảnh full-width cuối trang thiệp (look modern). */
+/** Ảnh full-width cuối (trang /album/ & thiệp modern). */
 export const MODERN_GALLERY_FINALE_FILE = 'LCN07147.jpg';
+
+/** Bố cục trang /album/ — chỉ ảnh hiện đại (web), kimono cuối, 07147 kết. */
+export const MODERN_ALBUM_CONCEPT_SECTIONS = [
+  {
+    id: 'forest',
+    files: [
+      'LCN06088.jpg',
+      'LCN06137.jpg',
+      'LCN06142.jpg',
+      'LCN06191.jpg',
+      'LCN06213.jpg',
+      'LCN06236.jpg',
+      'LCN06311.jpg',
+      'LCN06348 copy ok copy-+.jpg',
+      'LCN06369  OK copy+.jpg',
+      'LCN06382.jpg',
+      'LCN06420  OK copy+.jpg',
+      'LCN06521 ok.jpg',
+    ],
+    fullWidth: ['LCN06348 copy ok copy-+.jpg'],
+  },
+  {
+    id: 'gown',
+    files: [
+      'LCN06575  OK.jpg',
+      'LCN06654  OK copy+.jpg',
+      'LCN06685  ok.jpg',
+      'LCN06713  OK.jpg',
+      'LCN06727 OK.jpg',
+      'LCN06786.jpg',
+      'LCN06840.jpg',
+    ],
+    fullWidth: ['LCN06840.jpg'],
+  },
+  {
+    id: 'car',
+    files: [
+      'LCN06944.jpg',
+      'LCN06950.jpg',
+      'LCN07002.jpg',
+      'LCN07051.jpg',
+      'LCN07056.jpg',
+      'LCN07063.jpg',
+      'LCN07101.JPEG',
+      'LCN07201.jpg',
+      'IMG_8731.JPG',
+    ],
+    fullWidth: [],
+  },
+];
 
 /** Lớp chữ ảnh đầu album (full width). */
 export const MODERN_GALLERY_OPENING_CAPTION = {

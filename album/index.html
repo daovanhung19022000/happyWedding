@@ -6,7 +6,7 @@
   <title>Album ảnh cưới — Văn Hùng &amp; Thu Trang</title>
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/animations.css">
-  <link rel="stylesheet" href="../assets/css/album-pages.css">
+  <link rel="stylesheet" href="../assets/css/album-pages.css?v=album-full-6">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20y=%220%22%20width=%22100%22%20height=%22100%22><text y=%22.9em%22 font-size=%2290%22>💍</text></svg>">
 </head>
 <body class="intro-complete album-view-page">
@@ -36,9 +36,17 @@
     </footer>
   </div>
 
-  <div id="lightbox-modal" class="lightbox-backdrop">
-    <button id="lightbox-close" class="lightbox-close-btn" title="Đóng" type="button">&times;</button>
-    <img id="lightbox-img" src="" alt="Ảnh phóng to" />
+  <div id="lightbox-modal" class="lightbox-backdrop" role="dialog" aria-modal="true" aria-hidden="true"
+    aria-label="Xem ảnh phóng to">
+    <button id="lightbox-close" class="lightbox-close-btn" type="button" title="Đóng">&times;</button>
+    <div class="lightbox-stage">
+      <button id="lightbox-prev" class="lightbox-nav-btn lightbox-nav-btn--prev" type="button"
+        title="Ảnh trước" aria-label="Ảnh trước">&#8249;</button>
+      <img id="lightbox-img" src="" alt="Ảnh phóng to" />
+      <button id="lightbox-next" class="lightbox-nav-btn lightbox-nav-btn--next" type="button"
+        title="Ảnh sau" aria-label="Ảnh sau">&#8250;</button>
+    </div>
+    <p id="lightbox-counter" class="lightbox-counter" hidden></p>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -48,7 +56,8 @@
     import { initWeddingAudio } from '../assets/js/wedding-audio.js';
     initWeddingAudio({ enableIntroAutoplay: false });
   </script>
-  <script type="module" src="../assets/js/album-view.js"></script>
+  <script src="../assets/js/scroll-reveal.js" defer></script>
+  <script type="module" src="../assets/js/album-view.js?v=concept-album-10"></script>
   <script src="../assets/js/cherry-blossom-bg.js" defer></script>
 </body>
 </html>

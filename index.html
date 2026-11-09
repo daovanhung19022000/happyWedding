@@ -836,14 +836,14 @@
         <article class="gift-dialog-card">
           <h3 class="gift-dialog-card-role">Nhà trai</h3>
           <div class="gift-dialog-qr">
-            <img src="assets/images/qr-nha-trai-dao-thi-bich-lien.jpg"
-              alt="Mã QR chuyển khoản nhà trai — Đào Thị Bích Liên, Vietcombank" loading="lazy" width="140"
+            <img src="assets/images/qr_nha_trai_chu_re.jpg"
+              alt="Mã QR chuyển khoản nhà trai — Đào Văn Hùng, MB Bank" loading="lazy" width="140"
               height="140" />
           </div>
-          <p class="gift-dialog-name">ĐÀO THỊ BÍCH LIÊN</p>
-          <p class="gift-dialog-bank">Vietcombank · em gái chú rể</p>
-          <p class="gift-dialog-account">1064107744</p>
-          <button type="button" class="gift-dialog-copy" onclick="copyText('1064107744', this)">
+          <p class="gift-dialog-name">ĐÀO VĂN HÙNG</p>
+          <p class="gift-dialog-bank">MB Bank · chú rể</p>
+          <p class="gift-dialog-account">07022611090</p>
+          <button type="button" class="gift-dialog-copy" onclick="copyText('07022611090', this)">
             Sao chép số TK
           </button>
         </article>
@@ -868,9 +868,17 @@
   </div>
 
   <!-- LIGHTBOX MODAL XEM ẢNH FULL SIZE -->
-  <div id="lightbox-modal" class="lightbox-backdrop">
-    <button id="lightbox-close" class="lightbox-close-btn" title="Đóng">&times;</button>
-    <img id="lightbox-img" src="" alt="Ảnh phóng to">
+  <div id="lightbox-modal" class="lightbox-backdrop" role="dialog" aria-modal="true" aria-hidden="true"
+    aria-label="Xem ảnh phóng to">
+    <button id="lightbox-close" class="lightbox-close-btn" type="button" title="Đóng">&times;</button>
+    <div class="lightbox-stage">
+      <button id="lightbox-prev" class="lightbox-nav-btn lightbox-nav-btn--prev" type="button"
+        title="Ảnh trước" aria-label="Ảnh trước">&#8249;</button>
+      <img id="lightbox-img" src="" alt="Ảnh phóng to" />
+      <button id="lightbox-next" class="lightbox-nav-btn lightbox-nav-btn--next" type="button"
+        title="Ảnh sau" aria-label="Ảnh sau">&#8250;</button>
+    </div>
+    <p id="lightbox-counter" class="lightbox-counter" hidden></p>
   </div>
 
   <!-- Script phụ trợ cho Tab Hộp Mừng Cưới & Copy STK -->

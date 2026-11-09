@@ -1,15 +1,19 @@
-import { loadAllAlbumImageUrls } from './album-store.js';
-import { bindAlbumLightbox, renderAlbumMosaic } from './album-mosaic.js';
+import { buildAlbumPagePlan } from './album-concept-layout.js';
+import { bindAlbumLightbox, renderAlbumConceptMosaic } from './album-mosaic.js';
 
-async function initAlbumPage() {
+function initAlbumPage() {
   const mosaic = document.getElementById('album-mosaic');
-  const modal = document.getElementById('lightbox-modal');
-  const lightboxImg = document.getElementById('lightbox-img');
-  const closeBtn = document.getElementById('lightbox-close');
+  if (!mosaic) return;
 
-  const urls = await loadAllAlbumImageUrls('../kimono_image/');
-  renderAlbumMosaic(mosaic, urls);
-  bindAlbumLightbox(mosaic, modal, lightboxImg, closeBtn);
+  try {
+    const plan = buildAlbumPagePlan();
+    renderAlbumConceptMosaic(mosaic, plan);
+    bindAlbumLightbox(mosaic, { imageSelector: '.album-mosaic img' });
+  } catch (err) {
+    console.error('Album concept layout lỗi:', err);
+    mosaic.innerHTML =
+      '<p class="album-mosaic-error">Không tải được album — tải lại trang (Cmd+Shift+R).</p>';
+  }
 }
 
 initAlbumPage();

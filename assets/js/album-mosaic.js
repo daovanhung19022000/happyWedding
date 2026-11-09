@@ -1,86 +1,69 @@
 import { buildMosaicRows } from './album-store.js';
+import { flattenAlbumPageRows } from './album-concept-layout.js';
+import { initAlbumReveal } from './album-mosaic-reveal.js';
 
 export function renderAlbumMosaic(mosaicEl, urlList) {
   if (!mosaicEl) return;
   mosaicEl.replaceChildren();
   const rows = buildMosaicRows(urlList);
-
   rows.forEach((rowUrls) => {
-    const row = document.createElement('div');
-    row.className = `album-mosaic-row album-mosaic-row--${rowUrls.length}`;
-    rowUrls.forEach((src, colIndex) => {
-      const fig = document.createElement('figure');
-      fig.className = 'album-reveal';
-      fig.style.setProperty('--reveal-delay', `${colIndex * 0.09}s`);
-      const img = document.createElement('img');
-      img.src = src;
-      img.alt = 'Ảnh cưới Văn Hùng và Thu Trang';
-      img.loading = 'lazy';
-      img.addEventListener(
-        'load',
-        () => {
-          fig.classList.add('album-reveal--ready');
-          maybeRevealInView(fig);
-        },
-        { once: true },
-      );
-      fig.appendChild(img);
-      row.appendChild(fig);
+    appendPhotoRow(mosaicEl, rowUrls.length, rowUrls);
+  });
+  initAlbumReveal(mosaicEl);
+}
+
+/** Trang /album/ — một luồng ảnh, không tiêu đề concept. */
+export function renderAlbumConceptMosaic(mosaicEl, plan) {
+  if (!mosaicEl || !plan) return;
+  mosaicEl.replaceChildren();
+  mosaicEl.classList.add('album-mosaic--concept');
+
+  let rowIndex = 0;
+  flattenAlbumPageRows(plan).forEach((row) => {
+    const rowEl = document.createElement('div');
+    rowEl.className = `album-mosaic-row album-mosaic-row--${row.cols}`;
+    row.urls.forEach((src, colIndex) => {
+      rowEl.appendChild(createAlbumFigure(src, row.cols, colIndex, rowIndex));
     });
-    mosaicEl.appendChild(row);
+    if (row.fullBleed) rowEl.classList.add('album-mosaic-row--hero');
+    if (row.isFinale) rowEl.classList.add('album-mosaic-row--finale');
+    mosaicEl.appendChild(rowEl);
+    rowIndex += 1;
   });
 
   initAlbumReveal(mosaicEl);
 }
 
-function maybeRevealInView(fig) {
-  if (!fig.classList.contains('album-reveal--ready')) return;
-  const rect = fig.getBoundingClientRect();
-  const vh = window.innerHeight || document.documentElement.clientHeight;
-  if (rect.bottom > 0 && rect.top < vh) {
-    fig.classList.add('is-visible');
-  }
+function createAlbumFigure(src, cols, colIndex, rowIndex) {
+  const fig = document.createElement('figure');
+  fig.className = 'album-reveal';
+  fig.dataset.revealSide = albumRevealSide(cols, colIndex, rowIndex);
+  fig.style.setProperty('--reveal-delay', `${colIndex * 0.07}s`);
+
+  const img = document.createElement('img');
+  img.src = src;
+  img.alt = 'Ảnh cưới Văn Hùng và Thu Trang';
+  img.loading = 'lazy';
+  img.decoding = 'async';
+  fig.appendChild(img);
+  return fig;
 }
 
-export function initAlbumReveal(mosaicEl) {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    mosaicEl.querySelectorAll('.album-reveal').forEach((fig) => {
-      fig.classList.add('is-visible');
-    });
-    return;
-  }
-
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        const fig = entry.target;
-        if (!entry.isIntersecting) return;
-        const img = fig.querySelector('img');
-        if (img && !img.complete) return;
-        fig.classList.add('is-visible');
-        observer.unobserve(fig);
-      });
-    },
-    { threshold: 0.12, rootMargin: '0px 0px 6% 0px' },
-  );
-
-  mosaicEl.querySelectorAll('.album-reveal').forEach((fig) => {
-    const img = fig.querySelector('img');
-    if (img?.complete) fig.classList.add('album-reveal--ready');
-    observer.observe(fig);
-  });
+function albumRevealSide(cols, colIndex, rowIndex) {
+  if (cols === 1) return rowIndex % 2 === 0 ? 'left' : 'right';
+  if (colIndex === 0) return 'left';
+  if (colIndex >= cols - 1) return 'right';
+  return colIndex % 2 === 0 ? 'left' : 'right';
 }
 
-export function bindAlbumLightbox(mosaicEl, modal, lightboxImg, closeBtn) {
-  if (!mosaicEl || !modal || !lightboxImg) return;
-  mosaicEl.addEventListener('click', (e) => {
-    const img = e.target.closest('img');
-    if (!img) return;
-    lightboxImg.src = img.src;
-    modal.classList.add('active');
+function appendPhotoRow(parent, cols, urls) {
+  const row = document.createElement('div');
+  row.className = `album-mosaic-row album-mosaic-row--${cols}`;
+  urls.forEach((src, colIndex) => {
+    row.appendChild(createAlbumFigure(src, cols, colIndex, 0));
   });
-  closeBtn?.addEventListener('click', () => modal.classList.remove('active'));
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) modal.classList.remove('active');
-  });
+  parent.appendChild(row);
+  return row;
 }
+
+export { initAlbumReveal, bindAlbumLightbox } from './album-mosaic-reveal.js';

@@ -11,8 +11,17 @@
 
   const REVEAL_MEDIA =
     '.hero-signature-col, .polaroid-photo-box, .polaroid-card-body, ' +
-    '.gallery-grid-item, .formal-invite-schedule-illus, ' +
+    '.gallery-grid-item, .album-mosaic .album-reveal, .formal-invite-schedule-illus, ' +
     '.gift-envelope-wrap, .love-story-card, .love-story-photo, .always-you-photo, .marriage-trio-cell';
+
+  function getRevealRoots() {
+    const roots = [];
+    const app = document.getElementById('app-canvas');
+    if (app) roots.push(app);
+    const albumWrap = document.querySelector('body.album-view-page .album-page-wrap');
+    if (albumWrap) roots.push(albumWrap);
+    return roots;
+  }
 
   const REVEAL_TEXT =
     'h1, h2, h3, h4, h5, h6, p, li, .hero-eyebrow, .hero-journey-tagline, .hero-date-ribbon, ' +
@@ -144,6 +153,7 @@
 
   function shouldSkip(el) {
     if (!el || el.classList.contains('scroll-reveal')) return true;
+    if (el.classList.contains('album-more-link') || el.closest('.album-more-inline')) return true;
     if (el.closest('#envelope-intro, #gift-dialog, #guest-banner, #blossom-pulse-layer')) return true;
     if (el.closest('.hero-hearts-orbit, .wedding-calendar-bg, .wedding-calendar-scrim')) return true;
     if (el.hidden || el.getAttribute('aria-hidden') === 'true') return true;
@@ -165,6 +175,16 @@
 
   function variantFor(el, index, section) {
     const edge = isEdgeRevealSection(section);
+
+    if (el.classList.contains('album-reveal')) {
+      if (edge && section.classList.contains('gallery-canvas-section')) {
+        const side = el.dataset.revealSide;
+        if (side === 'right') return 'merge-right';
+        if (side === 'left') return 'merge-left';
+        return edgeSideByIndex(index);
+      }
+      return 'gallery';
+    }
 
     if (
       el.classList.contains('gallery-grid-item') ||
@@ -317,12 +337,14 @@
   }
 
   function markAll() {
-    const canvas = document.getElementById('app-canvas');
-    if (!canvas) return;
+    const roots = getRevealRoots();
+    if (!roots.length) return;
     stripTopBarReveal();
-    canvas.querySelectorAll('section, footer.canvas-footer-section').forEach((section) => {
-      if (section.classList.contains('hero-canvas-section')) return;
-      applyClasses(section);
+    roots.forEach((root) => {
+      root.querySelectorAll('section, footer.canvas-footer-section').forEach((section) => {
+        if (section.classList.contains('hero-canvas-section')) return;
+        applyClasses(section);
+      });
     });
   }
 
@@ -341,6 +363,7 @@
     }
     return (
       el.classList.contains('gallery-grid-item') ||
+      el.classList.contains('album-reveal') ||
       el.classList.contains('scroll-reveal--gallery') ||
       (el.classList.contains('album-section-title') && el.closest('.gallery-canvas-section'))
     );
@@ -417,19 +440,23 @@
   }
 
   function observeAll() {
-    const canvas = document.getElementById('app-canvas');
-    if (!canvas) return;
+    const roots = getRevealRoots();
+    if (!roots.length) return;
 
     if (reducedMotion()) {
-      canvas.querySelectorAll('.scroll-reveal').forEach((el) => el.classList.add('is-visible'));
+      roots.forEach((root) => {
+        root.querySelectorAll('.scroll-reveal').forEach((el) => el.classList.add('is-visible'));
+      });
       return;
     }
 
     const io = ensureObserver();
-    canvas.querySelectorAll('.scroll-reveal').forEach((el) => {
-      if (observed.has(el)) return;
-      observed.add(el);
-      io.observe(el);
+    roots.forEach((root) => {
+      root.querySelectorAll('.scroll-reveal').forEach((el) => {
+        if (observed.has(el)) return;
+        observed.add(el);
+        io.observe(el);
+      });
     });
   }
 
@@ -444,38 +471,41 @@
   }
 
   function setupGalleryLazyReveal() {
-    const section = document.querySelector('.gallery-canvas-section');
-    if (!section) return;
-
-    section.querySelectorAll('.gallery-grid-item.scroll-reveal').forEach((fig) => {
-      const img = fig.querySelector('img');
-      const tryShow = () => {
-        if (!isInViewport(fig)) return;
-        revealGalleryTile(fig);
-      };
-      if (!img) {
-        tryShow();
-        return;
-      }
-      if (img.complete) tryShow();
-      else img.addEventListener('load', tryShow, { once: true });
+    document.querySelectorAll('.gallery-canvas-section').forEach((section) => {
+      section
+        .querySelectorAll('.gallery-grid-item.scroll-reveal, .album-reveal.scroll-reveal')
+        .forEach((fig) => {
+          const img = fig.querySelector('img');
+          const tryShow = () => {
+            if (!isInViewport(fig)) return;
+            revealGalleryTile(fig);
+          };
+          if (!img) {
+            tryShow();
+            return;
+          }
+          if (img.complete) tryShow();
+          else img.addEventListener('load', tryShow, { once: true });
+        });
     });
   }
 
   function freezeForAutoScroll() {
-    const canvas = document.getElementById('app-canvas');
-    if (!canvas) return;
-    canvas.querySelectorAll('.scroll-reveal').forEach((el) => {
+    const roots = getRevealRoots();
+    if (!roots.length) return;
+    roots.forEach((root) => {
+      root.querySelectorAll('.scroll-reveal').forEach((el) => {
       el.classList.add('is-visible', 'scroll-reveal--persist');
       el.classList.remove('is-animating');
       el.style.removeProperty('--reveal-delay');
       if (isGalleryReveal(el)) el.dataset.revealDone = '1';
+      });
     });
   }
 
   function refreshGallerySection() {
-    const section = document.querySelector('.gallery-canvas-section');
-    if (!section) return;
+    const sections = document.querySelectorAll('.gallery-canvas-section');
+    if (!sections.length) return;
     if (
       !document.body.classList.contains('intro-complete') &&
       !document.body.classList.contains('intro-revealing')
@@ -488,10 +518,10 @@
   }
 
   function revealVisibleInViewport() {
-    const canvas = document.getElementById('app-canvas');
-    if (!canvas) return;
-    canvas.querySelectorAll('.scroll-reveal:not(.is-visible)').forEach((el) => {
-      if (isInViewport(el)) revealEl(el);
+    getRevealRoots().forEach((root) => {
+      root.querySelectorAll('.scroll-reveal:not(.is-visible)').forEach((el) => {
+        if (isInViewport(el)) revealEl(el);
+      });
     });
   }
 

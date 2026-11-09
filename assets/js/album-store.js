@@ -1,7 +1,7 @@
 /** Ảnh gốc trong repo + ảnh upload qua Firebase */
 
 import { INVITE_LOOK_MODERN } from './invite-look.js';
-import { modernStaticAlbumUrls } from './modern-album-store.js';
+import { MODERN_STATIC_ALBUM_FILES, modernStaticAlbumUrls } from './modern-album-store.js';
 
 export const STATIC_ALBUM_FILES = [
   'THA_3400.JPG', 'THA_3524.JPG', 'THA_3557.JPG', 'THA_4408.JPG', 'THA_3637.JPG',
@@ -10,11 +10,67 @@ export const STATIC_ALBUM_FILES = [
   'THA_4123.JPG', 'THA_4188.JPG', 'THA_4343.JPG', 'THA_4382.JPG', 'THA_3802.JPG',
 ];
 
+/** Thứ tự & ảnh full-width trên trang `/album/`. */
+export const KIMONO_ALBUM_PAGE_OPENING = ['THA_3524.JPG', 'THA_4343.JPG'];
+export const KIMONO_ALBUM_PAGE_CLOSING = 'THA_3802.JPG';
+/** Hàng 1 ảnh — có thể nằm giữa album (vd. THA_3566). */
+export const KIMONO_ALBUM_PAGE_FULL_WIDTH = [
+  ...KIMONO_ALBUM_PAGE_OPENING,
+  'THA_3566.JPG',
+  KIMONO_ALBUM_PAGE_CLOSING,
+];
+
+export function kimonoAlbumPageFiles() {
+  const pinned = new Set([...KIMONO_ALBUM_PAGE_OPENING, KIMONO_ALBUM_PAGE_CLOSING]);
+  const middle = STATIC_ALBUM_FILES.filter((name) => !pinned.has(name));
+  return [...KIMONO_ALBUM_PAGE_OPENING, ...middle, KIMONO_ALBUM_PAGE_CLOSING];
+}
+
 export function staticAlbumUrls(basePath = '../kimono_image/') {
   return STATIC_ALBUM_FILES.map((name) => `${basePath}${name}`);
 }
 
-export async function fetchUploadedAlbumUrls() {
+/** Đường dẫn trang album — đúng cả khi mở thiệp qua `/0/tên` hoặc GitHub project page. */
+export function resolveAlbumPageHref() {
+  try {
+    return new URL('album/index.html', window.location.href).href;
+  } catch {
+    return 'album/index.html';
+  }
+}
+
+/** Khóa so khớp tên file (bỏ khoảng trắng, hoa/thường) — lọc upload trùng ảnh repo. */
+export function photoAssetFingerprint(input) {
+  const raw = String(input || '').trim();
+  if (!raw) return '';
+  let base = raw;
+  if (/^https?:/i.test(raw)) {
+    try {
+      base = decodeURIComponent(new URL(raw).pathname.split('/').pop() || '');
+    } catch {
+      base = raw;
+    }
+  } else if (raw.includes('/')) {
+    base = decodeURIComponent(raw.split('/').pop().split('?')[0] || '');
+  }
+  base = base.replace(/^\d+_/, '');
+  return base.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+const REPO_PHOTO_FINGERPRINTS = new Set(
+  [...MODERN_STATIC_ALBUM_FILES, ...STATIC_ALBUM_FILES].map(photoAssetFingerprint).filter(Boolean),
+);
+
+export function isRepoDuplicateUpload(entry) {
+  if (!entry) return true;
+  const parts = [entry.fileName, entry.storagePath, entry.url];
+  return parts.some((part) => {
+    const fp = photoAssetFingerprint(part);
+    return fp && REPO_PHOTO_FINGERPRINTS.has(fp);
+  });
+}
+
+export async function fetchUploadedAlbumEntries() {
   if (!window.firebaseDb) return [];
   const snap = await window.firebaseDb.collection('album_photos').get();
   const rows = snap.docs.map((d) => ({ ...d.data(), id: d.id }));
@@ -23,7 +79,17 @@ export async function fetchUploadedAlbumUrls() {
     const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
     return tb - ta;
   });
-  return rows.map((r) => r.url).filter(Boolean);
+  return rows.filter((r) => r.url);
+}
+
+export async function fetchUploadedAlbumUrls() {
+  const rows = await fetchUploadedAlbumEntries();
+  return rows.map((r) => r.url);
+}
+
+/** Upload thật sự mới — không trùng modern/kimono trong repo. */
+export function filterNovelUploadUrls(entries) {
+  return entries.filter((row) => !isRepoDuplicateUpload(row)).map((r) => r.url);
 }
 
 const UPLOAD_FETCH_TIMEOUT_MS = 2500;
