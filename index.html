@@ -103,6 +103,20 @@
         if (pre) pre.setAttribute('href', heroSrc);
       }
 
+      var MODERN_MARQUEE_PRELOAD = ['LCN06088.jpg', 'LCN06142.jpg', 'LCN06236.jpg'];
+      function preloadModernMarqueeImages() {
+        if (look !== 'modern') return;
+        var base = 'modern_image/web/';
+        MODERN_MARQUEE_PRELOAD.forEach(function (file) {
+          var link = document.createElement('link');
+          link.rel = 'preload';
+          link.as = 'image';
+          link.href = base + encodeURIComponent(file);
+          document.head.appendChild(link);
+        });
+      }
+      preloadModernMarqueeImages();
+
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function () {
           applyHeroSlot(look);

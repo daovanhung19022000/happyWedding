@@ -117,22 +117,11 @@ export const MODERN_GALLERY_OPENING_CAPTION = {
   title: 'Two Hearts, One Love',
 };
 
-export const KIMONO_GALLERY_OPENING_CAPTION = {
-  title: 'Two Hearts, One Love',
-};
-
 /** Lớp chữ trên ảnh cuối — look modern. */
 export const MODERN_GALLERY_FINALE_CAPTION = {
   eyebrow: 'Hùng & Trang',
   title: 'The Beginning of Forever',
   subtitle: '15 · 11 · 2026',
-};
-
-/** Look kimono — cùng bố cục, khác copy. */
-export const KIMONO_GALLERY_FINALE_CAPTION = {
-  eyebrow: 'Văn Hùng & Thu Trang',
-  title: 'Khởi đầu hạnh phúc',
-  subtitle: 'Forever & Always',
 };
 
 /**
@@ -169,6 +158,24 @@ export function modernDefaultSrcForSlot(slotId) {
   if (!file) return '';
   if (slotId === 'hero-arch') return modernHeroArchSrc();
   return modernImagePath(file);
+}
+
+/** Sông ảnh thiệp modern — ít ảnh, luôn bản `web/`. */
+export const MODERN_MARQUEE_FILES = [
+  'LCN06088.jpg',
+  'LCN06142.jpg',
+  'LCN06191.jpg',
+  'LCN06236.jpg',
+  'LCN06311.jpg',
+  'LCN06382.jpg',
+  'LCN06575  OK.jpg',
+  'LCN06786.jpg',
+  'LCN06950.jpg',
+  'LCN07051.jpg',
+];
+
+export function modernMarqueeUrls() {
+  return MODERN_MARQUEE_FILES.map((name) => modernImagePath(name));
 }
 
 export function modernStaticAlbumUrls(basePath = 'modern_image/web/') {

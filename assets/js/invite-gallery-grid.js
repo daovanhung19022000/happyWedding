@@ -1,7 +1,5 @@
 import { resolveAlbumPageHref, STATIC_ALBUM_FILES } from './album-store.js';
 import {
-  KIMONO_GALLERY_FINALE_CAPTION,
-  KIMONO_GALLERY_OPENING_CAPTION,
   MODERN_GALLERY_FINALE_CAPTION,
   MODERN_GALLERY_OPENING_CAPTION,
   MODERN_GALLERY_FINALE_FILE,
@@ -89,11 +87,11 @@ function createAlbumLoiNgoZone() {
 }
 
 function finaleCaptionForLook(look) {
-  return look === INVITE_LOOK_MODERN ? MODERN_GALLERY_FINALE_CAPTION : KIMONO_GALLERY_FINALE_CAPTION;
+  return look === INVITE_LOOK_MODERN ? MODERN_GALLERY_FINALE_CAPTION : null;
 }
 
 function openingCaptionForLook(look) {
-  return look === INVITE_LOOK_MODERN ? MODERN_GALLERY_OPENING_CAPTION : KIMONO_GALLERY_OPENING_CAPTION;
+  return look === INVITE_LOOK_MODERN ? MODERN_GALLERY_OPENING_CAPTION : null;
 }
 
 function appendGalleryCaption(fig, caption, kind) {

@@ -1,9 +1,9 @@
 import { staticAlbumUrls, fetchUploadedAlbumUrls } from './album-store.js';
-import { modernStaticAlbumUrls } from './modern-album-store.js';
+import { modernMarqueeUrls } from './modern-album-store.js';
 import { albumBasePathForLook, getInviteLook, INVITE_LOOK_MODERN } from './invite-look.js';
 const UPLOAD_WAIT_MS = 600;
 
-function createMarqueeItem(src, index) {
+function createMarqueeItem(src, index, { eager = false } = {}) {
   const fig = document.createElement('figure');
   fig.className = 'invite-photo-marquee__item';
   const frame = document.createElement('div');
@@ -11,8 +11,8 @@ function createMarqueeItem(src, index) {
   const img = document.createElement('img');
   img.src = src;
   img.alt = 'Ảnh cưới Văn Hùng và Thu Trang';
-  img.loading = index < 12 ? 'eager' : 'lazy';
-  if (index < 4) img.setAttribute('fetchpriority', 'high');
+  img.loading = eager ? 'eager' : 'lazy';
+  if (eager && index < 3) img.setAttribute('fetchpriority', 'high');
   img.decoding = 'async';
   img.draggable = false;
   frame.appendChild(img);
@@ -44,13 +44,9 @@ function waitForMarqueeImages(track) {
 
 async function resolveMarqueeUrls() {
   const look = getInviteLook();
+  if (look === INVITE_LOOK_MODERN) return modernMarqueeUrls();
   const base = albumBasePathForLook(look);
-  let urls =
-    look === INVITE_LOOK_MODERN ? modernStaticAlbumUrls(base) : staticAlbumUrls(base);
-  if (look === INVITE_LOOK_MODERN && urls.length > 14) {
-    urls = urls.slice(0, 14);
-  }
-  return urls;
+  return staticAlbumUrls(base);
 }
 
 async function appendUploadedMarqueeUrls(urls) {
@@ -247,7 +243,9 @@ export async function buildInvitePhotoMarquee(root) {
     track.replaceChildren();
     const appendPass = (offset) => {
       list.forEach((src, index) => {
-        track.appendChild(createMarqueeItem(src, offset + index));
+        const globalIndex = offset + index;
+        const eager = offset === 0 && index < 6;
+        track.appendChild(createMarqueeItem(src, globalIndex, { eager }));
       });
     };
     appendPass(0);
@@ -258,13 +256,15 @@ export async function buildInvitePhotoMarquee(root) {
   root.classList.add('is-ready');
   let unwire = wireInvitePhotoMarqueeInteraction(root, viewport, track);
 
-  appendUploadedMarqueeUrls(urls).then((merged) => {
-    if (merged.length <= urls.length) return;
-    urls = merged;
-    paintTrack(urls);
-    unwire?.();
-    unwire = wireInvitePhotoMarqueeInteraction(root, viewport, track);
-  });
+  if (getInviteLook() !== INVITE_LOOK_MODERN) {
+    appendUploadedMarqueeUrls(urls).then((merged) => {
+      if (merged.length <= urls.length) return;
+      urls = merged;
+      paintTrack(urls);
+      unwire?.();
+      unwire = wireInvitePhotoMarqueeInteraction(root, viewport, track);
+    });
+  }
 
   waitForMarqueeImages(track);
 }
